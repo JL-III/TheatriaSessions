@@ -6,6 +6,7 @@ public class Session {
     private final UUID playerUUID;
     private final String playerName;
     private Integer sessionTime = 0;
+    private Integer afkTime = 0;
     public final Integer THRESHOLD = 3600;
     private boolean rewarded = false;
 
@@ -39,6 +40,10 @@ public class Session {
         sessionTime++;
     }
 
+    public void incrementAfkTime() {
+        afkTime++;
+    }
+
     public void setRewarded() {
         this.rewarded = true;
     }
@@ -49,5 +54,9 @@ public class Session {
 
     public String getPlayerName() {
         return this.playerName;
+    }
+
+    public Integer getAfkTime() {
+        return this.afkTime;
     }
 }

@@ -48,7 +48,10 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         switch (args.length) {
             case 1 -> {
-                return List.of("force-reward");
+                return List.of(
+                        "force-reward",
+                        "reset-progress"
+                );
             }
             case 2 -> {
                 return sessionManager.getSessions().stream()
