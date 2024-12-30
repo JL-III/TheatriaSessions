@@ -22,6 +22,7 @@ public final class TheatriaSessions extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
         if (essentials == null) {
             Bukkit.getConsoleSender().sendMessage("Essentials returned null, shutting down.");

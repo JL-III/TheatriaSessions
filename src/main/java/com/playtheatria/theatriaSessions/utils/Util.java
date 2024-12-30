@@ -9,6 +9,6 @@ public class Util {
                 .append(Component.text(value.toString(), NamedTextColor.GOLD));
     }
     public static Component formatLog(Component component) {
-        return Component.text("[TheatriaSessions]").append(component);
+        return Component.text("[TheatriaSessions] ").append(component);
     }
 }
