@@ -30,6 +30,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         if (!session.getPlayerName().equals(player.getName())) continue;
                         player.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
                         player.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
+                        player.sendMessage(Util.formatMessage("afkTime: ", session.getAfkTime()));
                         player.sendMessage(Util.formatMessage("threshold: ", session.THRESHOLD));
                         player.sendMessage(Util.formatMessage("hasEarnedReward: ", session.hasEarnedReward()));
                         player.sendMessage(Util.formatMessage("isRewarded: ", session.isRewarded()));
@@ -42,6 +43,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     if (!session.getPlayerName().equals(args[0])) continue;
                     sender.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
                     sender.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
+                    sender.sendMessage(Util.formatMessage("afkTime: ", session.getAfkTime()));
                     sender.sendMessage(Util.formatMessage("threshold: ", session.THRESHOLD));
                     sender.sendMessage(Util.formatMessage("hasEarnedReward: ", session.hasEarnedReward()));
                     sender.sendMessage(Util.formatMessage("isRewarded: ", session.isRewarded()));
