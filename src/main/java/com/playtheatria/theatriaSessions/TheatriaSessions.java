@@ -1,7 +1,6 @@
 package com.playtheatria.theatriaSessions;
 
 import com.earth2me.essentials.Essentials;
-import com.playtheatria.theatriaSessions.commands.AdminCommand;
 import com.playtheatria.theatriaSessions.commands.SessionCommand;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
@@ -72,7 +71,6 @@ public final class TheatriaSessions extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(), this);
         Bukkit.getPluginManager().registerEvents(new DatabaseDayChangeListener(sessionRepository), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager));
-        Objects.requireNonNull(getCommand("asession")).setExecutor(new AdminCommand(sessionManager));
     }
 
     @Override
