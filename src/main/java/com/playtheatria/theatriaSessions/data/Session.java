@@ -8,10 +8,10 @@ import java.util.UUID;
 @DatabaseTable(tableName = "sessions")
 public class Session {
     @DatabaseField(id = true, index = true)
-    private final UUID playerUUID;
+    private UUID playerUUID;
 
     @DatabaseField
-    private final String playerName;
+    private String playerName;
 
     @DatabaseField
     private Integer sessionTime = 0;
@@ -24,6 +24,8 @@ public class Session {
 
     @DatabaseField
     private boolean rewarded = false;
+
+    protected Session() {}
 
     public Session(UUID playerUUID, String playerName) {
         this.playerUUID = playerUUID;

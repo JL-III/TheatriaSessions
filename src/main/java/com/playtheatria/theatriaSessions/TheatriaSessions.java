@@ -39,6 +39,7 @@ public final class TheatriaSessions extends JavaPlugin {
             theatriaSessionsDB = new TheatriaSessionsDB(getDataFolder());
         } catch (IOException e) {
             Util.sendFormattedLog("Failed to create database: " + e.getMessage());
+            e.printStackTrace();
             Util.sendFormattedLog("Shutting down...");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
@@ -67,10 +68,10 @@ public final class TheatriaSessions extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        for (Session session : sessionManager.getSessions()) {
-            Util.sendFormattedLog("User: " + session.getPlayerName() + " had a session time of " + session.getSessionTime());
-        }
         if (databaseTask != null && sessionManager != null && sessionRepository != null) {
+            for (Session session : sessionManager.getSessions()) {
+                Util.sendFormattedLog("User: " + session.getPlayerName() + " had a session time of " + session.getSessionTime());
+            }
             databaseTask.cancel();
 
             for (Session session : sessionManager.getSessions()) {

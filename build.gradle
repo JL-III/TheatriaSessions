@@ -1,5 +1,15 @@
 plugins {
     id 'java'
+    id 'com.gradleup.shadow' version '9.0.0-beta4'
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'com.j256.ormlite', 'com.playtheatria.theatriasessions.shaded.ormlite'
+}
+
+tasks.build {
+    dependsOn shadowJar
 }
 
 group = 'com.playtheatria'

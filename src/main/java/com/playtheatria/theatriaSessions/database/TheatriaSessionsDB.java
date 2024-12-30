@@ -18,9 +18,7 @@ public class TheatriaSessionsDB {
 
     public TheatriaSessionsDB(File dataFolder) throws IOException {
         File databaseFile = new File(dataFolder, DATABASE_NAME);
-        if (!databaseFile.createNewFile()) {
-            throw new IOException("File was not created!");
-        }
+        databaseFile.createNewFile();
         this.databaseFile = databaseFile;
     }
 
