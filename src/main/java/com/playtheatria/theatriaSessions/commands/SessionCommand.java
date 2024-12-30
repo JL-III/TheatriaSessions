@@ -27,7 +27,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 0 -> {
                 if (sender instanceof Player player) {
                     for (Session session : sessionManager.getSessions()) {
-                        if (!session.getPlayerName().equals(player.getName())) continue;
+                        if (!session.getPlayerName().equalsIgnoreCase(player.getName())) continue;
                         player.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
                         player.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
                         player.sendMessage(Util.formatMessage("afkTime: ", session.getAfkTime()));
@@ -40,7 +40,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             }
             case 1 -> {
                 for (Session session : sessionManager.getSessions()) {
-                    if (!session.getPlayerName().equals(args[0])) continue;
+                    if (!session.getPlayerName().equalsIgnoreCase(args[0])) continue;
                     sender.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
                     sender.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
                     sender.sendMessage(Util.formatMessage("afkTime: ", session.getAfkTime()));

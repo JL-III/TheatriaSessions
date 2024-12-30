@@ -52,7 +52,7 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        sessionManager = new SessionManager();
+        sessionManager = new SessionManager(sessionRepository.loadSessions());
         databaseTask = new DatabaseTask(sessionRepository, sessionManager);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(this, 20 * 600, 20 * 600);

@@ -20,9 +20,9 @@ public class RewardPlayerListener implements Listener {
         }
 
         event.getSession().setRewarded();
-        player.sendMessage(Component.text("You achieved the session requirement for today!").color(NamedTextColor.GOLD));
-        player.sendMessage(Util.formatMessage("You have been awarded session keys! Use them at ", "/warp crates"));
-        Util.sendFormattedLog("Reward given to player: " + player.getName());
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "cc give p sessioncrate 5 " + player.getName());
+//        player.sendMessage(Component.text("You achieved the session requirement for today!").color(NamedTextColor.GOLD));
+//        player.sendMessage(Util.formatMessage("You have been awarded session keys! Use them at ", "/warp crates"));
+        Util.sendFormattedLog("Simulating reward given to player: " + player.getName());
+//        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "cc give p sessioncrate 5 " + player.getName());
     }
 }

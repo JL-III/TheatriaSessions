@@ -32,7 +32,7 @@ public class SessionTask extends BukkitRunnable {
         for (Session session : sessionManager.getSessions()) {
             User user = essentials.getUser(session.getPlayerUUID());
             Player player = Bukkit.getPlayer(session.getPlayerUUID());
-            if (user == null || player == null) continue;
+            if (user == null || player == null || player.isDead()) continue;
             if (user.isAfk()) {
                 session.incrementAfkTime();
                 continue;

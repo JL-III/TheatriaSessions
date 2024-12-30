@@ -6,12 +6,30 @@ import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SessionRepository {
     private final Dao<Session, String> dao;
 
     public SessionRepository(TheatriaSessionsDB theatriaSessionsDB) throws SQLException {
         dao = theatriaSessionsDB.getDao(Session.class);
+    }
+
+    // Load all sessions from the database
+    public List<Session> loadSessions() {
+        List<Session> sessions;
+        try {
+            // Query all rows from the database
+            sessions = dao.queryForAll();
+            Util.sendFormattedLog("Loaded " + sessions.size() + " sessions from the database.");
+            return sessions;
+        } catch (SQLException e) {
+            Util.sendFormattedLog("Failed to load sessions from the database: " + e.getMessage());
+            e.printStackTrace();
+            Util.sendFormattedLog("Returning and empty list of sessions.");
+        }
+        return new ArrayList<>();
     }
 
     /**
