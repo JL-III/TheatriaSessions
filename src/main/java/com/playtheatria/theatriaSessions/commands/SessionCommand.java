@@ -1,8 +1,8 @@
 package com.playtheatria.theatriaSessions.commands;
 
-import com.playtheatria.theatriaSessions.tasks.SessionTrackerTask;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
+import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.tasks.SessionManager;
+import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,11 +14,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Session implements CommandExecutor, TabCompleter {
-    private final SessionTrackerTask sessionTrackerTask;
+public class SessionCommand implements CommandExecutor, TabCompleter {
+    private final SessionManager sessionManager;
 
-    public Session(SessionTrackerTask sessionTrackerTask) {
-        this.sessionTrackerTask =sessionTrackerTask;
+    public SessionCommand(SessionManager sessionManager) {
+        this.sessionManager = sessionManager;
     }
 
     @Override
@@ -26,11 +26,27 @@ public class Session implements CommandExecutor, TabCompleter {
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
-                    player.sendMessage(Component.text());
+                    for (Session session : sessionManager.getSessions()) {
+                        if (!session.getPlayerName().equals(player.getName())) continue;
+                        player.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
+                        player.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
+                        player.sendMessage(Util.formatMessage("threshold: ", session.THRESHOLD));
+                        player.sendMessage(Util.formatMessage("hasEarnedReward: ", session.hasEarnedReward()));
+                        player.sendMessage(Util.formatMessage("isRewarded: ", session.isRewarded()));
+                        return true;
+                    }
                 }
             }
             case 1 -> {
-
+                for (Session session : sessionManager.getSessions()) {
+                    if (!session.getPlayerName().equals(args[0])) continue;
+                    sender.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
+                    sender.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
+                    sender.sendMessage(Util.formatMessage("threshold: ", session.THRESHOLD));
+                    sender.sendMessage(Util.formatMessage("hasEarnedReward: ", session.hasEarnedReward()));
+                    sender.sendMessage(Util.formatMessage("isRewarded: ", session.isRewarded()));
+                    return true;
+                }
             }
         }
         return false;
@@ -43,8 +59,8 @@ public class Session implements CommandExecutor, TabCompleter {
                 return List.of();
             }
             case 1 -> {
-                return Bukkit.getOnlinePlayers().stream()
-                        .map(Player::getName)
+                return sessionManager.getSessions().stream()
+                        .map(Session::getPlayerName)
                         .collect(Collectors.toList());
             }
         }

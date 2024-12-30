@@ -1,4 +1,4 @@
-package com.playtheatria.theatriaSessions;
+package com.playtheatria.theatriaSessions.events;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
