@@ -50,7 +50,8 @@ public class AdminCommand implements CommandExecutor, TabCompleter {
             case 1 -> {
                 return List.of(
                         "force-reward",
-                        "reset-progress"
+                        "reset-progress",
+                        "set-session-time"
                 );
             }
             case 2 -> {

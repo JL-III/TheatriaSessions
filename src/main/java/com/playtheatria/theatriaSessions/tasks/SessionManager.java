@@ -11,7 +11,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SessionManager {
-    private List<Session> sessions = new ArrayList<>();
+    private List<Session> sessions;
+
+    public SessionManager(List<Session> sessions) {
+        this.sessions = sessions;
+    }
 
     public boolean hasSession(UUID playerUUID) {
         for (Session session : sessions) {

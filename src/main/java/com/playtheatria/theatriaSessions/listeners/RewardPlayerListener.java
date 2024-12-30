@@ -15,14 +15,14 @@ public class RewardPlayerListener implements Listener {
     public void onRewardPlayer(RewardPlayerEvent event) {
         Player player = Bukkit.getPlayer(event.getSession().getPlayerUUID());
         if (player == null || !player.isOnline()) {
-            Bukkit.getConsoleSender().sendMessage(Util.formatLog(Component.text("Tried to reward a player but the player in the session returned as offline or null.")));
+            Util.sendFormattedLog("Tried to reward a player but the player in the session returned as offline or null.");
             return;
         }
 
         event.getSession().setRewarded();
-        player.sendMessage(Component.text("You achieved the session requirement for today!").color(NamedTextColor.GOLD));
-        player.sendMessage(Util.formatMessage("You have been awarded session keys! Use them at ", "/warp crates"));
-        Bukkit.getConsoleSender().sendMessage(Util.formatLog(Component.text("Reward given to player: " + player.getName())));
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "cc give p sessioncrate 5 " + player.getName());
+//        player.sendMessage(Component.text("You achieved the session requirement for today!").color(NamedTextColor.GOLD));
+//        player.sendMessage(Util.formatMessage("You have been awarded session keys! Use them at ", "/warp crates"));
+        Util.sendFormattedLog("Simulating reward given to player: " + player.getName());
+//        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "cc give p sessioncrate 5 " + player.getName());
     }
 }

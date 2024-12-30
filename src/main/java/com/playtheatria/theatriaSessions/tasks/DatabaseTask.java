@@ -1,0 +1,26 @@
+package com.playtheatria.theatriaSessions.tasks;
+
+import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
+import com.playtheatria.theatriaSessions.utils.Util;
+import org.bukkit.scheduler.BukkitRunnable;
+
+public class DatabaseTask extends BukkitRunnable {
+    private final SessionRepository sessionRepository;
+    private final SessionManager sessionManager;
+
+    public DatabaseTask(SessionRepository sessionRepository, SessionManager sessionManager) {
+        this.sessionRepository = sessionRepository;
+        this.sessionManager = sessionManager;
+    }
+
+    @Override
+    public void run() {
+        Util.sendFormattedLog("Persisting current sessions now.");
+        for (Session session : sessionManager.getSessions()) {
+            if (!sessionRepository.createOrUpdate(session)) {
+                Util.sendFormattedLog("Error persisting session to database " + session.getPlayerName() + session.getSessionTime());
+            }
+        }
+    }
+}

@@ -1,15 +1,31 @@
 package com.playtheatria.theatriaSessions.data;
 
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.table.DatabaseTable;
+
 import java.util.UUID;
 
+@DatabaseTable(tableName = "sessions")
 public class Session {
-    private final UUID playerUUID;
-    private final String playerName;
+    @DatabaseField(id = true, index = true)
+    private UUID playerUUID;
+
+    @DatabaseField
+    private String playerName;
+
+    @DatabaseField
     private Integer sessionTime = 0;
+
+    @DatabaseField
     private Integer afkTime = 0;
+
+    @DatabaseField
     public final Integer THRESHOLD = 3600;
+
+    @DatabaseField
     private boolean rewarded = false;
 
+    protected Session() {}
 
     public Session(UUID playerUUID, String playerName) {
         this.playerUUID = playerUUID;
