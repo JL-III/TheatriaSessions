@@ -35,6 +35,15 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
         }
         TheatriaSessionsDB theatriaSessionsDB;
+        // Ensure the data folder exists
+        if (!getDataFolder().exists()) {
+            boolean created = getDataFolder().mkdirs();
+            if (created) {
+                getLogger().info("Plugin data folder created at: " + getDataFolder().getAbsolutePath());
+            } else {
+                getLogger().severe("Failed to create plugin data folder: " + getDataFolder().getAbsolutePath());
+            }
+        }
         try {
             theatriaSessionsDB = new TheatriaSessionsDB(getDataFolder());
         } catch (IOException e) {
