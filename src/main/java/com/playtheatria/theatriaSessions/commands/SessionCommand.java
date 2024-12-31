@@ -13,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,14 +31,14 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+                    String formattedDate = LocalDateTime.now().format(formatter);
                     for (Session session : sessionManager.getSessions()) {
                         if (!session.getPlayerName().equalsIgnoreCase(player.getName())) continue;
-                        player.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
-                        player.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
-                        player.sendMessage(Util.formatMessage("afkTime: ", session.getAfkTime()));
-                        player.sendMessage(Util.formatMessage("threshold: ", session.THRESHOLD));
-                        player.sendMessage(Util.formatMessage("hasEarnedReward: ", session.hasEarnedReward()));
-                        player.sendMessage(Util.formatMessage("isRewarded: ", session.isRewarded()));
+                        player.sendMessage(Util.formatMessage("Date", formattedDate + " UTC"));
+                        player.sendMessage(Util.formatMessage("Progress", session.getSessionTime() + "/" + session.THRESHOLD));
+                        player.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
+                        player.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
                         return true;
                     }
                 }
@@ -45,9 +47,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
                     case "show-all" -> {
-                        sender.sendMessage(Util.formatMessage("Number of Sessions: ", sessionManager.getSessions().size()));
+                        sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions()) {
-                            sender.sendMessage(Util.formatMessage(" - ", session.getPlayerName() + " progress: " + session.getSessionTime() + "/" + session.THRESHOLD + " rewarded: " + session.isRewarded()));
+                            String indicator = "❌";
+                            if (session.isRewarded()) {
+                                indicator = "✅";
+                            }
+                            sender.sendMessage(Util.formatMessage(indicator, Util.formatToLengthWithEllipsis(session.getPlayerName(), 10) + " progress: " + session.getSessionTime() + "/" + session.THRESHOLD + " rewarded: " + session.isRewarded()));
                         }
                         return true;
                     }
@@ -71,14 +77,14 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     case "check" -> {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+                        String formattedDate = LocalDateTime.now().format(formatter);
                         for (Session session : sessionManager.getSessions()) {
                             if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
-                            sender.sendMessage(Util.formatMessage("player: ", session.getPlayerName()));
-                            sender.sendMessage(Util.formatMessage("session: ", session.getSessionTime()));
-                            sender.sendMessage(Util.formatMessage("afkTime: ", session.getAfkTime()));
-                            sender.sendMessage(Util.formatMessage("threshold: ", session.THRESHOLD));
-                            sender.sendMessage(Util.formatMessage("hasEarnedReward: ", session.hasEarnedReward()));
-                            sender.sendMessage(Util.formatMessage("isRewarded: ", session.isRewarded()));
+                            sender.sendMessage(Util.formatMessage("Date", formattedDate + " UTC"));
+                            sender.sendMessage(Util.formatMessage("Progress", session.getSessionTime() + "/" + session.THRESHOLD));
+                            sender.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
+                            sender.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
                             return true;
                         }
                     }
@@ -108,9 +114,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission(ADMIN_PERMISSION)) return List.of();
         switch (args.length) {
             case 1 -> {
-                if (!sender.hasPermission(ADMIN_PERMISSION)) return List.of();
                 return List.of(
                         "check",
                         "force-reward",
@@ -120,16 +126,18 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 );
             }
             case 2 -> {
-                if (!sender.hasPermission(ADMIN_PERMISSION)) return List.of();
+                if (args[0].equalsIgnoreCase("show-all")) return List.of();
                 return sessionManager.getSessions().stream()
                         .map(Session::getPlayerName)
                         .collect(Collectors.toList());
             }
             case 3 -> {
-                if (!sender.hasPermission(ADMIN_PERMISSION)) return List.of();
-                return List.of("<amount>");
+                if (args[1].equalsIgnoreCase("set-progress")) return List.of("<amount>");
+                return List.of();
+            }
+            default -> {
+                return List.of();
             }
         }
-        return List.of();
     }
 }
