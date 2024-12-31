@@ -2,8 +2,6 @@ package com.playtheatria.theatriaSessions.listeners;
 
 import com.playtheatria.theatriaSessions.tasks.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;

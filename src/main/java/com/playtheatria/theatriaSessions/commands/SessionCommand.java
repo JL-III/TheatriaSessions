@@ -1,9 +1,11 @@
 package com.playtheatria.theatriaSessions.commands;
 
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.tasks.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,10 +22,12 @@ import java.util.stream.Collectors;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final SessionManager sessionManager;
+    private final ConfigManager configManager;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
-    public SessionCommand(SessionManager sessionManager) {
+    public SessionCommand(SessionManager sessionManager, ConfigManager configManager) {
         this.sessionManager = sessionManager;
+        this.configManager = configManager;
     }
 
     @Override
@@ -53,9 +57,17 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             if (session.isRewarded()) {
                                 indicator = "✅";
                             }
-                            sender.sendMessage(Util.formatMessage(indicator, Util.formatToLengthWithEllipsis(session.getPlayerName(), 10) + " progress: " + session.getSessionTime() + "/" + session.THRESHOLD + " rewarded: " + session.isRewarded()));
+                            sender.sendMessage(Component.text(indicator)
+                                    .append(Component.text(
+                                            Util.formatToLengthWithEllipsis(session.getPlayerName(), 10) + " " + session.getSessionTime() + "/" + session.THRESHOLD)
+                                    )
+                            );
                         }
                         return true;
+                    }
+                    case "reload-config" -> {
+                        Util.sendFormattedMessage("Reloading config", sender);
+                        configManager.reloadConfig();
                     }
                 }
             }
@@ -66,6 +78,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         for (Session session : sessionManager.getSessions()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                 Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
+                                return true;
                             }
                         }
                     }
@@ -73,6 +86,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         for (Session session : sessionManager.getSessions()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                 session.setSessionTime(0);
+                                return true;
                             }
                         }
                     }
@@ -100,6 +114,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             for (Session session : sessionManager.getSessions()) {
                                 if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                     session.setSessionTime(integer);
+                                    return true;
                                 }
                             }
                         } catch (NumberFormatException e) {
@@ -120,6 +135,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 return List.of(
                         "check",
                         "force-reward",
+                        "reload-config",
                         "reset-progress",
                         "set-progress",
                         "show-all"

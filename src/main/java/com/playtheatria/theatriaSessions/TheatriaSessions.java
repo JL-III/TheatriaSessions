@@ -2,6 +2,7 @@ package com.playtheatria.theatriaSessions;
 
 import com.earth2me.essentials.Essentials;
 import com.playtheatria.theatriaSessions.commands.SessionCommand;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
@@ -12,6 +13,7 @@ import com.playtheatria.theatriaSessions.listeners.RewardPlayerListener;
 import com.playtheatria.theatriaSessions.tasks.DatabaseTask;
 import com.playtheatria.theatriaSessions.tasks.SessionManager;
 import com.playtheatria.theatriaSessions.tasks.SessionTask;
+import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -28,6 +30,9 @@ public final class TheatriaSessions extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+        ConfigManager configManager = new ConfigManager(this);
+        CustomLogger customLogger = new CustomLogger(configManager);
         Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
         if (essentials == null) {
             Util.sendFormattedLog("Essentials returned null, shutting down.");
@@ -53,7 +58,7 @@ public final class TheatriaSessions extends JavaPlugin {
             return;
         }
         try {
-            sessionRepository = new SessionRepository(theatriaSessionsDB);
+            sessionRepository = new SessionRepository(theatriaSessionsDB, customLogger);
         } catch (SQLException e) {
             Util.sendFormattedLog("Failed to create sessionRepository: " + e.getMessage());
             Util.sendFormattedLog("Shutting down...");
@@ -63,14 +68,14 @@ public final class TheatriaSessions extends JavaPlugin {
         sessionManager = new SessionManager(sessionRepository.loadSessions());
         databaseTask = new DatabaseTask(sessionRepository, sessionManager);
         // start first backup after ~10 minutes, continue every ~10 minutes
-        databaseTask.runTaskTimer(this, 20 * 600, 20 * 600);
+        databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
         SessionTask sessionTask = new SessionTask(sessionManager, essentials);
         sessionTask.runTaskTimer(this, 20, 20);
         Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(), this);
         Bukkit.getPluginManager().registerEvents(new DatabaseDayChangeListener(sessionRepository), this);
-        Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager));
+        Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, configManager));
     }
 
     @Override
