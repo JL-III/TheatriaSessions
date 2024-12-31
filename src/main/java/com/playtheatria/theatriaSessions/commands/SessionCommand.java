@@ -6,6 +6,8 @@ import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.tasks.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -57,11 +59,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             if (session.isRewarded()) {
                                 indicator = "✅";
                             }
-                            sender.sendMessage(Component.text(indicator)
-                                    .append(Component.text(
-                                            Util.formatToLengthWithEllipsis(session.getPlayerName(), 10) + " " + session.getSessionTime() + "/" + session.THRESHOLD)
+                            sender.sendMessage(Component.text("[").color(TextColor.fromHexString(Util.COLOR_ONE))
+                                            .append(Component.text(indicator).color(session.isRewarded() ? NamedTextColor.GREEN : NamedTextColor.DARK_RED)
+                                            .append(Component.text("] ").color(TextColor.fromHexString(Util.COLOR_ONE))))
+                                            .append(Component.text(Util.formatToLengthWithEllipsis(session.getPlayerName(), 12)).color(TextColor.fromHexString(Util.COLOR_TWO))
+                                            .append(Component.text(" " + session.getSessionTime() + "/" + session.THRESHOLD).color(TextColor.fromHexString(Util.COLOR_THREE))
                                     )
-                            );
+                            ));
                         }
                         return true;
                     }
