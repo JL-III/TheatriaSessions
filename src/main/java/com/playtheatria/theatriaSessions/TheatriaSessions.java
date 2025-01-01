@@ -73,7 +73,7 @@ public final class TheatriaSessions extends JavaPlugin {
         sessionTask.runTaskTimer(this, 20, 20);
         Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
-        Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(), this);
+        Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
         Bukkit.getPluginManager().registerEvents(new DatabaseDayChangeListener(sessionRepository), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, configManager));
     }

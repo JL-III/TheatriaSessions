@@ -6,3 +6,5 @@ debug: false
 backup-duration: 600
 # How many seconds until the first backup after a reboot
 initial-backup-duration: 600
+rewards:
+  - "cc give p sessioncrate {player}"
