@@ -6,5 +6,7 @@ debug: false
 backup-duration: 600
 # How many seconds until the first backup after a reboot
 initial-backup-duration: 600
+
+# Placeholders are {player}, {player_uuid}, {world}
 rewards:
   - "cc give p sessioncrate {player}"

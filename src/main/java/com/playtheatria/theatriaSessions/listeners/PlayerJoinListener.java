@@ -15,7 +15,7 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!sessionManager.hasSession(event.getPlayer().getUniqueId())) {
+        if (!sessionManager.hasSession(event.getPlayer().getUniqueId()) && event.getPlayer().hasPermission("theatria.sessions.allow")) {
             Util.sendFormattedLog("No session found for " + event.getPlayer().getName() + " creating one now.");
             sessionManager.addSession(event.getPlayer().getUniqueId(), event.getPlayer().getName());
         }

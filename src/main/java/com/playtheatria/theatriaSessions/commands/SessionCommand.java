@@ -34,6 +34,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!sender.hasPermission("theatria.sessions.allow")) return true;
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
