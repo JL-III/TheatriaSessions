@@ -26,14 +26,14 @@ public class RewardPlayerListener implements Listener {
         }
 
         event.getSession().setRewarded();
-        player.sendMessage(Component.text("You achieved the session requirement for today!").color(NamedTextColor.GOLD));
+        player.sendMessage(Component.text("Great work! You hit today’s session goal—thanks for making the server awesome!").color(NamedTextColor.GOLD));
         for (String reward : configManager.getRewards()) {
             String parsedCommand = reward
                     .replace("{player}", player.getName()) // Replace player name
                     .replace("{player_uuid}", player.getUniqueId().toString()) // Replace UUID
                     .replace("{world}", player.getWorld().getName()); // Replace world
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
-            Util.sendFormattedLog("Sent reward of: " + reward + " to " + player.getName());
+            Util.sendFormattedLog("Sent reward of: " + parsedCommand + " to " + player.getName());
         }
     }
 }

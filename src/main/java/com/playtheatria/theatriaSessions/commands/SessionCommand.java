@@ -5,9 +5,6 @@ import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.tasks.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -43,9 +40,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     for (Session session : sessionManager.getSessions()) {
                         if (!session.getPlayerName().equalsIgnoreCase(player.getName())) continue;
                         player.sendMessage(Util.formatMessage("Date", formattedDate + " UTC"));
-                        player.sendMessage(Util.formatMessage("Progress", session.getSessionTime() + "/" + session.THRESHOLD));
-                        player.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
-                        player.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
+                        player.sendMessage(Util.formatPlayerMessage(session));
                         return true;
                     }
                 }
@@ -56,17 +51,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "show-all" -> {
                         sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions()) {
-                            String indicator = "❌";
-                            if (session.isRewarded()) {
-                                indicator = "✅";
-                            }
-                            sender.sendMessage(Component.text("[").color(TextColor.fromHexString(Util.COLOR_ONE))
-                                            .append(Component.text(indicator).color(session.isRewarded() ? NamedTextColor.GREEN : NamedTextColor.DARK_RED)
-                                            .append(Component.text("] ").color(TextColor.fromHexString(Util.COLOR_ONE))))
-                                            .append(Component.text(Util.formatToLengthWithEllipsis(session.getPlayerName(), 12)).color(TextColor.fromHexString(Util.COLOR_TWO))
-                                            .append(Component.text(" " + session.getSessionTime() + "/" + session.THRESHOLD).color(TextColor.fromHexString(Util.COLOR_THREE))
-                                    )
-                            ));
+                            sender.sendMessage(Util.formatAdminMessage(session));
                         }
                         return true;
                     }

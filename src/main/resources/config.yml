@@ -9,4 +9,4 @@ initial-backup-duration: 600
 
 # Placeholders are {player}, {player_uuid}, {world}
 rewards:
-  - "cc give p sessioncrate {player}"
+  - "cc give p sessioncrate 5 {player}"

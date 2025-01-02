@@ -1,6 +1,9 @@
 package com.playtheatria.theatriaSessions.utils;
 
+import com.playtheatria.theatriaSessions.data.Session;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -15,6 +18,34 @@ public class Util {
         String message = String.format(template, COLOR_ONE, COLOR_TWO, label, COLOR_ONE, COLOR_THREE, value);
 
         return MiniMessage.miniMessage().deserialize(message);
+    }
+
+    public static Component formatProgress(double sessionMinutes, double thresholdMinutes) {
+        return Component.text(sessionMinutes + "/" + thresholdMinutes + " minutes");
+    }
+
+    public static Component formatIndicator(Session session) {
+        String indicator = "❌";
+        if (session.isRewarded()) {
+            indicator = "✅";
+        }
+        return Component.text("[").color(TextColor.fromHexString(Util.COLOR_ONE))
+                .append(Component.text(indicator).color(session.isRewarded() ? NamedTextColor.GREEN : NamedTextColor.DARK_RED))
+                .append(Component.text("] ").color(TextColor.fromHexString(Util.COLOR_ONE)));
+    }
+
+    public static Component formatPlayerMessage(Session session) {
+        double sessionMinutes = Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
+        double thresholdMinutes = session.THRESHOLD / 60.0;
+        return Util.formatIndicator(session).append(Util.formatProgress(sessionMinutes, thresholdMinutes).color(TextColor.fromHexString(COLOR_THREE)));
+    }
+
+    public static Component formatAdminMessage(Session session) {
+        double sessionMinutes = Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
+        double thresholdMinutes = session.THRESHOLD / 60.0;
+        return Util.formatIndicator(session)
+                .append(Component.text(Util.formatToLengthWithEllipsis(session.getPlayerName(), 12)).color(TextColor.fromHexString(Util.COLOR_TWO))
+                        .append(Component.text(" ").append(Util.formatProgress(sessionMinutes, thresholdMinutes))));
     }
 
     public static void sendFormattedLog(String message) {
