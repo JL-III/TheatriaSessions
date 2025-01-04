@@ -84,6 +84,19 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Bukkit.getPluginManager().callEvent(new DayChangeEvent());
                         return true;
                     }
+                    case "server-session" -> {
+                        ServerSession serverSession = serverSessionManager.getServerSession();
+                        sender.sendMessage(Util.formatMessage("Date", serverSession.getSessionDate()));
+                        sender.sendMessage(Util.formatMessage("PlayersJoined", sessionManager.getSessions().size()));
+                        for (RewardTier rewardTier : RewardTier.values()) {
+                            sender.sendMessage(Util.formatLabel(rewardTier.getDisplayName())
+                                    .append(serverSession.getRewardsEarned() >= rewardTier.getThreshold() ? Util.formatIndicator(true) : Util.formatIndicator(false))
+                                    .hoverEvent(Component.text("Unlocked when " + rewardTier.getThreshold() + " players have earned their /daily-reward!"))
+                            );
+                        }
+                        sender.sendMessage(Util.formatMessage("CurrentBoost", RewardTier.getNearestTier(serverSession.getRewardsEarned()) != null ? RewardTier.getNearestTier(serverSession.getRewardsEarned()).getPercentage() : "0%")
+                                .hoverEvent(Component.text("This is a /sell hand boost. This boost resets every day at 0:00UTC")));
+                    }
                     case "show-all" -> {
                         sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions()) {
@@ -164,6 +177,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "force-reward",
                         "reload-config",
                         "reset-progress",
+                        "server-session",
                         "set-progress",
                         "show-all"
                 );
