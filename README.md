@@ -15,8 +15,8 @@ The traditional voting system helped boost server visibility by encouraging play
 - Players can earn rewards by accumulating **active playtime** (currently set to 1 hour).
 - Upon reaching 1 hour of active playtime, players are awarded **5 SessionCrate keys**.
 - **Progress resets daily** at **0:00 UTC**:
-    - Players who are online and actively working towards their reward during the reset will retain their progress.
-    - Players who are offline during the reset will have their progress cleared.
+    - Players who are online and actively working towards their reward during the reset will retain their serverSession.
+    - Players who are offline during the reset will have their serverSession cleared.
 
 ---
 
@@ -27,7 +27,7 @@ The traditional voting system helped boost server visibility by encouraging play
 
 2. **AFK Tracking**:
     - AFK time does not count towards active playtime.
-    - Players must remain actively engaged to earn progress.
+    - Players must remain actively engaged to earn serverSession.
 
 3. **Fairness**:
     - Progress carries over through the reset if you’re online and actively working towards your reward.

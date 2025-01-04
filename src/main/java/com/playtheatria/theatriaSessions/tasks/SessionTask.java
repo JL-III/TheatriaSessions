@@ -5,6 +5,7 @@ import com.earth2me.essentials.User;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.events.DayChangeEvent;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
+import com.playtheatria.theatriaSessions.managers.SessionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;

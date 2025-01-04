@@ -1,9 +1,13 @@
 package com.playtheatria.theatriaSessions.commands;
 
 import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.data.ServerSession;
 import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.events.DayChangeEvent;
+import com.playtheatria.theatriaSessions.events.IncrementRewardCountEvent;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
-import com.playtheatria.theatriaSessions.tasks.SessionManager;
+import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
+import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -20,11 +24,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
+    private final ServerSessionManager serverSessionManager;
     private final SessionManager sessionManager;
     private final ConfigManager configManager;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
-    public SessionCommand(SessionManager sessionManager, ConfigManager configManager) {
+    public SessionCommand(ServerSessionManager serverSessionManager, SessionManager sessionManager, ConfigManager configManager) {
+        this.serverSessionManager = serverSessionManager;
         this.sessionManager = sessionManager;
         this.configManager = configManager;
     }
@@ -40,7 +46,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     for (Session session : sessionManager.getSessions()) {
                         if (!session.getPlayerName().equalsIgnoreCase(player.getName())) continue;
                         player.sendMessage(Util.formatMessage("Date", formattedDate + " UTC"));
-                        player.sendMessage(Util.formatPlayerMessage(session));
+                        player.sendMessage(Util.formatPlayerMessage(session, serverSessionManager.getServerSession().getRewardsEarned()));
                         return true;
                     }
                 }
@@ -48,6 +54,19 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 1 -> {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
+                    case "force-increment" -> {
+                        Bukkit.getPluginManager().callEvent(new IncrementRewardCountEvent());
+                    }
+                    case "force-day-change" -> {
+                        Bukkit.getPluginManager().callEvent(new DayChangeEvent());
+                        return true;
+                    }
+                    case "server-session" -> {
+                        ServerSession serverSession = serverSessionManager.getServerSession();
+                        sender.sendMessage(Util.formatMessage("SessionDate", serverSession.getSessionDate()));
+                        sender.sendMessage(Util.formatMessage("PlayersJoined", serverSession.getPlayersJoined()));
+                        sender.sendMessage(Util.formatMessage("RewardsEarned", serverSession.getRewardsEarned()));
+                    }
                     case "show-all" -> {
                         sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions()) {
@@ -124,9 +143,11 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 1 -> {
                 return List.of(
                         "check",
+                        "force-day-change",
                         "force-reward",
                         "reload-config",
                         "reset-progress",
+                        "server-session",
                         "set-progress",
                         "show-all"
                 );

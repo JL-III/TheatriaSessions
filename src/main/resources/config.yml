@@ -8,5 +8,6 @@ backup-duration: 600
 initial-backup-duration: 600
 
 # Placeholders are {player}, {player_uuid}, {world}
+# list of rewards to give the player when they achieve the session goal
 rewards:
   - "cc give p sessioncrate 5 {player}"

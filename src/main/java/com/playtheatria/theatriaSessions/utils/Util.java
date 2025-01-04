@@ -20,8 +20,12 @@ public class Util {
         return MiniMessage.miniMessage().deserialize(message);
     }
 
+    public static Component formatProgressPlayerMessage(double sessionMinutes, double thresholdMinutes, int totalRewardCount) {
+        return Component.text(sessionMinutes + "/" + thresholdMinutes + " minutes | total players earned: " + totalRewardCount);
+    }
+
     public static Component formatProgress(double sessionMinutes, double thresholdMinutes) {
-        return Component.text(sessionMinutes + "/" + thresholdMinutes + " minutes");
+        return Component.text(sessionMinutes + "/" + thresholdMinutes);
     }
 
     public static Component formatIndicator(Session session) {
@@ -34,10 +38,10 @@ public class Util {
                 .append(Component.text("] ").color(TextColor.fromHexString(Util.COLOR_ONE)));
     }
 
-    public static Component formatPlayerMessage(Session session) {
+    public static Component formatPlayerMessage(Session session, int totalRewardCount) {
         double sessionMinutes = Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
         double thresholdMinutes = session.THRESHOLD / 60.0;
-        return Util.formatIndicator(session).append(Util.formatProgress(sessionMinutes, thresholdMinutes).color(TextColor.fromHexString(COLOR_THREE)));
+        return Util.formatIndicator(session).append(Util.formatProgressPlayerMessage(sessionMinutes, thresholdMinutes, totalRewardCount).color(TextColor.fromHexString(COLOR_THREE)));
     }
 
     public static Component formatAdminMessage(Session session) {
