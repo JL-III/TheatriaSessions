@@ -3,12 +3,14 @@ package com.playtheatria.theatriaSessions.commands;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.data.ServerSession;
 import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.enums.RewardTier;
 import com.playtheatria.theatriaSessions.events.DayChangeEvent;
 import com.playtheatria.theatriaSessions.events.IncrementRewardCountEvent;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -41,12 +43,33 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
-                    String formattedDate = LocalDateTime.now().format(formatter);
+                    ServerSession serverSession = serverSessionManager.getServerSession();
                     for (Session session : sessionManager.getSessions()) {
                         if (!session.getPlayerName().equalsIgnoreCase(player.getName())) continue;
-                        player.sendMessage(Util.formatMessage("Date", formattedDate + " UTC"));
-                        player.sendMessage(Util.formatPlayerMessage(session, serverSessionManager.getServerSession().getRewardsEarned()));
+                        sender.sendMessage(Util.formatLabel("----------Daily-Rewards----------"));
+                        sender.sendMessage(Util.formatMessage("Date", serverSession.getSessionDate())
+                                .append(Component.text(" "))
+                                .append(Util.formatMessage("Players Joined", sessionManager.getSessions().size())));
+                        sender.sendMessage(Util.formatLabel("Your Progress")
+                                        .append(Component.text(" "))
+                                        .append(Util.formatPlayerMessage(session))
+                                .hoverEvent(
+                                        session.isRewarded() ? Component.text("You earned your reward for today! This resets at 0:00 UTC") : Component.text("Keep playing to earn your reward and help the server meet it's goals!"))
+                        );
+                        for (RewardTier rewardTier : RewardTier.values()) {
+                            sender.sendMessage(Util.formatLabel(rewardTier.getDisplayName())
+                                    .append(Component.text(" "))
+                                    .append(serverSession.getRewardsEarned() >= rewardTier.getThreshold() ? Util.formatIndicator(true) : Util.formatIndicator(false))
+                                    .hoverEvent(Component.text("This unlocks a /sell hand boost when " + rewardTier.getThreshold() + " players have earned their /daily-reward!"))
+                            );
+                        }
+                        sender.sendMessage(Util.formatLabel("Community")
+                                        .append(Component.text(" "))
+                                        .append(Util.formatMessage("Boost", RewardTier.getNearestTier(serverSession.getRewardsEarned()) != null ? RewardTier.getNearestTier(serverSession.getRewardsEarned()).getPercentage() : "0%")
+                                        .append(Component.text(" "))
+                                .append(Util.formatMessage("Progress", serverSession.getRewardsEarned()))
+                                .hoverEvent(Component.text("This /sell hand boost resets every day at 0:00 UTC.\nCurrently " + serverSession.getRewardsEarned() + " players have earned their /daily-reward"))));
+                        sender.sendMessage(Util.formatLabel("----------Daily-Rewards----------"));
                         return true;
                     }
                 }
@@ -61,12 +84,22 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Bukkit.getPluginManager().callEvent(new DayChangeEvent());
                         return true;
                     }
-                    case "server-session" -> {
-                        ServerSession serverSession = serverSessionManager.getServerSession();
-                        sender.sendMessage(Util.formatMessage("SessionDate", serverSession.getSessionDate()));
-                        sender.sendMessage(Util.formatMessage("PlayersJoined", serverSession.getPlayersJoined()));
-                        sender.sendMessage(Util.formatMessage("RewardsEarned", serverSession.getRewardsEarned()));
-                    }
+//                    case "server-session" -> {
+//                        ServerSession serverSession = serverSessionManager.getServerSession();
+//                        sender.sendMessage(Util.formatMessage("Date", serverSession.getSessionDate()));
+//                        sender.sendMessage(Util.formatMessage("PlayersJoined", sessionManager.getSessions().size()));
+//                        for (RewardTier rewardTier : RewardTier.values()) {
+//                            sender.sendMessage(Util.formatLabel(rewardTier.getDisplayName())
+//                                    .append(serverSession.getRewardsEarned() >= rewardTier.getThreshold() ? Util.formatIndicator(true) : Util.formatIndicator(false))
+//                                    .hoverEvent(Component.text("Unlocked when " + rewardTier.getThreshold() + " players have earned their /daily-reward!"))
+//                            );
+//                        }
+//                        sender.sendMessage(Util.formatMessage("CurrentBoost", RewardTier.getNearestTier(serverSession.getRewardsEarned()) != null ? RewardTier.getNearestTier(serverSession.getRewardsEarned()).getPercentage() : "0%")
+//                                .hoverEvent(Component.text("This is a /sell hand boost. This boost resets every day at 0:00UTC")));
+//                        sender.sendMessage(Util.formatLabel("Hover over the text for more info")
+//                                .hoverEvent(Component.text("Not this text, though."))
+//                        );
+//                    }
                     case "show-all" -> {
                         sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions()) {
