@@ -38,6 +38,7 @@ public final class TheatriaSessions extends JavaPlugin {
         if (essentials == null) {
             Util.sendFormattedLog("Essentials returned null, shutting down.");
             Bukkit.getPluginManager().disablePlugin(this);
+            return;
         }
         TheatriaSessionsDB theatriaSessionsDB;
         // Ensure the data folder exists
