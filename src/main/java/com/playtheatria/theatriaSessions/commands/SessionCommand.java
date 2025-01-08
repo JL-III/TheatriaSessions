@@ -141,6 +141,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "force-reward",
                         "reload-config",
                         "reset-progress",
+                        "reset-time",
+                        "reset-time-trigger",
                         "set-progress",
                         "show-all"
                 );
