@@ -7,7 +7,6 @@ import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 public class ResetTimeRepository {
     private final Dao<ResetTime, String> dao;
@@ -36,12 +35,12 @@ public class ResetTimeRepository {
     public void saveResetTime(ResetTime resetTime) {
         try {
             ResetTime existing = dao.queryForId("0");
-            if (existing != null) {
-                existing.setLastResetTime(resetTime.getLastResetTime());
-                existing.setNextResetTime(resetTime.getNextResetTime());
-                dao.update(existing);
-            } else {
+            if (existing == null) {
+                Util.sendFormattedLog("No ResetTime found. Creating a new ResetTime.");
                 dao.create(resetTime);
+            } else {
+                dao.update(resetTime);
+                customLogger.sendDebug("Updating reset time, this is normal");
             }
         } catch (SQLException exception) {
             exception.printStackTrace();
