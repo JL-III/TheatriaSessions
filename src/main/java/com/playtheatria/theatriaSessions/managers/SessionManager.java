@@ -1,4 +1,4 @@
-package com.playtheatria.theatriaSessions.tasks;
+package com.playtheatria.theatriaSessions.managers;
 
 import com.playtheatria.theatriaSessions.data.Session;
 import org.bukkit.Bukkit;

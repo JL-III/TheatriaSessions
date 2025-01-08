@@ -1,6 +1,6 @@
 package com.playtheatria.theatriaSessions.listeners;
 
-import com.playtheatria.theatriaSessions.tasks.SessionManager;
+import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

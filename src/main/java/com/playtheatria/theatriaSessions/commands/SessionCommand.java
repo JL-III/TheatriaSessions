@@ -1,9 +1,11 @@
 package com.playtheatria.theatriaSessions.commands;
 
 import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.data.ResetTime;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
-import com.playtheatria.theatriaSessions.tasks.SessionManager;
+import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
+import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -20,11 +22,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
+    private final ResetTimeManager resetTimeManager;
     private final SessionManager sessionManager;
     private final ConfigManager configManager;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
-    public SessionCommand(SessionManager sessionManager, ConfigManager configManager) {
+    public SessionCommand(ResetTimeManager resetTimeManager, SessionManager sessionManager, ConfigManager configManager) {
+        this.resetTimeManager = resetTimeManager;
         this.sessionManager = sessionManager;
         this.configManager = configManager;
     }
@@ -58,6 +62,15 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "reload-config" -> {
                         Util.sendFormattedMessage("Reloading config", sender);
                         configManager.reloadConfig();
+                    }
+                    case "reset-time" -> {
+                        Util.sendFormattedMessage(String.format("Reset Time: %s", resetTimeManager.getResetTime().getLastResetTime()), sender);
+                        Util.sendFormattedMessage(String.format("Next Reset: %s", resetTimeManager.getResetTime().getNextResetTime()), sender);
+                        return true;
+                    }
+                    case "reset-time-trigger" -> {
+                        resetTimeManager.setResetTime(new ResetTime(LocalDateTime.now().minusDays(2)));
+                        return true;
                     }
                 }
             }
