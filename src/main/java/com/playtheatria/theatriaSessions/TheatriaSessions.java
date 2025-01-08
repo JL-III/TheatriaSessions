@@ -102,6 +102,8 @@ public final class TheatriaSessions extends JavaPlugin {
             for (Session session : sessionManager.getSessions()) {
                 sessionRepository.createOrUpdate(session);
             }
+        }
+        if (resetTimeRepository != null && resetTimeManager != null) {
             resetTimeRepository.saveResetTime(resetTimeManager.getResetTime());
         }
     }
