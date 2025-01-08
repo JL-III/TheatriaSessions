@@ -68,6 +68,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Util.sendFormattedMessage(String.format("Next Reset: %s", resetTimeManager.getResetTime().getNextResetTime()), sender);
                         return true;
                     }
+                    // We intentionally set the ResetTime to an expired amount to leverage detection and trigger a reset.
                     case "reset-time-trigger" -> {
                         resetTimeManager.setResetTime(new ResetTime(LocalDateTime.now().minusDays(2)));
                         return true;
