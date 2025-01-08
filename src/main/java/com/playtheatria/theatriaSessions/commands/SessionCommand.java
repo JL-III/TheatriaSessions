@@ -11,6 +11,7 @@ import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -46,6 +47,11 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     ServerSession serverSession = serverSessionManager.getServerSession();
                     for (Session session : sessionManager.getSessions()) {
                         if (!session.getPlayerName().equalsIgnoreCase(player.getName())) continue;
+                        if (session.hasEarnedReward() && !session.isRewarded()) {
+                            Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
+                            player.sendMessage(Component.text("Redeeming reward!").color(NamedTextColor.GREEN));
+                            return true;
+                        }
                         sender.sendMessage(Util.formatLabel("----------Daily-Rewards----------"));
                         sender.sendMessage(Util.formatMessage("Date", serverSession.getSessionDate())
                                 .append(Component.text(" "))

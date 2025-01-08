@@ -1,6 +1,7 @@
 package com.playtheatria.theatriaSessions.managers;
 
 import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -35,6 +36,7 @@ public class SessionManager {
     }
 
     public void resetSessions() {
+        Util.sendFormattedLog("Reset sessions called on SessionManager.");
         Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream()
                 .map(Player::getUniqueId)
                 .collect(Collectors.toSet());
@@ -53,5 +55,6 @@ public class SessionManager {
             }
         }
         sessions = updatedSessions;
+        Util.sendFormattedLog("Sessions reset to a new list size of: " + sessions.size());
     }
 }

@@ -12,19 +12,16 @@ import org.bukkit.event.Listener;
 
 import java.time.LocalDate;
 
-public class DayChangeListener implements Listener {
-    private final SessionManager sessionManager;
+public class ServerSessionManagerDayChangeListener implements Listener {
     private final ServerSessionManager serverSessionManager;
 
-    public DayChangeListener(SessionManager sessionManager, ServerSessionManager serverSessionManager) {
-        this.sessionManager = sessionManager;
+    public ServerSessionManagerDayChangeListener(ServerSessionManager serverSessionManager) {
         this.serverSessionManager = serverSessionManager;
     }
 
     @EventHandler
     public void onDayChange(DayChangeEvent event) {
-        Util.sendFormattedLog("Day change detected. Clearing sessions.");
-        sessionManager.resetSessions();
+        Util.sendFormattedLog("Day change detected by ServerSessionManagerDayChangeListener - Clearing ServerSessions.");
         serverSessionManager.setServerSession(new ServerSession(LocalDate.now()));
         for (RewardTier rewardTier : RewardTier.values()) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp group default permission unsettemp " + rewardTier.getPermission());

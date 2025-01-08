@@ -67,6 +67,7 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
+        sessionManager = new SessionManager(sessionRepository.loadSessions());
         try {
             serverSessionRepository = new ServerSessionRepository(theatriaSessionsDB, customLogger);
         } catch (SQLException e) {
@@ -75,19 +76,20 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        sessionManager = new SessionManager(sessionRepository.loadSessions());
+        Bukkit.getPluginManager().registerEvents(new SessionManagerDayChangeListener(sessionManager), this);
         serverSessionManager = new ServerSessionManager(serverSessionRepository.loadServerSession());
         databaseTask = new DatabaseTask(sessionRepository, serverSessionRepository, sessionManager, serverSessionManager);
-        // start first backup after ~10 minutes, continue every ~10 minutes
-        databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
+
         SessionTask sessionTask = new SessionTask(sessionManager, essentials);
-        sessionTask.runTaskTimer(this, 20, 20);
-        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionManager, serverSessionManager), this);
+        Bukkit.getPluginManager().registerEvents(new SessionManagerDayChangeListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(serverSessionManager, sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
         Bukkit.getPluginManager().registerEvents(new DatabaseDayChangeListener(sessionRepository), this);
         Bukkit.getPluginManager().registerEvents(new IncrementRewardCountListener(serverSessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new RewardCommunityListener(), this);
+        // start first backup after ~10 minutes, continue every ~10 minutes
+        databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
+        sessionTask.runTaskTimer(this, 20, 20);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(serverSessionManager, sessionManager, configManager));
     }
 

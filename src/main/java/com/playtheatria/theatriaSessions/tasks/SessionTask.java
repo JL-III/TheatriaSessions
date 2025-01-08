@@ -6,6 +6,8 @@ import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.events.DayChangeEvent;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -41,7 +43,8 @@ public class SessionTask extends BukkitRunnable {
 
             session.incrementSessionTime();
             if (!session.hasEarnedReward() || session.isRewarded()) continue;
-            Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
+            player.sendActionBar(Component.text("You have a reward! Do /daily-reward to redeem!").color(NamedTextColor.RED));
+//            Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
         }
     }
 }

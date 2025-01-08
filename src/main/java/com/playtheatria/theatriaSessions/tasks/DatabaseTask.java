@@ -29,7 +29,7 @@ public class DatabaseTask extends BukkitRunnable {
                 Util.sendFormattedLog("Error persisting session to database " + session.getPlayerName() + session.getSessionTime());
             }
         }
-        Util.sendFormattedLog("Persisting current ServerSession now. " + serverSessionManager.getServerSession().getSessionDate() + " sessions found." );
+        Util.sendFormattedLog("Persisting current ServerSession now. " + serverSessionManager.getServerSession().getSessionDate() + " rewards earned: " + serverSessionManager.getServerSession().getRewardsEarned() + " joins: "  + serverSessionManager.getServerSession().getPlayersJoined());
         serverSessionRepository.createOrUpdate(serverSessionManager.getServerSession());
     }
 }
