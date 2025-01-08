@@ -8,8 +8,6 @@ import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.time.LocalDateTime;
-
 public class DayChangeListener implements Listener {
     private final ResetTimeManager resetTimeManager;
     private final SessionManager sessionManager;
@@ -23,6 +21,6 @@ public class DayChangeListener implements Listener {
     public void onDayChange(DayChangeEvent event) {
         Util.sendFormattedLog("Day change detected. Clearing sessions.");
         sessionManager.resetSessions();
-        resetTimeManager.setResetTime(new ResetTime(LocalDateTime.now()));
+        resetTimeManager.setResetTime(new ResetTime());
     }
 }

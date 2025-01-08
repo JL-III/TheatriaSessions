@@ -22,8 +22,9 @@ public class ResetTime {
      */
     public ResetTime() {
         this.id = 0;
-        this.lastResetTime = LocalDateTime.now().toString();
-        this.nextResetTime = calculateNextResetTime(LocalDateTime.now()).toString();
+        LocalDateTime now = LocalDateTime.now();
+        this.lastResetTime = now.toString();
+        this.nextResetTime = calculateNextResetTime(now).toString();
     }
 
     /**
