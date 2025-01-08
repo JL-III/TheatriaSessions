@@ -23,14 +23,14 @@ public class ResetTimeRepository {
             ResetTime resetTime = dao.queryForId("0");
             if (resetTime == null) {
                 Util.sendFormattedLog("No ResetTime found in database. Creating a new ResetTime.");
-                resetTime = new ResetTime(LocalDateTime.now());
+                resetTime = new ResetTime();
                 dao.create(resetTime);
             }
             return resetTime;
         } catch (SQLException exception) {
             exception.printStackTrace();
+            return null;
         }
-        return new ResetTime(LocalDateTime.now());
     }
 
     public void saveResetTime(ResetTime resetTime) {

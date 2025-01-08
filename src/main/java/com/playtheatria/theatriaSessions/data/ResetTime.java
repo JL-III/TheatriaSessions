@@ -16,16 +16,25 @@ public class ResetTime {
     @DatabaseField
     private String nextResetTime;
 
+    /**
+     * Call this method to create a new ResetTime for the ResetTimeManager to hold in memory.
+     * DatabaseTask then reads and propagates to the ResetTimeRepository.
+     */
     public ResetTime() {
         this.id = 0;
         this.lastResetTime = LocalDateTime.now().toString();
         this.nextResetTime = calculateNextResetTime(LocalDateTime.now()).toString();
     }
 
-    public ResetTime(LocalDateTime now) {
+    /**
+     * Normally you should call the 0 args constructor.
+     * This method allows for testing or a force reset to occur.
+     * @param manuallySetTime a time provided in order to manually set a time.
+     */
+    public ResetTime(LocalDateTime manuallySetTime) {
         this.id = 0;
-        this.lastResetTime = now.toString();
-        this.nextResetTime = calculateNextResetTime(now).toString();
+        this.lastResetTime = manuallySetTime.toString();
+        this.nextResetTime = calculateNextResetTime(manuallySetTime).toString();
     }
 
     public LocalDateTime getLastResetTime() {

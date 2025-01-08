@@ -3,6 +3,7 @@ package com.playtheatria.theatriaSessions;
 import com.earth2me.essentials.Essentials;
 import com.playtheatria.theatriaSessions.commands.SessionCommand;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.data.ResetTime;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.repositories.ResetTimeRepository;
@@ -78,7 +79,14 @@ public final class TheatriaSessions extends JavaPlugin {
             return;
         }
         sessionManager = new SessionManager(sessionRepository.loadSessions());
-        resetTimeManager = new ResetTimeManager(resetTimeRepository.loadResetTime());
+        // If there is an exception
+        ResetTime resetTime = resetTimeRepository.loadResetTime();
+        if (resetTime == null) {
+            Bukkit.getPluginManager().disablePlugin(this);
+            Util.sendFormattedLog("ResetTime returned null, this needs to be addressed. Shutting down the plugin.");
+            return;
+        }
+        resetTimeManager = new ResetTimeManager(resetTime);
         databaseTask = new DatabaseTask(resetTimeRepository, resetTimeManager, sessionRepository, sessionManager);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
