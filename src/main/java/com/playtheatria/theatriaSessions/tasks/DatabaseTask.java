@@ -3,6 +3,7 @@ package com.playtheatria.theatriaSessions.tasks;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.database.repositories.ResetTimeRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
+import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -10,13 +11,16 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.time.LocalDateTime;
 
 public class DatabaseTask extends BukkitRunnable {
-    private final SessionRepository sessionRepository;
     private final ResetTimeRepository resetTimeRepository;
+    private final ResetTimeManager resetTimeManager;
+    private final SessionRepository sessionRepository;
     private final SessionManager sessionManager;
 
-    public DatabaseTask(SessionRepository sessionRepository, ResetTimeRepository resetTimeRepository, SessionManager sessionManager) {
-        this.sessionRepository = sessionRepository;
+
+    public DatabaseTask(ResetTimeRepository resetTimeRepository, ResetTimeManager resetTimeManager, SessionRepository sessionRepository, SessionManager sessionManager) {
         this.resetTimeRepository = resetTimeRepository;
+        this.resetTimeManager = resetTimeManager;
+        this.sessionRepository = sessionRepository;
         this.sessionManager = sessionManager;
     }
 
@@ -28,6 +32,6 @@ public class DatabaseTask extends BukkitRunnable {
                 Util.sendFormattedLog("Error persisting session to database " + session.getPlayerName() + session.getSessionTime());
             }
         }
-        resetTimeRepository.saveResetTime(LocalDateTime.now());
+        resetTimeRepository.saveResetTime(resetTimeManager.getResetTime());
     }
 }

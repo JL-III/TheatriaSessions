@@ -3,7 +3,6 @@ package com.playtheatria.theatriaSessions;
 import com.earth2me.essentials.Essentials;
 import com.playtheatria.theatriaSessions.commands.SessionCommand;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
-import com.playtheatria.theatriaSessions.data.ResetTime;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.repositories.ResetTimeRepository;
@@ -80,7 +79,7 @@ public final class TheatriaSessions extends JavaPlugin {
         }
         sessionManager = new SessionManager(sessionRepository.loadSessions());
         resetTimeManager = new ResetTimeManager(resetTimeRepository.loadResetTime());
-        databaseTask = new DatabaseTask(sessionRepository, resetTimeRepository, sessionManager);
+        databaseTask = new DatabaseTask(resetTimeRepository, resetTimeManager, sessionRepository, sessionManager);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
         OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(resetTimeManager, sessionManager, essentials);
@@ -103,7 +102,7 @@ public final class TheatriaSessions extends JavaPlugin {
             for (Session session : sessionManager.getSessions()) {
                 sessionRepository.createOrUpdate(session);
             }
-            resetTimeRepository.saveResetTime(resetTimeManager.getResetTime().getLastResetTime());
+            resetTimeRepository.saveResetTime(resetTimeManager.getResetTime());
         }
     }
 }

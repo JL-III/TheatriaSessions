@@ -33,15 +33,15 @@ public class ResetTimeRepository {
         return new ResetTime(LocalDateTime.now());
     }
 
-    public void saveResetTime(LocalDateTime resetTime) {
+    public void saveResetTime(ResetTime resetTime) {
         try {
             ResetTime existing = dao.queryForId("0");
             if (existing != null) {
-                existing.setLastResetTime(resetTime);
+                existing.setLastResetTime(resetTime.getLastResetTime());
+                existing.setNextResetTime(resetTime.getNextResetTime());
                 dao.update(existing);
             } else {
-                ResetTime newResetTime = new ResetTime(resetTime);
-                dao.create(newResetTime);
+                dao.create(resetTime);
             }
         } catch (SQLException exception) {
             exception.printStackTrace();
