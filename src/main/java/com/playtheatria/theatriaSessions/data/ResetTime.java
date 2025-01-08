@@ -4,17 +4,18 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @DatabaseTable(tableName = "reset_time")
 public class ResetTime {
     @DatabaseField(id = true)
-    private int id;
+    private final int id;
 
     @DatabaseField
-    private String lastResetTime;
+    private final String lastResetTime;
 
     @DatabaseField
-    private String nextResetTime;
+    private final String nextResetTime;
 
     /**
      * Call this method to create a new ResetTime for the ResetTimeManager to hold in memory.
@@ -42,23 +43,18 @@ public class ResetTime {
         return LocalDateTime.parse(lastResetTime);
     }
 
-    public void setLastResetTime(LocalDateTime lastResetTime) {
-        this.lastResetTime = lastResetTime.toString();
-    }
-
     public LocalDateTime getNextResetTime() {
         return LocalDateTime.parse(nextResetTime);
     }
 
-    public LocalDateTime calculateNextResetTime(LocalDateTime now) {
-        return now.plusDays(1)
-                .withHour(8)
+    public LocalDateTime calculateNextResetTime(LocalDateTime lastResetTime) {
+        return lastResetTime
+                .plusDays(1)
+                .withHour(3)
                 .withMinute(0)
                 .withSecond(0)
-                .withNano(0);
-    }
-
-    public void setNextResetTime(LocalDateTime now) {
-        this.nextResetTime = calculateNextResetTime(now).toString();
+                .withNano(0)
+                .atZone(ZoneId.of("America/New_York"))
+                .toLocalDateTime();
     }
 }
