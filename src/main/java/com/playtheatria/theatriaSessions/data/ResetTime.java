@@ -2,9 +2,9 @@ package com.playtheatria.theatriaSessions.data;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @DatabaseTable(tableName = "reset_time")
 public class ResetTime {
@@ -23,7 +23,7 @@ public class ResetTime {
      */
     public ResetTime() {
         this.id = 0;
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(Util.timeZone);
         this.lastResetTime = now.toString();
         this.nextResetTime = calculateNextResetTime(now).toString();
     }
@@ -54,7 +54,7 @@ public class ResetTime {
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0)
-                .atZone(ZoneId.of("America/New_York"))
+                .atZone(Util.timeZone)
                 .toLocalDateTime();
     }
 }

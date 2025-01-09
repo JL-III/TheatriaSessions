@@ -2,19 +2,18 @@ package com.playtheatria.theatriaSessions.tasks;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
-import com.playtheatria.theatriaSessions.data.ResetTime;
 import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.events.DayChangeEvent;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
+import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 public class OneSecondTimerTask extends BukkitRunnable {
     private final ResetTimeManager resetTimeManager;
@@ -52,7 +51,7 @@ public class OneSecondTimerTask extends BukkitRunnable {
     public void checkReset() {
         LocalDateTime resetTime = resetTimeManager.getResetTime().getLastResetTime();
 
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        LocalDateTime now = LocalDateTime.now(Util.timeZone);
         LocalDateTime nextScheduledReset = resetTimeManager.getResetTime().getNextResetTime();
 
         // Check if the current time is past the scheduled reset or more than 24 hours since last reset

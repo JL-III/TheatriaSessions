@@ -40,7 +40,7 @@ public class ResetTimeRepository {
                 dao.create(resetTime);
             } else {
                 dao.update(resetTime);
-                customLogger.sendDebug("Updating reset time, this is normal");
+                customLogger.sendDebug("Backing up reset time, this is normal");
             }
         } catch (SQLException exception) {
             exception.printStackTrace();
