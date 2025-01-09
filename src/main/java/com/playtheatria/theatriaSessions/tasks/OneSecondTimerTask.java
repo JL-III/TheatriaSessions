@@ -33,7 +33,7 @@ public class OneSecondTimerTask extends BukkitRunnable {
     }
 
     public void handleSessionIncrement() {
-        for (Session session : sessionManager.getSessions()) {
+        for (Session session : sessionManager.getSessions().values()) {
             User user = essentials.getUser(session.getPlayerUUID());
             Player player = Bukkit.getPlayer(session.getPlayerUUID());
             if (user == null || player == null || player.isDead()) continue;

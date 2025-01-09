@@ -1,37 +1,43 @@
 package com.playtheatria.theatriaSessions.managers;
 
 import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.result.Err;
+import com.playtheatria.theatriaSessions.result.Ok;
+import com.playtheatria.theatriaSessions.result.Result;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SessionManager {
-    private List<Session> sessions;
+    private HashMap<UUID, Session> mappedSessions = new HashMap<>();
 
     public SessionManager(List<Session> sessions) {
-        this.sessions = sessions;
-    }
-
-    public boolean hasSession(UUID playerUUID) {
         for (Session session : sessions) {
-            if (session.getPlayerUUID().equals(playerUUID)) {
-                return true;
-            }
+            mappedSessions.put(session.getPlayerUUID(), session);
         }
-        return false;
     }
 
-    public List<Session> getSessions() {
-        return this.sessions;
+    public boolean hasSession(@NotNull UUID playerUUID) {
+        return mappedSessions.get(playerUUID) != null;
     }
 
-    public void addSession(UUID playerUUID, String playerName) {
-        sessions.add(new Session(playerUUID, playerName));
+    public Result<Session, Exception> getSession(@NotNull UUID playerUUID) {
+        Session session = mappedSessions.get(playerUUID);
+        if (session == null) {
+            return new Err<>(new Exception(String.format("Failed to return a session from the SessionManager mappedSessions for UUID: %s", playerUUID)));
+        }
+        return new Ok<>(mappedSessions.get(playerUUID));
+    }
+
+    public HashMap<UUID, Session> getSessions() {
+        return mappedSessions;
+    }
+
+    public void addSession(@NotNull UUID playerUUID, @NotNull String playerName) {
+        mappedSessions.put(playerUUID, new Session(playerUUID, playerName));
     }
 
     public void resetSessions() {
@@ -39,20 +45,20 @@ public class SessionManager {
                 .map(Player::getUniqueId)
                 .collect(Collectors.toSet());
 
-        List<Session> updatedSessions = new ArrayList<>();
+        HashMap<UUID, Session> updatedSessions = new HashMap<>();
 
-        for (Session session : sessions) {
+        for (Session session : mappedSessions.values()) {
             if (onlinePlayers.contains(session.getPlayerUUID())) {
                 if (!session.isRewarded()) {
                     // Player is online and has not reached the threshold
-                    updatedSessions.add(session);
+                    updatedSessions.put(session.getPlayerUUID(), session);
                 } else {
                     // Player has reached the threshold, create a new session
-                    updatedSessions.add(new Session(session.getPlayerUUID(), session.getPlayerName()));
+                    updatedSessions.put(session.getPlayerUUID(), new Session(session.getPlayerUUID(), session.getPlayerName()));
                 }
             }
         }
 
-        sessions = updatedSessions;
+        mappedSessions = updatedSessions;
     }
 }

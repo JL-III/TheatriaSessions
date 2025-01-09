@@ -6,6 +6,8 @@ import com.playtheatria.theatriaSessions.data.Session;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
+import com.playtheatria.theatriaSessions.result.Err;
+import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -41,12 +43,16 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 if (sender instanceof Player player) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:ss");
                     String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
-                    for (Session session : sessionManager.getSessions()) {
-                        if (!session.getPlayerName().equalsIgnoreCase(player.getName())) continue;
-                        player.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
-                        player.sendMessage(Util.formatPlayerMessage(session));
-                        return true;
+                    switch (sessionManager.getSession(player.getUniqueId())) {
+                        case Ok<Session, Exception> ok -> {
+                            player.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
+                            player.sendMessage(Util.formatPlayerMessage(ok.value()));
+                        }
+                        case Err<Session, Exception> err -> {
+                            player.sendMessage(err.error().getMessage());
+                        }
                     }
+                    return true;
                 }
             }
             case 1 -> {
@@ -54,7 +60,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 switch (args[0].toLowerCase()) {
                     case "show-all" -> {
                         sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
-                        for (Session session : sessionManager.getSessions()) {
+                        for (Session session : sessionManager.getSessions().values()) {
                             sender.sendMessage(Util.formatAdminMessage(session));
                         }
                         return true;
@@ -79,7 +85,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
                     case "force-reward" -> {
-                        for (Session session : sessionManager.getSessions()) {
+                        for (Session session : sessionManager.getSessions().values()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                 Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
                                 return true;
@@ -87,7 +93,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     case "reset-progress" -> {
-                        for (Session session : sessionManager.getSessions()) {
+                        for (Session session : sessionManager.getSessions().values()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                 session.setSessionTime(0);
                                 return true;
@@ -97,7 +103,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "check" -> {
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:ss");
                         String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
-                        for (Session session : sessionManager.getSessions()) {
+                        for (Session session : sessionManager.getSessions().values()) {
                             if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
                             sender.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
                             sender.sendMessage(Util.formatMessage("Progress", session.getSessionTime() + "/" + session.THRESHOLD));
@@ -115,7 +121,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         try {
                             Integer integer = Integer.parseInt(args[2]);
                             if (integer < 0) throw new NumberFormatException("Must be higher than 0");
-                            for (Session session : sessionManager.getSessions()) {
+                            for (Session session : sessionManager.getSessions().values()) {
                                 if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                     session.setSessionTime(integer);
                                     return true;
@@ -149,7 +155,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             }
             case 2 -> {
                 if (args[0].equalsIgnoreCase("show-all")) return List.of();
-                return sessionManager.getSessions().stream()
+                return sessionManager.getSessions().values().stream()
                         .map(Session::getPlayerName)
                         .collect(Collectors.toList());
             }

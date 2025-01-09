@@ -102,12 +102,9 @@ public final class TheatriaSessions extends JavaPlugin {
     @Override
     public void onDisable() {
         if (databaseTask != null && sessionManager != null && sessionRepository != null) {
-            for (Session session : sessionManager.getSessions()) {
-                Util.sendFormattedLog("User: " + session.getPlayerName() + " had a session time of " + session.getSessionTime());
-            }
             databaseTask.cancel();
-
-            for (Session session : sessionManager.getSessions()) {
+            for (Session session : sessionManager.getSessions().values()) {
+                Util.sendFormattedLog("User: " + session.getPlayerName() + " had a session time of " + session.getSessionTime());
                 sessionRepository.createOrUpdate(session);
             }
         }

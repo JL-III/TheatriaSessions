@@ -29,7 +29,7 @@ public class DatabaseTask extends BukkitRunnable {
     @Override
     public void run() {
         Util.sendFormattedLog("Persisting data now. " + sessionManager.getSessions().size() + " sessions found." );
-        for (Session session : sessionManager.getSessions()) {
+        for (Session session : sessionManager.getSessions().values()) {
             if (!sessionRepository.createOrUpdate(session)) {
                 Util.sendFormattedLog("Error persisting session to database " + session.getPlayerName() + session.getSessionTime());
             }
