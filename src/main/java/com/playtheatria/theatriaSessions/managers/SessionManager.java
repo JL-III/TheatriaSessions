@@ -9,10 +9,11 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class SessionManager {
-    private HashMap<UUID, Session> mappedSessions = new HashMap<>();
+    private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
 
     public SessionManager(List<Session> sessions) {
         for (Session session : sessions) {
@@ -32,7 +33,7 @@ public class SessionManager {
         return new Ok<>(mappedSessions.get(playerUUID));
     }
 
-    public HashMap<UUID, Session> getSessions() {
+    public ConcurrentHashMap<UUID, Session> getSessions() {
         return mappedSessions;
     }
 
@@ -45,7 +46,7 @@ public class SessionManager {
                 .map(Player::getUniqueId)
                 .collect(Collectors.toSet());
 
-        HashMap<UUID, Session> updatedSessions = new HashMap<>();
+        ConcurrentHashMap<UUID, Session> updatedSessions = new ConcurrentHashMap<>();
 
         for (Session session : mappedSessions.values()) {
             if (onlinePlayers.contains(session.getPlayerUUID())) {
