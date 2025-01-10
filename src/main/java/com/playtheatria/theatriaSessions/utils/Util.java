@@ -1,6 +1,6 @@
 package com.playtheatria.theatriaSessions.utils;
 
-import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.database.data.Session;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -8,10 +8,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
+import java.time.ZoneId;
+
 public class Util {
     public static final String COLOR_ONE = "#f5428a";
     public static final String COLOR_TWO = "#42f598";
     public static final String COLOR_THREE = "#fff8bd";
+    public static final ZoneId timeZone = ZoneId.of("America/New_York");
 
     public static Component formatMessage(String label, Object value) {
         String template = "<color:%s>[<color:%s>%s<color:%s>]<color:%s> %s";
