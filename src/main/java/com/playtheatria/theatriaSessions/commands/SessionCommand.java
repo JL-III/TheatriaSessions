@@ -1,8 +1,8 @@
 package com.playtheatria.theatriaSessions.commands;
 
 import com.playtheatria.theatriaSessions.config.ConfigManager;
-import com.playtheatria.theatriaSessions.data.ResetTime;
-import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.database.data.ResetTime;
+import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;

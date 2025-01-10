@@ -1,6 +1,6 @@
 package com.playtheatria.theatriaSessions.tasks;
 
-import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.repositories.ResetTimeRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;

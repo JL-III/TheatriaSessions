@@ -1,6 +1,6 @@
 package com.playtheatria.theatriaSessions.managers;
 
-import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.result.Err;
 import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.result.Result;

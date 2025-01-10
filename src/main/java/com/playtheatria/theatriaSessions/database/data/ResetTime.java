@@ -1,4 +1,4 @@
-package com.playtheatria.theatriaSessions.data;
+package com.playtheatria.theatriaSessions.database.data;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
