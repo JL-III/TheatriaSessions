@@ -1,8 +1,9 @@
 package com.playtheatria.theatriaSessions.database.repositories;
 
 import com.j256.ormlite.dao.Dao;
-import com.playtheatria.theatriaSessions.data.Session;
+import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
+import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.sql.SQLException;
@@ -11,9 +12,11 @@ import java.util.List;
 
 public class SessionRepository {
     private final Dao<Session, String> dao;
+    private final CustomLogger customLogger;
 
-    public SessionRepository(TheatriaSessionsDB theatriaSessionsDB) throws SQLException {
+    public SessionRepository(TheatriaSessionsDB theatriaSessionsDB, CustomLogger customLogger) throws SQLException {
         dao = theatriaSessionsDB.getDao(Session.class);
+        this.customLogger = customLogger;
     }
 
     // Load all sessions from the database
@@ -38,7 +41,7 @@ public class SessionRepository {
      * @return returns true if creation or update was successful, returns false if something failed.
      */
     public boolean createOrUpdate(Session session) {
-        Util.sendFormattedLog("Sending session to database for persistence. " + session.getSessionTime() + " " + session.getPlayerName() + " " + session.getPlayerUUID());
+        customLogger.sendDebug("Sending session to database for persistence. " + session.getSessionTime() + " " + session.getPlayerName() + " " + session.getPlayerUUID());
         try {
             dao.createOrUpdate(session);
             return true;

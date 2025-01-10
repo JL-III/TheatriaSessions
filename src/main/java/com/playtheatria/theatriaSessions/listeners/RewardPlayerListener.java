@@ -1,5 +1,6 @@
 package com.playtheatria.theatriaSessions.listeners;
 
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.utils.Util;
 import net.kyori.adventure.text.Component;
@@ -10,6 +11,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public class RewardPlayerListener implements Listener {
+    private final ConfigManager configManager;
+
+    public RewardPlayerListener(ConfigManager configManager) {
+        this.configManager = configManager;
+    }
 
     @EventHandler
     public void onRewardPlayer(RewardPlayerEvent event) {
@@ -20,9 +26,14 @@ public class RewardPlayerListener implements Listener {
         }
 
         event.getSession().setRewarded();
-//        player.sendMessage(Component.text("You achieved the session requirement for today!").color(NamedTextColor.GOLD));
-//        player.sendMessage(Util.formatMessage("You have been awarded session keys! Use them at ", "/warp crates"));
-        Util.sendFormattedLog("Simulating reward given to player: " + player.getName());
-//        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "cc give p sessioncrate 5 " + player.getName());
+        player.sendMessage(Component.text("Great work! You hit today’s session goal—thanks for making the server awesome!").color(NamedTextColor.GOLD));
+        for (String reward : configManager.getRewards()) {
+            String parsedCommand = reward
+                    .replace("{player}", player.getName()) // Replace player name
+                    .replace("{player_uuid}", player.getUniqueId().toString()) // Replace UUID
+                    .replace("{world}", player.getWorld().getName()); // Replace world
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
+            Util.sendFormattedLog("Sent reward of: " + parsedCommand + " to " + player.getName());
+        }
     }
 }
