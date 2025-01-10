@@ -1,6 +1,6 @@
 package com.playtheatria.theatriaSessions.listeners;
 
-import com.playtheatria.theatriaSessions.data.ResetTime;
+import com.playtheatria.theatriaSessions.database.data.ResetTime;
 import com.playtheatria.theatriaSessions.events.DayChangeEvent;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;

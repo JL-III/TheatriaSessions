@@ -1,6 +1,6 @@
 package com.playtheatria.theatriaSessions.managers;
 
-import com.playtheatria.theatriaSessions.data.ResetTime;
+import com.playtheatria.theatriaSessions.database.data.ResetTime;
 
 public class ResetTimeManager {
     private ResetTime resetTime;
