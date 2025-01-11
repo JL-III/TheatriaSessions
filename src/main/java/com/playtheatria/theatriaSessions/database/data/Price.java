@@ -20,7 +20,7 @@ public class Price {
     @DatabaseField(canBeNull = false, index = true)
     private String historyType;
 
-    @DatabaseField(canBeNull = false, index = true)
+    @DatabaseField(canBeNull = false)
     private String material;
 
     @DatabaseField(canBeNull = false, index = true)

@@ -39,8 +39,8 @@ public class ResetTimeRepository {
                 Util.sendFormattedLog("No ResetTime found. Creating a new ResetTime.");
                 dao.create(resetTime);
             } else {
+                customLogger.sendDebug("Backing up reset time, this is normal.");
                 dao.update(resetTime);
-                customLogger.sendDebug("Backing up reset time, this is normal");
             }
         } catch (SQLException exception) {
             exception.printStackTrace();

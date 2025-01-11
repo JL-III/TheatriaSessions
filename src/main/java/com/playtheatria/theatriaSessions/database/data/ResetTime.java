@@ -5,56 +5,62 @@ import com.j256.ormlite.table.DatabaseTable;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.time.LocalDateTime;
+import java.time.temporal.IsoFields;
 
 @DatabaseTable(tableName = "reset_time")
 public class ResetTime {
+
     @DatabaseField(id = true)
     private final int id;
 
     @DatabaseField
-    private final String lastResetTime;
+    private final String lastResetHour; // ISO 8601 string for the last reset
 
     @DatabaseField
-    private final String nextResetTime;
+    private final String nextResetHour; // ISO 8601 string for the next reset
 
-    /**
-     * Call this method to create a new ResetTime for the ResetTimeManager to hold in memory.
-     * DatabaseTask then reads and propagates to the ResetTimeRepository.
-     */
     public ResetTime() {
         this.id = 0;
         LocalDateTime now = LocalDateTime.now(Util.timeZone);
-        this.lastResetTime = now.toString();
-        this.nextResetTime = calculateNextResetTime(now).toString();
+        this.lastResetHour = now.toString();
+        this.nextResetHour = calculateNextResetHour(now).toString();
     }
 
-    /**
-     * Normally you should call the 0 args constructor.
-     * This method allows for testing or a force reset to occur.
-     * @param manuallySetTime a time provided in order to manually set a time.
-     */
     public ResetTime(LocalDateTime manuallySetTime) {
         this.id = 0;
-        this.lastResetTime = manuallySetTime.toString();
-        this.nextResetTime = calculateNextResetTime(manuallySetTime).toString();
+        this.lastResetHour = manuallySetTime.toString();
+        this.nextResetHour = calculateNextResetHour(manuallySetTime).toString();
     }
 
-    public LocalDateTime getLastResetTime() {
-        return LocalDateTime.parse(lastResetTime);
+    public LocalDateTime getLastResetHour() {
+        return LocalDateTime.parse(lastResetHour);
     }
 
-    public LocalDateTime getNextResetTime() {
-        return LocalDateTime.parse(nextResetTime);
+    public LocalDateTime getNextResetHour() {
+        return LocalDateTime.parse(nextResetHour);
     }
 
-    public LocalDateTime calculateNextResetTime(LocalDateTime lastResetTime) {
-        return lastResetTime
-                .plusDays(1)
-                .withHour(3)
+    public LocalDateTime calculateNextResetHour(LocalDateTime lastResetHour) {
+        return lastResetHour.plusHours(1)
                 .withMinute(0)
                 .withSecond(0)
-                .withNano(0)
-                .atZone(Util.timeZone)
-                .toLocalDateTime();
+                .withNano(0);
+    }
+
+    public boolean isNewDay(LocalDateTime now) {
+        return getLastResetHour().getDayOfYear() != now.getDayOfYear();
+    }
+
+    public boolean isNewWeek(LocalDateTime now) {
+        return getLastResetHour().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) != now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+    }
+
+    public boolean isNewMonth(LocalDateTime now) {
+        return getLastResetHour().getMonthValue() != now.getMonthValue();
+    }
+
+    public boolean isNewYear(LocalDateTime now) {
+        return getLastResetHour().getYear() != now.getYear();
     }
 }
+

@@ -2,9 +2,9 @@ package com.playtheatria.theatriaSessions.tasks;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
+import com.playtheatria.theatriaSessions.database.data.ResetTime;
 import com.playtheatria.theatriaSessions.database.data.Session;
-import com.playtheatria.theatriaSessions.events.DayChangeEvent;
-import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
+import com.playtheatria.theatriaSessions.events.*;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
@@ -12,7 +12,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 public class OneSecondTimerTask extends BukkitRunnable {
@@ -37,6 +36,7 @@ public class OneSecondTimerTask extends BukkitRunnable {
             User user = essentials.getUser(session.getPlayerUUID());
             Player player = Bukkit.getPlayer(session.getPlayerUUID());
             if (user == null || player == null || player.isDead()) continue;
+            if (!player.hasPermission("theatria.sessions.allow")) continue;
             if (user.isAfk()) {
                 session.incrementAfkTime();
                 continue;
@@ -49,15 +49,28 @@ public class OneSecondTimerTask extends BukkitRunnable {
     }
 
     public void checkReset() {
-        LocalDateTime resetTime = resetTimeManager.getResetTime().getLastResetTime();
-
+        ResetTime resetTime = resetTimeManager.getResetTime();
         LocalDateTime now = LocalDateTime.now(Util.timeZone);
-        LocalDateTime nextScheduledReset = resetTimeManager.getResetTime().getNextResetTime();
 
-        // Check if the current time is past the scheduled reset or more than 24 hours since last reset
-        if (now.isAfter(nextScheduledReset) || Duration.between(resetTime, now).toHours() >= 24) {
-            // Trigger the reset
+        if (now.isAfter(resetTime.getNextResetHour())) {
+            Bukkit.getPluginManager().callEvent(new HourChangeEvent());
+            resetTimeManager.setResetTime(new ResetTime());
+        }
+
+        if (resetTime.isNewDay(now)) {
             Bukkit.getPluginManager().callEvent(new DayChangeEvent());
+        }
+
+        if (resetTime.isNewWeek(now)) {
+            Bukkit.getPluginManager().callEvent(new WeekChangeEvent());
+        }
+
+        if (resetTime.isNewMonth(now)) {
+            Bukkit.getPluginManager().callEvent(new MonthChangeEvent());
+        }
+
+        if (resetTime.isNewYear(now)) {
+            Bukkit.getPluginManager().callEvent(new YearChangeEvent());
         }
     }
 }

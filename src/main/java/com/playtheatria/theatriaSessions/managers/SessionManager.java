@@ -37,8 +37,12 @@ public class SessionManager {
         return mappedSessions;
     }
 
-    public void addSession(@NotNull UUID playerUUID, @NotNull String playerName) {
+    public void createNewSession(@NotNull UUID playerUUID, @NotNull String playerName) {
         mappedSessions.put(playerUUID, new Session(playerUUID, playerName));
+    }
+
+    public void addSession(@NotNull Session session) {
+        mappedSessions.put(session.getPlayerUUID(), session);
     }
 
     public void resetSessions() {

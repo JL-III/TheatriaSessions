@@ -10,6 +10,7 @@ import com.playtheatria.theatriaSessions.result.Err;
 import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -70,8 +71,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         configManager.reloadConfig();
                     }
                     case "reset-time" -> {
-                        Util.sendFormattedMessage(String.format("Reset Time: %s", resetTimeManager.getResetTime().getLastResetTime()), sender);
-                        Util.sendFormattedMessage(String.format("Next Reset: %s", resetTimeManager.getResetTime().getNextResetTime()), sender);
+                        Util.sendFormattedMessage(String.format("Reset Time: %s", resetTimeManager.getResetTime().getLastResetHour()), sender);
+                        Util.sendFormattedMessage(String.format("Next Reset: %s", resetTimeManager.getResetTime().getNextResetHour()), sender);
                         return true;
                     }
                     // We intentionally set the ResetTime to an expired amount to leverage detection and trigger a reset.
@@ -84,6 +85,18 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 2 -> {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
+                    case "check" -> {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:ss");
+                        String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
+                        for (Session session : sessionManager.getSessions().values()) {
+                            if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
+                            sender.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
+                            sender.sendMessage(Util.formatMessage("Progress", session.getSessionTime() + "/" + session.THRESHOLD));
+                            sender.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
+                            sender.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
+                            return true;
+                        }
+                    }
                     case "force-reward" -> {
                         for (Session session : sessionManager.getSessions().values()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
@@ -100,23 +113,34 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             }
                         }
                     }
-                    case "check" -> {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:ss");
-                        String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
-                        for (Session session : sessionManager.getSessions().values()) {
-                            if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
-                            sender.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
-                            sender.sendMessage(Util.formatMessage("Progress", session.getSessionTime() + "/" + session.THRESHOLD));
-                            sender.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
-                            sender.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
-                            return true;
-                        }
-                    }
                 }
             }
             case 3 -> {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
+                    case "create" -> {
+                        try {
+                            Integer integer = Integer.parseInt(args[2]);
+                            if (integer < 0) throw new NumberFormatException("Must be higher than 0");
+                            for (Session session : sessionManager.getSessions().values()) {
+                                if (session.getPlayerName().equalsIgnoreCase(args[1])) {
+                                    session.setSessionTime(integer);
+                                    return true;
+                                }
+                            }
+                            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+                            if (offlinePlayer.getName() != null) {
+                                Session session = new Session(offlinePlayer.getUniqueId(), offlinePlayer.getName());
+                                session.setSessionTime(integer);
+                                sessionManager.addSession(session);
+                                return true;
+                            }
+                            Util.sendFormattedMessage(String.format("Player returned null: %s", args[1]), sender);
+                        } catch (NumberFormatException exception) {
+                            sender.sendMessage("Not a valid number: " + exception.getMessage());
+                        }
+
+                    }
                     case "set-progress" -> {
                         try {
                             Integer integer = Integer.parseInt(args[2]);
@@ -144,6 +168,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 1 -> {
                 return List.of(
                         "check",
+                        "create",
                         "force-reward",
                         "reload-config",
                         "reset-progress",
@@ -160,7 +185,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         .collect(Collectors.toList());
             }
             case 3 -> {
-                if (args[1].equalsIgnoreCase("set-progress")) return List.of("<amount>");
+                if (args[1].equalsIgnoreCase("set-progress") || args[1].equalsIgnoreCase("create")) return List.of("<amount>");
                 return List.of();
             }
             default -> {
