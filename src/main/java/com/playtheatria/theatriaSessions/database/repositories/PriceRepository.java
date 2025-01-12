@@ -3,12 +3,16 @@ package com.playtheatria.theatriaSessions.database.repositories;
 import com.j256.ormlite.dao.Dao;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.data.Price;
+import com.playtheatria.theatriaSessions.result.Err;
+import com.playtheatria.theatriaSessions.result.Ok;
+import com.playtheatria.theatriaSessions.result.Result;
 import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public class PriceRepository {
@@ -26,6 +30,14 @@ public class PriceRepository {
     public PriceRepository(TheatriaSessionsDB theatriaSessionsDB, CustomLogger customLogger) throws SQLException {
         this.dao = theatriaSessionsDB.getDao(Price.class);
         this.customLogger = customLogger;
+    }
+
+    public Result<List<Price>, Exception> loadPrices() {
+        try {
+            return new Ok<>(dao.queryForAll());
+        } catch (SQLException exception) {
+            return new Err<>(exception);
+        }
     }
 
     public void cleanupTask() {

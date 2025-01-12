@@ -4,6 +4,7 @@ import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.result.Err;
 import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.result.Result;
+import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,11 +15,13 @@ import java.util.stream.Collectors;
 
 public class SessionManager {
     private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
+    private final CustomLogger customLogger;
 
-    public SessionManager(List<Session> sessions) {
+    public SessionManager(List<Session> sessions, CustomLogger customLogger) {
         for (Session session : sessions) {
             mappedSessions.put(session.getPlayerUUID(), session);
         }
+        this.customLogger = customLogger;
     }
 
     public boolean hasSession(@NotNull UUID playerUUID) {
@@ -46,6 +49,7 @@ public class SessionManager {
     }
 
     public void resetSessions() {
+        customLogger.sendDebug("Reset sessions started...");
         Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream()
                 .map(Player::getUniqueId)
                 .collect(Collectors.toSet());
@@ -65,5 +69,6 @@ public class SessionManager {
         }
 
         mappedSessions = updatedSessions;
+        customLogger.sendDebug("Reset mapped sessions size: " + mappedSessions.size());
     }
 }

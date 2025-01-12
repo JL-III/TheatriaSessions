@@ -78,7 +78,7 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        sessionManager = new SessionManager(sessionRepository.loadSessions());
+        sessionManager = new SessionManager(sessionRepository.loadSessions(), customLogger);
         // If there is an exception
         ResetTime resetTime = resetTimeRepository.loadResetTime();
         if (resetTime == null) {
@@ -92,7 +92,7 @@ public final class TheatriaSessions extends JavaPlugin {
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
         OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(resetTimeManager, sessionManager, essentials);
         oneSecondTimerTask.runTaskTimer(this, 20, 20);
-        Bukkit.getPluginManager().registerEvents(new DayChangeListener(resetTimeManager, sessionManager), this);
+        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
         Bukkit.getPluginManager().registerEvents(new DatabaseDayChangeListener(sessionRepository), this);

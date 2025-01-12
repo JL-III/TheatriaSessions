@@ -3,7 +3,7 @@ package com.playtheatria.theatriaSessions.commands;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.ResetTime;
 import com.playtheatria.theatriaSessions.database.data.Session;
-import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
+import com.playtheatria.theatriaSessions.events.*;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.result.Err;
@@ -97,6 +97,29 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             return true;
                         }
                     }
+                    case "fire-time-event" -> {
+                        switch (args[1]) {
+                            case "day" -> {
+                                Bukkit.getPluginManager().callEvent(new DayChangeEvent());
+                            }
+                            case "hour" -> {
+                                Bukkit.getPluginManager().callEvent(new HourChangeEvent());
+                            }
+                            case "month" -> {
+                                Bukkit.getPluginManager().callEvent(new MonthChangeEvent());
+                            }
+                            case "week" -> {
+                                Bukkit.getPluginManager().callEvent(new WeekChangeEvent());
+                            }
+                            case "year" -> {
+                                Bukkit.getPluginManager().callEvent(new YearChangeEvent());
+                            }
+                            default -> {
+                                sender.sendMessage("Not a valid time-event");
+                            }
+                        }
+                        return true;
+                    }
                     case "force-reward" -> {
                         for (Session session : sessionManager.getSessions().values()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
@@ -169,6 +192,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 return List.of(
                         "check",
                         "create",
+                        "fire-time-event",
                         "force-reward",
                         "reload-config",
                         "reset-progress",
@@ -180,6 +204,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             }
             case 2 -> {
                 if (args[0].equalsIgnoreCase("show-all")) return List.of();
+                if (args[0].equalsIgnoreCase("fire-time-event")) return List.of("day", "hour", "week", "month", "year");
                 return sessionManager.getSessions().values().stream()
                         .map(Session::getPlayerName)
                         .collect(Collectors.toList());
