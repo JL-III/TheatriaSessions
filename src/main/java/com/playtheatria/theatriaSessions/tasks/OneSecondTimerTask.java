@@ -50,27 +50,11 @@ public class OneSecondTimerTask extends BukkitRunnable {
 
     public void checkReset() {
         ResetTime resetTime = resetTimeManager.getResetTime();
-        LocalDateTime now = LocalDateTime.now(Util.timeZone);
+        LocalDateTime now = LocalDateTime.now();
 
         if (now.isAfter(resetTime.getNextResetHour())) {
-            Bukkit.getPluginManager().callEvent(new HourChangeEvent());
+            Bukkit.getPluginManager().callEvent(new HourChangeEvent(resetTime.getLastResetHour(), now));
             resetTimeManager.setResetTime(new ResetTime());
-        }
-
-        if (resetTime.isNewDay(now)) {
-            Bukkit.getPluginManager().callEvent(new DayChangeEvent());
-        }
-
-        if (resetTime.isNewWeek(now)) {
-            Bukkit.getPluginManager().callEvent(new WeekChangeEvent());
-        }
-
-        if (resetTime.isNewMonth(now)) {
-            Bukkit.getPluginManager().callEvent(new MonthChangeEvent());
-        }
-
-        if (resetTime.isNewYear(now)) {
-            Bukkit.getPluginManager().callEvent(new YearChangeEvent());
         }
     }
 }

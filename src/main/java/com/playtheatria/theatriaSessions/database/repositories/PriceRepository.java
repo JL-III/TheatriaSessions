@@ -3,6 +3,7 @@ package com.playtheatria.theatriaSessions.database.repositories;
 import com.j256.ormlite.dao.Dao;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.data.Price;
+import com.playtheatria.theatriaSessions.enums.HistoryType;
 import com.playtheatria.theatriaSessions.result.Err;
 import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.result.Result;
@@ -58,10 +59,10 @@ public class PriceRepository {
         }
     }
 
-    public void save(Price price) {
+    public void createOrUpdate(Price price) {
         try {
             customLogger.sendDebug(String.format("Saving price to database for: %s %s %s %s", price.getHistoryType(), price.getMaterial(), price.getPrice(), price.getTimestamp()));
-            dao.create(price);
+            dao.createOrUpdate(price);
         } catch (SQLException exception) {
             exception.printStackTrace();
         }

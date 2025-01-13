@@ -5,7 +5,6 @@ import com.j256.ormlite.table.DatabaseTable;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.time.LocalDateTime;
-import java.time.temporal.IsoFields;
 
 @DatabaseTable(tableName = "reset_time")
 public class ResetTime {
@@ -45,22 +44,6 @@ public class ResetTime {
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0);
-    }
-
-    public boolean isNewDay(LocalDateTime now) {
-        return getLastResetHour().getDayOfYear() != now.getDayOfYear();
-    }
-
-    public boolean isNewWeek(LocalDateTime now) {
-        return getLastResetHour().get(IsoFields.WEEK_OF_WEEK_BASED_YEAR) != now.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-    }
-
-    public boolean isNewMonth(LocalDateTime now) {
-        return getLastResetHour().getMonthValue() != now.getMonthValue();
-    }
-
-    public boolean isNewYear(LocalDateTime now) {
-        return getLastResetHour().getYear() != now.getYear();
     }
 }
 

@@ -38,22 +38,12 @@ public class Price {
         this.timestamp = LocalDateTime.now(Util.timeZone).toString();
     }
 
-    public Result<HistoryType, Exception> getHistoryType() {
-        try {
-            HistoryType h = HistoryType.valueOf(historyType);
-            return new Ok<>(h);
-        } catch (IllegalArgumentException exception) {
-            return new Err<>(exception);
-        }
+    public HistoryType getHistoryType() {
+        return HistoryType.valueOf(historyType);
     }
 
-    public Result<Material, Exception> getMaterial() {
-        try {
-            Material m = Material.valueOf(material);
-            return new Ok<>(m);
-        } catch (IllegalArgumentException exception) {
-            return new Err<>(exception);
-        }
+    public Material getMaterial() {
+        return  Material.valueOf(material);
     }
 
     public double getPrice() {

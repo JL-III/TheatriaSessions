@@ -8,6 +8,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 public class Util {
@@ -66,5 +68,37 @@ public class Util {
         }
         // Pad the string with spaces
         return String.format("%-" + length + "s", input);
+    }
+
+    // Checks if the difference between the two timestamps exceeds 24 hours (rolling day)
+    public static boolean isNewDay(LocalDateTime timestamp, LocalDateTime now) {
+        return Duration.between(
+                timestamp.atZone(timeZone),
+                now.atZone(timeZone)
+        ).toHours() >= 24;
+    }
+
+    // Checks if the difference between the two timestamps exceeds 7 days (rolling week)
+    public static boolean isNewWeek(LocalDateTime timestamp, LocalDateTime now) {
+        return Duration.between(
+                timestamp.atZone(timeZone),
+                now.atZone(timeZone)
+        ).toDays() >= 7;
+    }
+
+    // Checks if the difference between the two timestamps exceeds 30 days (rolling month)
+    public static boolean isNewMonth(LocalDateTime timestamp, LocalDateTime now) {
+        return Duration.between(
+                timestamp.atZone(timeZone),
+                now.atZone(timeZone)
+        ).toDays() >= 30;
+    }
+
+    // Checks if the difference between the two timestamps exceeds 365 days (rolling year)
+    public static boolean isNewYear(LocalDateTime timestamp, LocalDateTime now) {
+        return Duration.between(
+                timestamp.atZone(timeZone),
+                now.atZone(timeZone)
+        ).toDays() >= 365;
     }
 }

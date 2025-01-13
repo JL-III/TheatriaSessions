@@ -97,29 +97,17 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             return true;
                         }
                     }
-                    case "fire-time-event" -> {
-                        switch (args[1]) {
-                            case "day" -> {
-                                Bukkit.getPluginManager().callEvent(new DayChangeEvent());
-                            }
-                            case "hour" -> {
-                                Bukkit.getPluginManager().callEvent(new HourChangeEvent());
-                            }
-                            case "month" -> {
-                                Bukkit.getPluginManager().callEvent(new MonthChangeEvent());
-                            }
-                            case "week" -> {
-                                Bukkit.getPluginManager().callEvent(new WeekChangeEvent());
-                            }
-                            case "year" -> {
-                                Bukkit.getPluginManager().callEvent(new YearChangeEvent());
-                            }
-                            default -> {
-                                sender.sendMessage("Not a valid time-event");
-                            }
-                        }
-                        return true;
-                    }
+//                    case "fire-time-event" -> {
+//                        switch (args[1]) {
+//                            case "hour" -> {
+//                                Bukkit.getPluginManager().callEvent(new HourChangeEvent());
+//                            }
+//                            default -> {
+//                                sender.sendMessage("Not a valid time-event");
+//                            }
+//                        }
+//                        return true;
+//                    }
                     case "force-reward" -> {
                         for (Session session : sessionManager.getSessions().values()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {

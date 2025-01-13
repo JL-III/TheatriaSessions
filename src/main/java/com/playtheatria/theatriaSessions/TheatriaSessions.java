@@ -3,16 +3,18 @@ package com.playtheatria.theatriaSessions;
 import com.earth2me.essentials.Essentials;
 import com.playtheatria.theatriaSessions.commands.SessionCommand;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.database.data.ResetTime;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
+import com.playtheatria.theatriaSessions.database.repositories.PriceRepository;
 import com.playtheatria.theatriaSessions.database.repositories.ResetTimeRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
-import com.playtheatria.theatriaSessions.listeners.DatabaseDayChangeListener;
-import com.playtheatria.theatriaSessions.listeners.DayChangeListener;
-import com.playtheatria.theatriaSessions.listeners.PlayerJoinListener;
-import com.playtheatria.theatriaSessions.listeners.RewardPlayerListener;
+import com.playtheatria.theatriaSessions.listeners.*;
+import com.playtheatria.theatriaSessions.managers.PriceManager;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
+import com.playtheatria.theatriaSessions.result.Err;
+import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.tasks.DatabaseTask;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.tasks.OneSecondTimerTask;
@@ -23,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Objects;
 
 public final class TheatriaSessions extends JavaPlugin {
@@ -31,6 +34,8 @@ public final class TheatriaSessions extends JavaPlugin {
     private SessionRepository sessionRepository;
     private ResetTimeManager resetTimeManager;
     private ResetTimeRepository resetTimeRepository;
+    private PriceRepository priceRepository;
+    private PriceManager priceManager;
     private DatabaseTask databaseTask;
 
     @Override
@@ -78,6 +83,14 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
+        try {
+            priceRepository = new PriceRepository(theatriaSessionsDB, customLogger);
+        } catch (SQLException e) {
+            Util.sendFormattedLog("Failed to create PriceRepository: " + e.getMessage());
+            Util.sendFormattedLog("Shutting down...");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
         sessionManager = new SessionManager(sessionRepository.loadSessions(), customLogger);
         // If there is an exception
         ResetTime resetTime = resetTimeRepository.loadResetTime();
@@ -87,15 +100,25 @@ public final class TheatriaSessions extends JavaPlugin {
             return;
         }
         resetTimeManager = new ResetTimeManager(resetTime);
+        switch (priceRepository.loadPrices()) {
+            case Ok<List<Price>, Exception> ok -> {
+                priceManager = new PriceManager(essentials, ok.value());
+            }
+            case Err<List<Price>, Exception> err -> {
+                Bukkit.getPluginManager().disablePlugin(this);
+                Util.sendFormattedLog("Could not load prices from database: " + err.error().getMessage());
+                err.error().printStackTrace();
+                return;
+            }
+        }
         databaseTask = new DatabaseTask(resetTimeRepository, resetTimeManager, sessionRepository, sessionManager);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
         OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(resetTimeManager, sessionManager, essentials);
         oneSecondTimerTask.runTaskTimer(this, 20, 20);
-        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionManager), this);
+        Bukkit.getPluginManager().registerEvents(new HourChangeListener(priceManager, priceRepository, sessionManager, sessionRepository, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
-        Bukkit.getPluginManager().registerEvents(new DatabaseDayChangeListener(sessionRepository), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(resetTimeManager, sessionManager, configManager));
     }
 
@@ -110,6 +133,11 @@ public final class TheatriaSessions extends JavaPlugin {
         }
         if (resetTimeRepository != null && resetTimeManager != null) {
             resetTimeRepository.saveResetTime(resetTimeManager.getResetTime());
+        }
+        if (priceRepository != null && priceManager != null) {
+            for (Price price : priceManager.getPricesToBeSaved().values()) {
+                priceRepository.createOrUpdate(price);
+            }
         }
     }
 }
