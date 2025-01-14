@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public class HourChangeListener implements Listener {
     private final PriceManager priceManager;
@@ -24,7 +25,13 @@ public class HourChangeListener implements Listener {
     private final SessionRepository sessionRepository;
     private final CustomLogger customLogger;
 
-    public HourChangeListener(PriceManager priceManager, PriceRepository priceRepository, SessionManager sessionManager, SessionRepository sessionRepository, CustomLogger customLogger) {
+    public HourChangeListener(
+            PriceManager priceManager,
+            PriceRepository priceRepository,
+            SessionManager sessionManager,
+            SessionRepository sessionRepository,
+            CustomLogger customLogger
+    ) {
         this.priceManager = priceManager;
         this.priceRepository = priceRepository;
         this.sessionManager = sessionManager;
@@ -71,50 +78,38 @@ public class HourChangeListener implements Listener {
     private void handleGraduationLogic(LocalDateTime lastResetHour, LocalDateTime now) {
         // Persist the last hourly price as a daily price if a new day has started
         if (Util.isNewDay(lastResetHour, now)) {
-            persistHourlyAsDaily();
+            Optional<Price> optionalPrice = priceManager.getLastPrice(HistoryType.HOURlY);
+            if (optionalPrice.isPresent()) {
+                Price dailyPrice = new Price(HistoryType.DAILY, optionalPrice.get().getMaterial(), optionalPrice.get().getPrice());
+                priceRepository.createOrUpdate(dailyPrice);
+            }
         }
 
         // Persist daily prices as weekly prices if a new week has started
         if (Util.isNewWeek(lastResetHour, now)) {
-            persistDailyAsWeekly();
+            Optional<Price> optionalPrice = priceManager.getLastPrice(HistoryType.DAILY);
+            if (optionalPrice.isPresent()) {
+                Price weeklyPrice = new Price(HistoryType.WEEKLY, optionalPrice.get().getMaterial(), optionalPrice.get().getPrice());
+                priceRepository.createOrUpdate(weeklyPrice);
+            }
         }
 
         // Persist weekly prices as monthly prices if a new month has started
         if (Util.isNewMonth(lastResetHour, now)) {
-            persistWeeklyAsMonthly();
+            Optional<Price> optionalPrice = priceManager.getLastPrice(HistoryType.WEEKLY);
+            if (optionalPrice.isPresent()) {
+                Price monthlyPrice = new Price(HistoryType.MONTHLY, optionalPrice.get().getMaterial(), optionalPrice.get().getPrice());
+                priceRepository.createOrUpdate(monthlyPrice);
+            }
         }
 
         // Persist monthly prices as yearly prices if a new year has started
         if (Util.isNewYear(lastResetHour, now)) {
-            persistMonthlyAsYearly();
-        }
-    }
-
-    private void persistHourlyAsDaily() {
-        for (Price hourlyPrice : priceManager.getPrices(HistoryType.HOURlY)) {
-            Price dailyPrice = new Price(HistoryType.DAILY, hourlyPrice.getMaterial(), hourlyPrice.getPrice());
-            priceRepository.createOrUpdate(dailyPrice);
-        }
-    }
-
-    private void persistDailyAsWeekly() {
-        for (Price dailyPrice : priceManager.getPrices(HistoryType.DAILY)) {
-            Price weeklyPrice = new Price(HistoryType.WEEKLY, dailyPrice.getMaterial(), dailyPrice.getPrice());
-            priceRepository.createOrUpdate(weeklyPrice);
-        }
-    }
-
-    private void persistWeeklyAsMonthly() {
-        for (Price weeklyPrice : priceManager.getPrices(HistoryType.WEEKLY)) {
-            Price monthlyPrice = new Price(HistoryType.MONTHLY, weeklyPrice.getMaterial(), weeklyPrice.getPrice());
-            priceRepository.createOrUpdate(monthlyPrice);
-        }
-    }
-
-    private void persistMonthlyAsYearly() {
-        for (Price monthlyPrice : priceManager.getPrices(HistoryType.MONTHLY)) {
-            Price yearlyPrice = new Price(HistoryType.YEARLY, monthlyPrice.getMaterial(), monthlyPrice.getPrice());
-            priceRepository.createOrUpdate(yearlyPrice);
+            Optional<Price> optionalPrice = priceManager.getLastPrice(HistoryType.MONTHLY);
+            if (optionalPrice.isPresent()) {
+                Price yearlyPrice = new Price(HistoryType.YEARLY, optionalPrice.get().getMaterial(), optionalPrice.get().getPrice());
+                priceRepository.createOrUpdate(yearlyPrice);
+            }
         }
     }
 }

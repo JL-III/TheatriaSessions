@@ -97,17 +97,17 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             return true;
                         }
                     }
-//                    case "fire-time-event" -> {
-//                        switch (args[1]) {
-//                            case "hour" -> {
-//                                Bukkit.getPluginManager().callEvent(new HourChangeEvent());
-//                            }
-//                            default -> {
-//                                sender.sendMessage("Not a valid time-event");
-//                            }
-//                        }
-//                        return true;
-//                    }
+                    case "graduate" -> {
+                        switch (args[1]) {
+                            case "hour" -> {
+                                Bukkit.getPluginManager().callEvent(new HourChangeEvent());
+                            }
+                            default -> {
+                                sender.sendMessage("Not a valid time-event");
+                            }
+                        }
+                        return true;
+                    }
                     case "force-reward" -> {
                         for (Session session : sessionManager.getSessions().values()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
@@ -180,8 +180,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 return List.of(
                         "check",
                         "create",
-                        "fire-time-event",
                         "force-reward",
+                        "graduate",
                         "reload-config",
                         "reset-progress",
                         "reset-time",

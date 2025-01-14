@@ -11,7 +11,9 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -101,11 +103,11 @@ public class PriceManager {
         }
     }
 
-    public List<Price> getPrices(HistoryType historyType) {
+    public Optional<Price> getLastPrice(HistoryType historyType) {
         return pricesToBeSaved.values()
-                .stream().filter(
-                        x -> x.getHistoryType().equals(historyType))
-                .collect(Collectors.toList());
+                .stream()
+                .filter(x -> x.getHistoryType().equals(historyType))
+                .max(Comparator.comparing(Price::getTimestamp));
     }
 
     /**
