@@ -78,7 +78,7 @@ public class HourChangeListener implements Listener {
     private void handleGraduationLogic(LocalDateTime lastResetHour, LocalDateTime now) {
         // Persist the last hourly price as a daily price if a new day has started
         if (Util.isNewDay(lastResetHour, now)) {
-            Optional<Price> optionalPrice = priceManager.getLastPrice(HistoryType.HOURlY);
+            Optional<Price> optionalPrice = priceManager.getLastPrice(HistoryType.HOURLY);
             if (optionalPrice.isPresent()) {
                 Price dailyPrice = new Price(HistoryType.DAILY, optionalPrice.get().getMaterial(), optionalPrice.get().getPrice());
                 priceRepository.createOrUpdate(dailyPrice);

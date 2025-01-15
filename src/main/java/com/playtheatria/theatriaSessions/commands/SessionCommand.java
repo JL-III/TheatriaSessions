@@ -1,9 +1,11 @@
 package com.playtheatria.theatriaSessions.commands;
 
 import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.database.data.ResetTime;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.events.*;
+import com.playtheatria.theatriaSessions.managers.PriceManager;
 import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.result.Err;
@@ -27,12 +29,19 @@ import java.util.stream.Collectors;
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final ResetTimeManager resetTimeManager;
     private final SessionManager sessionManager;
+    private final PriceManager priceManager;
     private final ConfigManager configManager;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
-    public SessionCommand(ResetTimeManager resetTimeManager, SessionManager sessionManager, ConfigManager configManager) {
+    public SessionCommand(
+            ResetTimeManager resetTimeManager,
+            SessionManager sessionManager,
+            PriceManager priceManager,
+            ConfigManager configManager
+    ) {
         this.resetTimeManager = resetTimeManager;
         this.sessionManager = sessionManager;
+        this.priceManager = priceManager;
         this.configManager = configManager;
     }
 
@@ -59,6 +68,12 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 1 -> {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
+                    case "get-prices" -> {
+                        for (Price price : priceManager.getHistoricalPrices()) {
+                            sender.sendMessage(String.format("Price: %s, %s, %s", price.getMaterial(), price.getHistoryType(), price.getPrice()));
+                        }
+                        return true;
+                    }
                     case "show-all" -> {
                         sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions().values()) {
@@ -100,7 +115,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "graduate" -> {
                         switch (args[1]) {
                             case "hour" -> {
-                                Bukkit.getPluginManager().callEvent(new HourChangeEvent());
+                                Bukkit.getPluginManager().callEvent(
+                                        new HourChangeEvent(resetTimeManager.getResetTime().getLastResetHour(), LocalDateTime.now(Util.timeZone))
+                                );
                             }
                             default -> {
                                 sender.sendMessage("Not a valid time-event");
@@ -181,6 +198,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "check",
                         "create",
                         "force-reward",
+                        "get-prices",
                         "graduate",
                         "reload-config",
                         "reset-progress",

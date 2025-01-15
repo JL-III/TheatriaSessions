@@ -119,7 +119,7 @@ public final class TheatriaSessions extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new HourChangeListener(priceManager, priceRepository, sessionManager, sessionRepository, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
-        Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(resetTimeManager, sessionManager, configManager));
+        Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(resetTimeManager, sessionManager, priceManager, configManager));
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.playtheatria.theatriaSessions.enums;
 
 public enum HistoryType {
-    HOURlY,
+    HOURLY,
     DAILY,
     WEEKLY,
     MONTHLY,

@@ -31,7 +31,7 @@ public class PriceManager {
 
     public PriceManager(Essentials essentials, List<Price> priceList) {
         this.essentials = essentials;
-        this.historicalPrices = new CopyOnWriteArrayList<>(priceList);
+        updateHistoricalPrices(priceList);
     }
 
     public void addPriceToPricesToBeSaved(Price price) {
@@ -59,6 +59,7 @@ public class PriceManager {
      * @param priceList Provide the Historical Price list from the database.
      */
     public void updateHistoricalPrices(List<Price> priceList) {
+        Util.sendFormattedLog(String.format("Loaded: %s historical prices from the database.", priceList.size()));
         historicalPrices = new CopyOnWriteArrayList<>(priceList);
     }
 
@@ -96,7 +97,7 @@ public class PriceManager {
 
             // Save the adjusted price in memory for later database persistence
             addPriceToPricesToBeSaved(new Price(
-                    HistoryType.HOURlY,
+                    HistoryType.HOURLY,
                     material,
                     adjustedPrice.doubleValue()
             ));
