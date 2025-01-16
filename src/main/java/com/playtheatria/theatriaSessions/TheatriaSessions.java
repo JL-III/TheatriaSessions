@@ -135,7 +135,7 @@ public final class TheatriaSessions extends JavaPlugin {
             resetTimeRepository.saveResetTime(resetTimeManager.getResetTime());
         }
         if (priceRepository != null && priceManager != null) {
-            for (Price price : priceManager.getPricesToBeSaved().values()) {
+            for (Price price : priceManager.getPrices()) {
                 priceRepository.createOrUpdate(price);
             }
         }

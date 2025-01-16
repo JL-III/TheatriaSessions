@@ -6,17 +6,17 @@ import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.enums.HistoryType;
 import com.playtheatria.theatriaSessions.result.Err;
 import com.playtheatria.theatriaSessions.result.Ok;
+import com.playtheatria.theatriaSessions.result.Result;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 /**
  * The PriceManager holds the prices containing all historical data in memory.
@@ -26,48 +26,36 @@ import java.util.stream.Collectors;
  */
 public class PriceManager {
     private final Essentials essentials;
-    private CopyOnWriteArrayList<Price> historicalPrices;
-    private ConcurrentHashMap<Material, Price> pricesToBeSaved = new ConcurrentHashMap<>();
+    private List<Price> prices = new ArrayList<>();
 
     public PriceManager(Essentials essentials, List<Price> priceList) {
         this.essentials = essentials;
-        updateHistoricalPrices(priceList);
-    }
-
-    public void addPriceToPricesToBeSaved(Price price) {
-        pricesToBeSaved.put(price.getMaterial(), price);
+        setPrices(priceList);
     }
 
     /**
-     * Called when the Price Repository has successfully persisted this data to the database.
-     * The pricesToBeSaved are calculated at HourChangeEvents, the information stays in this class until persisted.
+     * Storing local cache of yet to be persisted prices.
+     * @param priceList The price list loaded from calculatePrices() method
      */
-    public void resetPricesToBeSaved() {
-        pricesToBeSaved = new ConcurrentHashMap<>();
+    public void setPrices(List<Price> priceList) {
+        prices = List.copyOf(priceList);
     }
 
-    public ConcurrentHashMap<Material, Price> getPricesToBeSaved() {
-        return pricesToBeSaved;
+    public void addPrice(Price price) {
+        List<Price> newPrices = new ArrayList<>(prices);
+        newPrices.add(price);
+        prices = List.copyOf(newPrices);
     }
 
-    public CopyOnWriteArrayList<Price> getHistoricalPrices() {
-        return historicalPrices;
-    }
-
-    /**
-     * Use this method once pricesToBeSaved have been successfully saved.
-     * @param priceList Provide the Historical Price list from the database.
-     */
-    public void updateHistoricalPrices(List<Price> priceList) {
-        Util.sendFormattedLog(String.format("Loaded: %s historical prices from the database.", priceList.size()));
-        historicalPrices = new CopyOnWriteArrayList<>(priceList);
+    public List<Price> getPrices() {
+        return List.copyOf(prices);
     }
 
     /**
      * Fetches prices for materials from Essentials, adjusts them using a pricing algorithm,
      * and prepares them to be saved to the database.
      */
-    public void calculatePrices() {
+    public @NotNull List<Price> calculatePrices() {
         List<Material> materials = List.of(
                 Material.DIAMOND,
                 Material.TROPICAL_FISH,
@@ -79,6 +67,7 @@ public class PriceManager {
 
         Worth worth = essentials.getWorth();
 
+        List<Price> newPricesToBeSaved = new ArrayList<>(prices);
         // Process materials in a single loop
         for (Material material : materials) {
             BigDecimal originalPrice = worth.getPrice(essentials, new ItemStack(material));
@@ -95,20 +84,24 @@ public class PriceManager {
             // Save adjusted price in Essentials
             setPricesInEssentials(material, adjustedPrice);
 
-            // Save the adjusted price in memory for later database persistence
-            addPriceToPricesToBeSaved(new Price(
+            newPricesToBeSaved.add(new Price(
                     HistoryType.HOURLY,
                     material,
-                    adjustedPrice.doubleValue()
-            ));
+                    adjustedPrice.doubleValue()));
         }
+        return newPricesToBeSaved;
     }
 
-    public Optional<Price> getLastPrice(HistoryType historyType) {
-        return pricesToBeSaved.values()
+    public Result<Price, Exception> getLastPrice(HistoryType historyType) {
+        Optional<Price> optionalPrice = prices
                 .stream()
                 .filter(x -> x.getHistoryType().equals(historyType))
                 .max(Comparator.comparing(Price::getTimestamp));
+        if (optionalPrice.isPresent()) {
+            return new Ok<>(optionalPrice.get());
+        } else {
+            return new Err<>(new Exception("Could not find the last price in PriceManager for history type of " + historyType));
+        }
     }
 
     /**

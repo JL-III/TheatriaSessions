@@ -40,7 +40,7 @@ public class PriceRepository {
         }
     }
 
-    public void cleanupTask() {
+    public void cleanupOldDatabaseEntries() {
         for (Map.Entry<String, Duration> entry : retentionPeriods.entrySet()) {
             String historyType = entry.getKey();
             Duration duration = entry.getValue();

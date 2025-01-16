@@ -1,5 +1,6 @@
 package com.playtheatria.theatriaSessions.utils;
 
+import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -8,9 +9,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 
 public class Util {
     public static final String COLOR_ONE = "#f5428a";
@@ -70,35 +71,38 @@ public class Util {
         return String.format("%-" + length + "s", input);
     }
 
-    // Checks if the difference between the two timestamps exceeds 24 hours (rolling day)
     public static boolean isNewDay(LocalDateTime timestamp, LocalDateTime now) {
-        return Duration.between(
-                timestamp.atZone(timeZone),
-                now.atZone(timeZone)
-        ).toHours() >= 24;
+        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
+        ZonedDateTime zonedNow = now.atZone(timeZone);
+        return !zonedTimestamp.toLocalDate().isEqual(zonedNow.toLocalDate());
     }
 
-    // Checks if the difference between the two timestamps exceeds 7 days (rolling week)
     public static boolean isNewWeek(LocalDateTime timestamp, LocalDateTime now) {
-        return Duration.between(
-                timestamp.atZone(timeZone),
-                now.atZone(timeZone)
-        ).toDays() >= 7;
+        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
+        ZonedDateTime zonedNow = now.atZone(timeZone);
+        WeekFields weekFields = WeekFields.of(DayOfWeek.SUNDAY, 1);
+        int weekOfYearTimestamp = zonedTimestamp.get(weekFields.weekOfWeekBasedYear());
+        int weekOfYearNow = zonedNow.get(weekFields.weekOfWeekBasedYear());
+        return zonedTimestamp.getYear() != zonedNow.getYear() || weekOfYearTimestamp != weekOfYearNow;
     }
 
-    // Checks if the difference between the two timestamps exceeds 30 days (rolling month)
     public static boolean isNewMonth(LocalDateTime timestamp, LocalDateTime now) {
-        return Duration.between(
-                timestamp.atZone(timeZone),
-                now.atZone(timeZone)
-        ).toDays() >= 30;
+        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
+        ZonedDateTime zonedNow = now.atZone(timeZone);
+        return zonedTimestamp.getYear() != zonedNow.getYear() || zonedTimestamp.getMonth() != zonedNow.getMonth();
     }
 
-    // Checks if the difference between the two timestamps exceeds 365 days (rolling year)
     public static boolean isNewYear(LocalDateTime timestamp, LocalDateTime now) {
-        return Duration.between(
-                timestamp.atZone(timeZone),
-                now.atZone(timeZone)
-        ).toDays() >= 365;
+        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
+        ZonedDateTime zonedNow = now.atZone(timeZone);
+        return zonedTimestamp.getYear() != zonedNow.getYear();
+    }
+
+    public static String formatPrice(Price price) {
+        return String.format(String.format("%s, %s, %s", price.getTimestamp().format(Util.getFormat()), price.getHistoryType(), price.getPrice()));
+    }
+
+    public static DateTimeFormatter getFormat() {
+        return DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
     }
 }

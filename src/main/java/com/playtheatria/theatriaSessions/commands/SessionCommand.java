@@ -12,6 +12,7 @@ import com.playtheatria.theatriaSessions.result.Err;
 import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +53,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:ss");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
                     String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
                     switch (sessionManager.getSession(player.getUniqueId())) {
                         case Ok<Session, Exception> ok -> {
@@ -68,12 +70,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 1 -> {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
-                    case "get-prices" -> {
-                        for (Price price : priceManager.getHistoricalPrices()) {
-                            sender.sendMessage(String.format("Price: %s, %s, %s", price.getMaterial(), price.getHistoryType(), price.getPrice()));
-                        }
-                        return true;
-                    }
                     case "show-all" -> {
                         sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions().values()) {
@@ -101,7 +97,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
                     case "check" -> {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:ss");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
                         String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
                         for (Session session : sessionManager.getSessions().values()) {
                             if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
@@ -111,6 +107,57 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             sender.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
                             return true;
                         }
+                    }
+                    case "get-price" -> {
+                        switch (args[1]) {
+                            case "diamond" -> {
+                                sender.sendMessage("Diamond Prices:");
+                                priceManager.getPrices()
+                                        .stream()
+                                        .filter(x -> x.getMaterial() == Material.DIAMOND)
+                                        .sorted(Comparator.comparing(Price::getTimestamp))
+                                        .forEach(x -> {
+                                            sender.sendMessage(Util.formatPrice(x));
+                                        });
+                            }
+                            case "tropical" -> {
+                                priceManager.getPrices()
+                                        .stream()
+                                        .filter(x -> x.getMaterial() == Material.TROPICAL_FISH)
+                                        .sorted(Comparator.comparing(Price::getTimestamp))
+                                        .forEach(x -> {
+                                            sender.sendMessage(Util.formatPrice(x));
+                                        });
+                            }
+                            case "puffer" -> {
+                                priceManager.getPrices()
+                                        .stream()
+                                        .filter(x -> x.getMaterial() == Material.PUFFERFISH)
+                                        .sorted(Comparator.comparing(Price::getTimestamp))
+                                        .forEach(x -> {
+                                            sender.sendMessage(Util.formatPrice(x));
+                                        });
+                            }
+                            case "gold" -> {
+                                priceManager.getPrices()
+                                        .stream()
+                                        .filter(x -> x.getMaterial() == Material.GOLD_INGOT)
+                                        .sorted(Comparator.comparing(Price::getTimestamp))
+                                        .forEach(x -> {
+                                            sender.sendMessage(Util.formatPrice(x));
+                                        });
+                            }
+                            case "iron" -> {
+                                priceManager.getPrices()
+                                        .stream()
+                                        .filter(x -> x.getMaterial() == Material.IRON_INGOT)
+                                        .sorted(Comparator.comparing(Price::getTimestamp))
+                                        .forEach(x -> {
+                                            sender.sendMessage(Util.formatPrice(x));
+                                        });
+                            }
+                        }
+                        return true;
                     }
                     case "graduate" -> {
                         switch (args[1]) {
@@ -198,7 +245,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "check",
                         "create",
                         "force-reward",
-                        "get-prices",
+                        "get-price",
                         "graduate",
                         "reload-config",
                         "reset-progress",
@@ -211,6 +258,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 2 -> {
                 if (args[0].equalsIgnoreCase("show-all")) return List.of();
                 if (args[0].equalsIgnoreCase("fire-time-event")) return List.of("day", "hour", "week", "month", "year");
+                if (args[0].equalsIgnoreCase("get-price")) return List.of("diamond", "tropical", "puffer", "gold", "iron");
                 return sessionManager.getSessions().values().stream()
                         .map(Session::getPlayerName)
                         .collect(Collectors.toList());
