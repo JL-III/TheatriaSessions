@@ -116,7 +116,12 @@ public final class TheatriaSessions extends JavaPlugin {
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
         OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(resetTimeManager, sessionManager, essentials);
         oneSecondTimerTask.runTaskTimer(this, 20, 20);
-        Bukkit.getPluginManager().registerEvents(new HourChangeListener(priceManager, priceRepository, sessionManager, sessionRepository, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new HourChangeListener(priceManager, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, sessionManager), this);
+        Bukkit.getPluginManager().registerEvents(new PricesGraduationListener(customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new PricesSaveToDatabaseListener(priceRepository, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new PricesCalculateListener(priceManager), this);
+        Bukkit.getPluginManager().registerEvents(new PricesReadyForCacheListener(priceManager), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(resetTimeManager, sessionManager, priceManager, configManager));
@@ -135,7 +140,7 @@ public final class TheatriaSessions extends JavaPlugin {
             resetTimeRepository.saveResetTime(resetTimeManager.getResetTime());
         }
         if (priceRepository != null && priceManager != null) {
-            for (Price price : priceManager.getPrices()) {
+            for (Price price : priceManager.getPriceListCache()) {
                 priceRepository.createOrUpdate(price);
             }
         }

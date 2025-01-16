@@ -3,9 +3,6 @@ package com.playtheatria.theatriaSessions.database.data;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import com.playtheatria.theatriaSessions.enums.HistoryType;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
-import com.playtheatria.theatriaSessions.result.Result;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Material;
 
@@ -36,6 +33,13 @@ public class Price {
         this.material = material.name();
         this.price = price;
         this.timestamp = LocalDateTime.now(Util.timeZone).toString();
+    }
+
+    public Price(HistoryType historyType, LocalDateTime timestamp, Material material, double price) {
+        this.historyType = historyType.name();
+        this.material = material.name();
+        this.price = price;
+        this.timestamp = timestamp.toString();
     }
 
     public HistoryType getHistoryType() {

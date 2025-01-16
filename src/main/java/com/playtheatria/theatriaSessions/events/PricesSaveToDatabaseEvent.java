@@ -1,26 +1,28 @@
 package com.playtheatria.theatriaSessions.events;
 
+import com.playtheatria.theatriaSessions.database.data.Price;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * HourChangeEvent contains the last hour reset and the current time.
+ * This event exists to handle persisting the cached price list into the database.
  */
-public class HourChangeEvent extends Event {
+public class PricesSaveToDatabaseEvent extends Event {
     private static final HandlerList HANDLERS = new HandlerList();
-    private final LocalDateTime lastResetHour;
+    private final List<Price> priceList;
     private final LocalDateTime now;
 
-    public HourChangeEvent(LocalDateTime lastResetHour, LocalDateTime now) {
-        this.lastResetHour = lastResetHour;
+    public PricesSaveToDatabaseEvent(List<Price> priceList, LocalDateTime now) {
+        this.priceList = priceList;
         this.now = now;
     }
 
-    public LocalDateTime getLastResetHour() {
-        return lastResetHour;
+    public List<Price> getPriceList() {
+        return priceList;
     }
 
     public LocalDateTime getNow() {

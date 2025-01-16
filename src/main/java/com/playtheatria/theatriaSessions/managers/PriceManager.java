@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * The PriceManager holds the prices containing all historical data in memory.
@@ -26,48 +25,41 @@ import java.util.Optional;
  */
 public class PriceManager {
     private final Essentials essentials;
-    private List<Price> prices = new ArrayList<>();
+    private List<Price> priceListCache = new ArrayList<>();
+    private final List<Material> materials = List.of(
+            Material.DIAMOND,
+            Material.TROPICAL_FISH,
+            Material.PUFFERFISH,
+            Material.GOLD_INGOT,
+            Material.NETHERITE_INGOT,
+            Material.IRON_INGOT
+    );
 
     public PriceManager(Essentials essentials, List<Price> priceList) {
         this.essentials = essentials;
-        setPrices(priceList);
+        setPriceListCache(priceList);
     }
 
     /**
      * Storing local cache of yet to be persisted prices.
      * @param priceList The price list loaded from calculatePrices() method
      */
-    public void setPrices(List<Price> priceList) {
-        prices = List.copyOf(priceList);
+    public void setPriceListCache(List<Price> priceList) {
+        priceListCache = List.copyOf(priceList);
     }
 
-    public void addPrice(Price price) {
-        List<Price> newPrices = new ArrayList<>(prices);
-        newPrices.add(price);
-        prices = List.copyOf(newPrices);
-    }
-
-    public List<Price> getPrices() {
-        return List.copyOf(prices);
+    public List<Price> getPriceListCache() {
+        return List.copyOf(priceListCache);
     }
 
     /**
      * Fetches prices for materials from Essentials, adjusts them using a pricing algorithm,
      * and prepares them to be saved to the database.
      */
-    public @NotNull List<Price> calculatePrices() {
-        List<Material> materials = List.of(
-                Material.DIAMOND,
-                Material.TROPICAL_FISH,
-                Material.PUFFERFISH,
-                Material.GOLD_INGOT,
-                Material.NETHERITE_INGOT,
-                Material.IRON_INGOT
-        );
-
+    public @NotNull List<Price> calculatePrices(List<Price> priceList) {
         Worth worth = essentials.getWorth();
 
-        List<Price> newPricesToBeSaved = new ArrayList<>(prices);
+        List<Price> newPricesToBeSaved = new ArrayList<>(priceList);
         // Process materials in a single loop
         for (Material material : materials) {
             BigDecimal originalPrice = worth.getPrice(essentials, new ItemStack(material));
@@ -92,16 +84,21 @@ public class PriceManager {
         return newPricesToBeSaved;
     }
 
-    public Result<Price, Exception> getLastPrice(HistoryType historyType) {
-        Optional<Price> optionalPrice = prices
+    public static Result<Price, Exception> getLastPrice(
+            @NotNull HistoryType historyType,
+            @NotNull Material material,
+            @NotNull List<Price> priceList
+    ) {
+        if (priceList.isEmpty()) {
+            return new Err<>(new Exception(String.format("Price list is empty for %s, %s", historyType, material)));
+        }
+        return priceList
                 .stream()
                 .filter(x -> x.getHistoryType().equals(historyType))
-                .max(Comparator.comparing(Price::getTimestamp));
-        if (optionalPrice.isPresent()) {
-            return new Ok<>(optionalPrice.get());
-        } else {
-            return new Err<>(new Exception("Could not find the last price in PriceManager for history type of " + historyType));
-        }
+                .filter(x -> x.getMaterial() == material)
+                .max(Comparator.comparing(Price::getTimestamp))
+                .<Result<Price, Exception>>map(Ok::new)
+                .orElseGet(() -> new Err<>(new Exception(String.format("Could not find the last price in provided list for %s, %s ", historyType, material))));
     }
 
     /**
@@ -122,5 +119,9 @@ public class PriceManager {
      */
     public void setPricesInEssentials(Material material, BigDecimal price) {
         essentials.getWorth().setPrice(essentials, new ItemStack(material), price.doubleValue());
+    }
+
+    public List<Material> getMaterials() {
+        return materials;
     }
 }
