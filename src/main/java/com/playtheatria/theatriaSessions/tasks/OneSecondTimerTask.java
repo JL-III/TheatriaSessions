@@ -50,7 +50,7 @@ public class OneSecondTimerTask extends BukkitRunnable {
 
     public void checkReset() {
         ResetTime resetTime = resetTimeManager.getResetTime();
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(Util.timeZone);
 
         if (now.isAfter(resetTime.getNextResetHour())) {
             Bukkit.getPluginManager().callEvent(new HourChangeEvent(resetTime.getLastResetHour(), now));
