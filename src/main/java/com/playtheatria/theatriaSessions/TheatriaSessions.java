@@ -117,11 +117,11 @@ public final class TheatriaSessions extends JavaPlugin {
         OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(resetTimeManager, sessionManager, essentials);
         oneSecondTimerTask.runTaskTimer(this, 20, 20);
         Bukkit.getPluginManager().registerEvents(new HourChangeListener(priceManager, customLogger), this);
-        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, sessionManager), this);
+        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, sessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new PricesGraduationListener(customLogger), this);
         Bukkit.getPluginManager().registerEvents(new PricesSaveToDatabaseListener(priceRepository, customLogger), this);
-        Bukkit.getPluginManager().registerEvents(new PricesCalculateListener(priceManager), this);
-        Bukkit.getPluginManager().registerEvents(new PricesReadyForCacheListener(priceManager), this);
+        Bukkit.getPluginManager().registerEvents(new PricesCalculateListener(priceManager, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new PricesReadyForCacheListener(priceManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(resetTimeManager, sessionManager, priceManager, configManager));

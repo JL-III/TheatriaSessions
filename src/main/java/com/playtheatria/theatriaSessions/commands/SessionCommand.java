@@ -82,6 +82,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "reload-config" -> {
                         Util.sendFormattedMessage("Reloading config", sender);
                         configManager.reloadConfig();
+                        return true;
                     }
                     case "reset-time" -> {
                         Util.sendFormattedMessage(String.format("Reset Time: %s", resetTimeManager.getResetTime().getLastResetHour()), sender);

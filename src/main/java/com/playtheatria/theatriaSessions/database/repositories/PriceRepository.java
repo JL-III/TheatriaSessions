@@ -60,7 +60,7 @@ public class PriceRepository {
 
     public void createOrUpdate(Price price) {
         try {
-            customLogger.sendDebug(String.format("Saving price to database for: %s %s %s %s", price.getHistoryType(), price.getMaterial(), price.getPrice(), price.getTimestamp()));
+            customLogger.sendDebug(String.format("Saving price to database for: %s %s %s %s", price.getTimestamp(), price.getHistoryType(), price.getMaterial(), price.getPrice()));
             dao.createOrUpdate(price);
         } catch (SQLException exception) {
             exception.printStackTrace();
