@@ -94,6 +94,10 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         resetTimeManager.setResetTime(new ResetTime(LocalDateTime.now(Util.timeZone).minusDays(2)));
                         return true;
                     }
+                    case "test" -> {
+                        Bukkit.getPluginManager().callEvent(new PricesGraduationEvent(Util.getTestPriceList(), LocalDateTime.now(Util.timeZone).minusDays(2), LocalDateTime.now(Util.timeZone)));
+                        return true;
+                    }
                 }
             }
             case 2 -> {
@@ -223,7 +227,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "reset-time",
                         "reset-time-trigger",
                         "set-progress",
-                        "show-all"
+                        "show-all",
+                        "test"
                 );
             }
             case 2 -> {

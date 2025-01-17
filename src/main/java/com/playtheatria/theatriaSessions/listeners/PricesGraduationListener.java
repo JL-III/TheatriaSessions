@@ -17,6 +17,8 @@ import org.bukkit.event.Listener;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Listens for the PricesGraduationEvent and processes the list provided in the event.
@@ -72,12 +74,12 @@ public class PricesGraduationListener implements Listener {
     }
 
     private List<Price> graduate(HistoryType original, HistoryType target, List<Price> priceList) {
-        List<Material> materials = priceList.stream().map(Price::getMaterial).toList();
+        Set<Material> materials = priceList.stream().map(Price::getMaterial).collect(Collectors.toSet());
         List<Price> newPriceList = new ArrayList<>();
         for (Material material : materials) {
             switch (PriceManager.getLastPrice(original, material, priceList)) {
                 case Ok<Price, Exception> ok -> {
-                    customLogger.sendDebug("[PricesGraduationEvent] Found " + original + " price for " + material + " in cache.");
+                    customLogger.sendDebug("[PricesGraduationEvent] Found " + original + " price for " + material + " in provided Price List.");
                     customLogger.sendDebug("[PricesGraduationEvent] " + Util.formatPrice(ok.value()));
 
                     newPriceList.add(
