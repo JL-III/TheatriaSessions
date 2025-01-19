@@ -11,7 +11,6 @@ public class ConfigManager extends AbstractConfigManager<TheatriaSessions> {
     private final long initialBackupDuration;
 
     private List<String> rewards;
-    private boolean debug;
 
     public ConfigManager(TheatriaSessions plugin) {
         super(plugin);
@@ -29,10 +28,6 @@ public class ConfigManager extends AbstractConfigManager<TheatriaSessions> {
     public void loadConfig() {
         this.debug = plugin.getConfig().getBoolean("debug");
         this.rewards = plugin.getConfig().getStringList("rewards");
-    }
-
-    public boolean isDebug() {
-        return this.debug;
     }
 
     public long getBackupDuration() {
