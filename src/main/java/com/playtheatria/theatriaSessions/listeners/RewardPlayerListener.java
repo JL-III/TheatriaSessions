@@ -1,5 +1,7 @@
 package com.playtheatria.theatriaSessions.listeners;
 
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.utils.Util;
@@ -12,16 +14,18 @@ import org.bukkit.event.Listener;
 
 public class RewardPlayerListener implements Listener {
     private final ConfigManager configManager;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public RewardPlayerListener(ConfigManager configManager) {
+    public RewardPlayerListener(ConfigManager configManager, CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.configManager = configManager;
+        this.customLogger = customLogger;
     }
 
     @EventHandler
     public void onRewardPlayer(RewardPlayerEvent event) {
         Player player = Bukkit.getPlayer(event.getSession().getPlayerUUID());
         if (player == null || !player.isOnline()) {
-            Util.sendFormattedLog("Tried to reward a player but the player in the session returned as offline or null.");
+            customLogger.sendFormattedLog("Tried to reward a player but the player in the session returned as offline or null.");
             return;
         }
 
@@ -33,7 +37,7 @@ public class RewardPlayerListener implements Listener {
                     .replace("{player_uuid}", player.getUniqueId().toString()) // Replace UUID
                     .replace("{world}", player.getWorld().getName()); // Replace world
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
-            Util.sendFormattedLog("Sent reward of: " + parsedCommand + " to " + player.getName());
+            customLogger.sendFormattedLog("Sent reward of: " + parsedCommand + " to " + player.getName());
         }
     }
 }

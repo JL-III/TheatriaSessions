@@ -5,16 +5,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
-
-import java.time.ZoneId;
 
 public class Util {
     public static final String COLOR_ONE = "#f5428a";
     public static final String COLOR_TWO = "#42f598";
     public static final String COLOR_THREE = "#fff8bd";
-    public static final ZoneId timeZone = ZoneId.of("America/New_York");
 
     public static Component formatMessage(String label, Object value) {
         String template = "<color:%s>[<color:%s>%s<color:%s>]<color:%s> %s";
@@ -49,14 +44,6 @@ public class Util {
         return Util.formatIndicator(session)
                 .append(Component.text(Util.formatToLengthWithEllipsis(session.getPlayerName(), 12)).color(TextColor.fromHexString(Util.COLOR_TWO))
                         .append(Component.text(" ").append(Util.formatProgress(sessionMinutes, thresholdMinutes))));
-    }
-
-    public static void sendFormattedLog(String message) {
-        sendFormattedMessage(message, Bukkit.getConsoleSender());
-    }
-
-    public static void sendFormattedMessage(String message, CommandSender sender) {
-        sender.sendMessage(formatMessage("TheatriaSessions", message));
     }
 
     public static String formatToLengthWithEllipsis(String input, int length) {

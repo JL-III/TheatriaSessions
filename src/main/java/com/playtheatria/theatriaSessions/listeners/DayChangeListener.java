@@ -1,26 +1,32 @@
 package com.playtheatria.theatriaSessions.listeners;
 
-import com.playtheatria.theatriaSessions.database.data.ResetTime;
-import com.playtheatria.theatriaSessions.events.DayChangeEvent;
-import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
+import com.playtheatria.jliii.generalutils.events.time.DayChangeEvent;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
-import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public class DayChangeListener implements Listener {
-    private final ResetTimeManager resetTimeManager;
+    private final SessionRepository sessionRepository;
     private final SessionManager sessionManager;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public DayChangeListener(ResetTimeManager resetTimeManager, SessionManager sessionManager) {
-        this.resetTimeManager = resetTimeManager;
+    public DayChangeListener(
+            SessionRepository sessionRepository, SessionManager sessionManager,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
+    ) {
+        this.sessionRepository = sessionRepository;
         this.sessionManager = sessionManager;
+        this.customLogger = customLogger;
     }
 
     @EventHandler
     public void onDayChange(DayChangeEvent event) {
-        Util.sendFormattedLog("Day change detected. Clearing sessions.");
+        customLogger.sendDebug("[DayChangeEvent] Day change detected. Clearing sessions.");
         sessionManager.resetSessions();
-        resetTimeManager.setResetTime(new ResetTime());
+        sessionRepository.purgeAll();
     }
 }

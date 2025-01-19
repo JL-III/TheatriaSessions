@@ -1,9 +1,11 @@
 package com.playtheatria.theatriaSessions.database.repositories;
 
 import com.j256.ormlite.dao.Dao;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.sql.SQLException;
@@ -12,9 +14,12 @@ import java.util.List;
 
 public class SessionRepository {
     private final Dao<Session, String> dao;
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public SessionRepository(TheatriaSessionsDB theatriaSessionsDB, CustomLogger customLogger) throws SQLException {
+    public SessionRepository(
+            TheatriaSessionsDB theatriaSessionsDB,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
+    ) throws SQLException {
         dao = theatriaSessionsDB.getDao(Session.class);
         this.customLogger = customLogger;
     }
@@ -25,12 +30,12 @@ public class SessionRepository {
         try {
             // Query all rows from the database
             sessions = dao.queryForAll();
-            Util.sendFormattedLog("Loaded " + sessions.size() + " sessions from the database.");
+            customLogger.sendFormattedLog("Loaded " + sessions.size() + " sessions from the database.");
             return sessions;
         } catch (SQLException e) {
-            Util.sendFormattedLog("Failed to load sessions from the database: " + e.getMessage());
+            customLogger.sendFormattedLog("Failed to load sessions from the database: " + e.getMessage());
             e.printStackTrace();
-            Util.sendFormattedLog("Returning and empty list of sessions.");
+            customLogger.sendFormattedLog("Returning and empty list of sessions.");
         }
         return new ArrayList<>();
     }
@@ -46,7 +51,7 @@ public class SessionRepository {
             dao.createOrUpdate(session);
             return true;
         } catch (SQLException exception) {
-            Util.sendFormattedLog("Error on createOrUpdate Session: " + session.getSessionTime() + " " + session.getPlayerName() + " " + session.getPlayerUUID());
+            customLogger.sendFormattedLog("Error on createOrUpdate Session: " + session.getSessionTime() + " " + session.getPlayerName() + " " + session.getPlayerUUID());
             return false;
         }
     }
@@ -56,7 +61,7 @@ public class SessionRepository {
             dao.delete(dao.queryForAll());
             return true;
         } catch (SQLException e) {
-            Util.sendFormattedLog("Failed to purge all entries" + e.getMessage());
+            customLogger.sendFormattedLog("Failed to purge all entries" + e.getMessage());
             return false;
         }
     }

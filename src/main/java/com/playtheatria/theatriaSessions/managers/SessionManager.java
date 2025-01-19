@@ -1,9 +1,12 @@
 package com.playtheatria.theatriaSessions.managers;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.result.Result;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Session;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
-import com.playtheatria.theatriaSessions.result.Result;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,11 +17,16 @@ import java.util.stream.Collectors;
 
 public class SessionManager {
     private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public SessionManager(List<Session> sessions) {
+    public SessionManager(
+            List<Session> sessions,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
+    ) {
         for (Session session : sessions) {
             mappedSessions.put(session.getPlayerUUID(), session);
         }
+        this.customLogger = customLogger;
     }
 
     public boolean hasSession(@NotNull UUID playerUUID) {
@@ -37,11 +45,16 @@ public class SessionManager {
         return mappedSessions;
     }
 
-    public void addSession(@NotNull UUID playerUUID, @NotNull String playerName) {
+    public void createNewSession(@NotNull UUID playerUUID, @NotNull String playerName) {
         mappedSessions.put(playerUUID, new Session(playerUUID, playerName));
     }
 
+    public void addSession(@NotNull Session session) {
+        mappedSessions.put(session.getPlayerUUID(), session);
+    }
+
     public void resetSessions() {
+        customLogger.sendDebug("Reset sessions started...");
         Set<UUID> onlinePlayers = Bukkit.getOnlinePlayers().stream()
                 .map(Player::getUniqueId)
                 .collect(Collectors.toSet());
@@ -61,5 +74,6 @@ public class SessionManager {
         }
 
         mappedSessions = updatedSessions;
+        customLogger.sendDebug("Reset mapped sessions size: " + mappedSessions.size());
     }
 }
