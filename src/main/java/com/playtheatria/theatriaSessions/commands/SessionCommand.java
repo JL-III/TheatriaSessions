@@ -2,18 +2,15 @@ package com.playtheatria.theatriaSessions.commands;
 
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
-import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.database.data.Session;
-import com.playtheatria.theatriaSessions.enums.HistoryType;
-import com.playtheatria.theatriaSessions.events.PricesGraduationEvent;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
-import com.playtheatria.theatriaSessions.managers.PriceManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -25,25 +22,23 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final SessionManager sessionManager;
-    private final PriceManager priceManager;
     private final ConfigManager configManager;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
     public SessionCommand(
             SessionManager sessionManager,
-            PriceManager priceManager,
-            ConfigManager configManager
+            ConfigManager configManager,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
     ) {
         this.sessionManager = sessionManager;
-        this.priceManager = priceManager;
         this.configManager = configManager;
+        this.customLogger = customLogger;
     }
 
     @Override
@@ -77,12 +72,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         return true;
                     }
                     case "reload-config" -> {
-                        Util.sendFormattedMessage("Reloading config", sender);
+                        customLogger.sendFormattedMessage("Reloading config", sender);
                         configManager.reloadConfig();
-                        return true;
-                    }
-                    case "test" -> {
-                        Bukkit.getPluginManager().callEvent(new PricesGraduationEvent(Util.getTestPriceList(), LocalDateTime.now(TimeUtils.timeZone).minusDays(2), LocalDateTime.now(TimeUtils.timeZone)));
                         return true;
                     }
                 }
@@ -140,30 +131,10 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 sessionManager.addSession(session);
                                 return true;
                             }
-                            Util.sendFormattedMessage(String.format("Player returned null: %s", args[1]), sender);
+                            customLogger.sendFormattedMessage(String.format("Player returned null: %s", args[1]), sender);
                         } catch (NumberFormatException exception) {
                             sender.sendMessage("Not a valid number: " + exception.getMessage());
                         }
-                    }
-                    case "get-price" -> {
-                        String materialString = args[1].toUpperCase();
-                        String historyString = args[2].toUpperCase();
-                        try {
-                            Material material = Material.valueOf(materialString);
-                            HistoryType historyType = HistoryType.valueOf(historyString);
-                            sender.sendMessage("Diamond Prices:");
-                            priceManager.getPriceListCache()
-                                    .stream()
-                                    .filter(x -> x.getMaterial() == material)
-                                    .filter(x -> x.getHistoryType() == historyType)
-                                    .sorted(Comparator.comparing(Price::getTimestamp))
-                                    .forEach(x -> {
-                                        sender.sendMessage(Util.formatPrice(x));
-                                    });
-                        } catch (IllegalArgumentException exception) {
-                            sender.sendMessage(exception.getMessage());
-                        }
-                        return true;
                     }
                     case "set-progress" -> {
                         try {
@@ -194,23 +165,19 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "check",
                         "create",
                         "force-reward",
-                        "get-price",
                         "reload-config",
                         "reset-progress",
                         "set-progress",
-                        "show-all",
-                        "test"
+                        "show-all"
                 );
             }
             case 2 -> {
                 if (args[0].equalsIgnoreCase("show-all")) return List.of();
-                if (args[0].equalsIgnoreCase("get-price")) return priceManager.getMaterials().stream().map(Enum::toString).collect(Collectors.toList());
                 return sessionManager.getSessions().values().stream()
                         .map(Session::getPlayerName)
                         .collect(Collectors.toList());
             }
             case 3 -> {
-                if (args[0].equalsIgnoreCase("get-price")) return Arrays.stream(HistoryType.values()).map(Enum::toString).toList();
                 if (args[1].equalsIgnoreCase("set-progress") || args[1].equalsIgnoreCase("create")) return List.of("<amount>");
                 return List.of();
             }
