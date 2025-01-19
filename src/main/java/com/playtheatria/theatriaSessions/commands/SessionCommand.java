@@ -1,16 +1,16 @@
 package com.playtheatria.theatriaSessions.commands;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Price;
-import com.playtheatria.theatriaSessions.database.data.ResetTime;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.enums.HistoryType;
-import com.playtheatria.theatriaSessions.events.*;
+import com.playtheatria.theatriaSessions.events.PricesGraduationEvent;
+import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.PriceManager;
-import com.playtheatria.theatriaSessions.managers.ResetTimeManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -31,19 +31,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
-    private final ResetTimeManager resetTimeManager;
     private final SessionManager sessionManager;
     private final PriceManager priceManager;
     private final ConfigManager configManager;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
     public SessionCommand(
-            ResetTimeManager resetTimeManager,
             SessionManager sessionManager,
             PriceManager priceManager,
             ConfigManager configManager
     ) {
-        this.resetTimeManager = resetTimeManager;
         this.sessionManager = sessionManager;
         this.priceManager = priceManager;
         this.configManager = configManager;
@@ -56,7 +53,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case 0 -> {
                 if (sender instanceof Player player) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
-                    String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
+                    String formattedDate = LocalDateTime.now(TimeUtils.timeZone).format(formatter);
                     switch (sessionManager.getSession(player.getUniqueId())) {
                         case Ok<Session, Exception> ok -> {
                             player.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
@@ -84,18 +81,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         configManager.reloadConfig();
                         return true;
                     }
-                    case "reset-time" -> {
-                        Util.sendFormattedMessage(String.format("Reset Time: %s", resetTimeManager.getResetTime().getLastResetHour()), sender);
-                        Util.sendFormattedMessage(String.format("Next Reset: %s", resetTimeManager.getResetTime().getNextResetHour()), sender);
-                        return true;
-                    }
-                    // We intentionally set the ResetTime to an expired amount to leverage detection and trigger a reset.
-                    case "reset-time-trigger" -> {
-                        resetTimeManager.setResetTime(new ResetTime(LocalDateTime.now(Util.timeZone).minusDays(2)));
-                        return true;
-                    }
                     case "test" -> {
-                        Bukkit.getPluginManager().callEvent(new PricesGraduationEvent(Util.getTestPriceList(), LocalDateTime.now(Util.timeZone).minusDays(2), LocalDateTime.now(Util.timeZone)));
+                        Bukkit.getPluginManager().callEvent(new PricesGraduationEvent(Util.getTestPriceList(), LocalDateTime.now(TimeUtils.timeZone).minusDays(2), LocalDateTime.now(TimeUtils.timeZone)));
                         return true;
                     }
                 }
@@ -105,7 +92,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 switch (args[0].toLowerCase()) {
                     case "check" -> {
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
-                        String formattedDate = LocalDateTime.now(Util.timeZone).format(formatter);
+                        String formattedDate = LocalDateTime.now(TimeUtils.timeZone).format(formatter);
                         for (Session session : sessionManager.getSessions().values()) {
                             if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
                             sender.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
@@ -114,19 +101,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             sender.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
                             return true;
                         }
-                    }
-                    case "graduate" -> {
-                        switch (args[1]) {
-                            case "hour" -> {
-                                Bukkit.getPluginManager().callEvent(
-                                        new HourChangeEvent(resetTimeManager.getResetTime().getLastResetHour(), LocalDateTime.now(Util.timeZone))
-                                );
-                            }
-                            default -> {
-                                sender.sendMessage("Not a valid time-event");
-                            }
-                        }
-                        return true;
                     }
                     case "force-reward" -> {
                         for (Session session : sessionManager.getSessions().values()) {
@@ -221,11 +195,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "create",
                         "force-reward",
                         "get-price",
-                        "graduate",
                         "reload-config",
                         "reset-progress",
-                        "reset-time",
-                        "reset-time-trigger",
                         "set-progress",
                         "show-all",
                         "test"

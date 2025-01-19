@@ -1,5 +1,6 @@
 package com.playtheatria.theatriaSessions.utils;
 
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.enums.HistoryType;
@@ -11,16 +12,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.WeekFields;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Util {
     public static final String COLOR_ONE = "#f5428a";
     public static final String COLOR_TWO = "#42f598";
     public static final String COLOR_THREE = "#fff8bd";
-    public static final ZoneId timeZone = ZoneId.of("America/New_York");
 
     public static Component formatMessage(String label, Object value) {
         String template = "<color:%s>[<color:%s>%s<color:%s>]<color:%s> %s";
@@ -74,43 +72,12 @@ public class Util {
         return String.format("%-" + length + "s", input);
     }
 
-    public static boolean isNewDay(LocalDateTime timestamp, LocalDateTime now) {
-        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
-        ZonedDateTime zonedNow = now.atZone(timeZone);
-        return !zonedTimestamp.toLocalDate().isEqual(zonedNow.toLocalDate());
-    }
-
-    public static boolean isNewWeek(LocalDateTime timestamp, LocalDateTime now) {
-        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
-        ZonedDateTime zonedNow = now.atZone(timeZone);
-        WeekFields weekFields = WeekFields.of(DayOfWeek.SUNDAY, 1);
-        int weekOfYearTimestamp = zonedTimestamp.get(weekFields.weekOfWeekBasedYear());
-        int weekOfYearNow = zonedNow.get(weekFields.weekOfWeekBasedYear());
-        return zonedTimestamp.getYear() != zonedNow.getYear() || weekOfYearTimestamp != weekOfYearNow;
-    }
-
-    public static boolean isNewMonth(LocalDateTime timestamp, LocalDateTime now) {
-        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
-        ZonedDateTime zonedNow = now.atZone(timeZone);
-        return zonedTimestamp.getYear() != zonedNow.getYear() || zonedTimestamp.getMonth() != zonedNow.getMonth();
-    }
-
-    public static boolean isNewYear(LocalDateTime timestamp, LocalDateTime now) {
-        ZonedDateTime zonedTimestamp = timestamp.atZone(timeZone);
-        ZonedDateTime zonedNow = now.atZone(timeZone);
-        return zonedTimestamp.getYear() != zonedNow.getYear();
-    }
-
     public static String formatPrice(Price price) {
-        return String.format(String.format("%s, %s, %s", price.getTimestamp().format(Util.getFormat()), price.getHistoryType(), price.getPrice()));
-    }
-
-    public static DateTimeFormatter getFormat() {
-        return DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
+        return String.format(String.format("%s, %s, %s", price.getTimestamp().format(TimeUtils.getFormat()), price.getHistoryType(), price.getPrice()));
     }
 
     public static List<Price> getTestPriceList() {
-        LocalDateTime localDateTime = LocalDateTime.now(Util.timeZone);
+        LocalDateTime localDateTime = LocalDateTime.now(TimeUtils.timeZone);
         return List.of(
                 // The four hourly prices in a day
                 new Price(HistoryType.HOURLY, localDateTime.minusHours(6), Material.DIAMOND, 105),

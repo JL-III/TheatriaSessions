@@ -1,11 +1,13 @@
 package com.playtheatria.theatriaSessions.listeners;
 
-import com.playtheatria.theatriaSessions.events.DayChangeEvent;
-import com.playtheatria.theatriaSessions.events.HourChangeEvent;
+import com.playtheatria.jliii.generalutils.events.time.DayChangeEvent;
+import com.playtheatria.jliii.generalutils.events.time.HourChangeEvent;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.events.PricesGraduationEvent;
 import com.playtheatria.theatriaSessions.managers.PriceManager;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
-import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,9 +18,9 @@ import org.bukkit.event.Listener;
  */
 public class HourChangeListener implements Listener {
     private final PriceManager priceManager;
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public HourChangeListener(PriceManager priceManager, CustomLogger customLogger) {
+    public HourChangeListener(PriceManager priceManager, CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.priceManager = priceManager;
         this.customLogger = customLogger;
     }
@@ -26,10 +28,10 @@ public class HourChangeListener implements Listener {
     @EventHandler
     public void onHourChange(HourChangeEvent event) {
         customLogger.sendDebug("[HourChangeEvent] fired, checking if new day has started since last reset hour.");
-        if (Util.isNewDay(event.getLastResetHour(), event.getNow())) {
+        if (TimeUtils.isNewDay(event.getLastHour(), event.getNow())) {
             Bukkit.getPluginManager().callEvent(new DayChangeEvent());
         }
         customLogger.sendDebug("[HourChangeEvent] Calling PricesGraduationEvent.");
-        Bukkit.getPluginManager().callEvent(new PricesGraduationEvent(priceManager.getPriceListCache(), event.getLastResetHour(), event.getNow()));
+        Bukkit.getPluginManager().callEvent(new PricesGraduationEvent(priceManager.getPriceListCache(), event.getLastHour(), event.getNow()));
     }
 }

@@ -2,11 +2,11 @@ package com.playtheatria.theatriaSessions.managers;
 
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.Worth;
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.enums.HistoryType;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
-import com.playtheatria.theatriaSessions.result.Result;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

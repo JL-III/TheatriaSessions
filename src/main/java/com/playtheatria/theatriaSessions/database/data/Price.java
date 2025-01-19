@@ -2,8 +2,8 @@ package com.playtheatria.theatriaSessions.database.data;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.theatriaSessions.enums.HistoryType;
-import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Material;
 
 import java.time.LocalDateTime;
@@ -32,7 +32,7 @@ public class Price {
         this.historyType = historyType.name();
         this.material = material.name();
         this.price = price;
-        this.timestamp = LocalDateTime.now(Util.timeZone).toString();
+        this.timestamp = LocalDateTime.now(TimeUtils.timeZone).toString();
     }
 
     public Price(HistoryType historyType, LocalDateTime timestamp, Material material, double price) {

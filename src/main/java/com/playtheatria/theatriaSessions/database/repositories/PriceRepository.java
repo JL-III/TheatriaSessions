@@ -1,12 +1,15 @@
 package com.playtheatria.theatriaSessions.database.repositories;
 
 import com.j256.ormlite.dao.Dao;
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.result.Result;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.data.Price;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
-import com.playtheatria.theatriaSessions.result.Result;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.sql.SQLException;
@@ -17,7 +20,7 @@ import java.util.Map;
 
 public class PriceRepository {
     private final Dao<Price, String> dao;
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
     Map<String, Duration> retentionPeriods = Map.of(
             "HOURLY", Duration.ofHours(24),
@@ -27,7 +30,10 @@ public class PriceRepository {
             "YEARLY", Duration.ofDays(3650)
     );
 
-    public PriceRepository(TheatriaSessionsDB theatriaSessionsDB, CustomLogger customLogger) throws SQLException {
+    public PriceRepository(
+            TheatriaSessionsDB theatriaSessionsDB,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
+    ) throws SQLException {
         this.dao = theatriaSessionsDB.getDao(Price.class);
         this.customLogger = customLogger;
     }
@@ -45,7 +51,7 @@ public class PriceRepository {
             String historyType = entry.getKey();
             Duration duration = entry.getValue();
 
-            LocalDateTime cutoff = LocalDateTime.now(Util.timeZone).minus(duration);
+            LocalDateTime cutoff = LocalDateTime.now(TimeUtils.timeZone).minus(duration);
             String query = "DELETE FROM prices WHERE historyType = ? AND timestamp < ?";
             try {
                 dao.executeRaw(query, historyType, cutoff.toString());

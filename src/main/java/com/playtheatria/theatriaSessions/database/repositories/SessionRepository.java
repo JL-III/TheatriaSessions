@@ -1,9 +1,11 @@
 package com.playtheatria.theatriaSessions.database.repositories;
 
 import com.j256.ormlite.dao.Dao;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 
 import java.sql.SQLException;
@@ -12,9 +14,12 @@ import java.util.List;
 
 public class SessionRepository {
     private final Dao<Session, String> dao;
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public SessionRepository(TheatriaSessionsDB theatriaSessionsDB, CustomLogger customLogger) throws SQLException {
+    public SessionRepository(
+            TheatriaSessionsDB theatriaSessionsDB,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
+    ) throws SQLException {
         dao = theatriaSessionsDB.getDao(Session.class);
         this.customLogger = customLogger;
     }

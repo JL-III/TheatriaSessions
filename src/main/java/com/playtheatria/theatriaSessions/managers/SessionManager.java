@@ -1,10 +1,12 @@
 package com.playtheatria.theatriaSessions.managers;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.result.Result;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Session;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
-import com.playtheatria.theatriaSessions.result.Result;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,9 +17,12 @@ import java.util.stream.Collectors;
 
 public class SessionManager {
     private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public SessionManager(List<Session> sessions, CustomLogger customLogger) {
+    public SessionManager(
+            List<Session> sessions,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
+    ) {
         for (Session session : sessions) {
             mappedSessions.put(session.getPlayerUUID(), session);
         }

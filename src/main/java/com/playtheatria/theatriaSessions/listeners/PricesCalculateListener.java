@@ -1,9 +1,11 @@
 package com.playtheatria.theatriaSessions.listeners;
 
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.events.PricesCalculateEvent;
 import com.playtheatria.theatriaSessions.events.PricesReadyForCacheEvent;
 import com.playtheatria.theatriaSessions.managers.PriceManager;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,9 +18,9 @@ import org.bukkit.event.Listener;
  */
 public class PricesCalculateListener implements Listener {
     private final PriceManager priceManager;
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public PricesCalculateListener(PriceManager priceManager, CustomLogger customLogger) {
+    public PricesCalculateListener(PriceManager priceManager, CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.priceManager = priceManager;
         this.customLogger = customLogger;
     }

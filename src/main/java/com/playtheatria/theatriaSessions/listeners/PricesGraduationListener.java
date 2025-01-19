@@ -1,13 +1,16 @@
 package com.playtheatria.theatriaSessions.listeners;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.enums.HistoryType;
 import com.playtheatria.theatriaSessions.events.PricesGraduationEvent;
 import com.playtheatria.theatriaSessions.events.PricesSaveToDatabaseEvent;
 import com.playtheatria.theatriaSessions.managers.PriceManager;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -26,9 +29,9 @@ import java.util.stream.Collectors;
  * Fires the PricesSaveToDatabaseEvent and passes the new list into it.
  */
 public class PricesGraduationListener implements Listener {
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public PricesGraduationListener(CustomLogger customLogger) {
+    public PricesGraduationListener(CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.customLogger = customLogger;
     }
 
@@ -52,22 +55,22 @@ public class PricesGraduationListener implements Listener {
     private List<Price> handleGraduationLogic(LocalDateTime lastResetHour, LocalDateTime now, List<Price> priceList) {
         // Persist the last hourly price as a daily price if a new day has started
         List<Price> allPrices = new ArrayList<>(priceList);
-        if (Util.isNewDay(lastResetHour, now)) {
+        if (TimeUtils.isNewDay(lastResetHour, now)) {
             allPrices.addAll(graduate(HistoryType.HOURLY, HistoryType.DAILY, priceList));
         }
 
         // Persist daily prices as weekly prices if a new week has started
-        if (Util.isNewWeek(lastResetHour, now)) {
+        if (TimeUtils.isNewWeek(lastResetHour, now)) {
             allPrices.addAll(graduate(HistoryType.DAILY, HistoryType.WEEKLY, priceList));
         }
 
         // Persist weekly prices as monthly prices if a new month has started
-        if (Util.isNewMonth(lastResetHour, now)) {
+        if (TimeUtils.isNewMonth(lastResetHour, now)) {
             allPrices.addAll(graduate(HistoryType.WEEKLY, HistoryType.MONTHLY, priceList));
         }
 
         // Persist monthly prices as yearly prices if a new year has started
-        if (Util.isNewYear(lastResetHour, now)) {
+        if (TimeUtils.isNewYear(lastResetHour, now)) {
             allPrices.addAll(graduate(HistoryType.MONTHLY, HistoryType.YEARLY,  priceList));
         }
         return allPrices;
@@ -83,7 +86,7 @@ public class PricesGraduationListener implements Listener {
                     customLogger.sendDebug("[PricesGraduationEvent] " + Util.formatPrice(ok.value()));
 
                     newPriceList.add(
-                            new Price(target, getEndOfPreviousDay(LocalDateTime.now(Util.timeZone)), ok.value().getMaterial(), ok.value().getPrice())
+                            new Price(target, getEndOfPreviousDay(LocalDateTime.now(TimeUtils.timeZone)), ok.value().getMaterial(), ok.value().getPrice())
                     );
                 }
                 case Err<Price, Exception> err -> customLogger.sendDebug("[PricesGraduationEvent] " + err.error().getMessage());

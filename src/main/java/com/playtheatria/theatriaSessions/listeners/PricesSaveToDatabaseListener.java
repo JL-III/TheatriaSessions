@@ -1,13 +1,16 @@
 package com.playtheatria.theatriaSessions.listeners;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
+import com.playtheatria.theatriaSessions.TheatriaSessions;
+import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Price;
 import com.playtheatria.theatriaSessions.database.repositories.PriceRepository;
 import com.playtheatria.theatriaSessions.events.PricesCalculateEvent;
 import com.playtheatria.theatriaSessions.events.PricesReadyForCacheEvent;
 import com.playtheatria.theatriaSessions.events.PricesSaveToDatabaseEvent;
-import com.playtheatria.theatriaSessions.result.Err;
-import com.playtheatria.theatriaSessions.result.Ok;
-import com.playtheatria.theatriaSessions.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -25,11 +28,11 @@ import java.util.List;
  */
 public class PricesSaveToDatabaseListener implements Listener {
     private final PriceRepository priceRepository;
-    private final CustomLogger customLogger;
+    private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
     public PricesSaveToDatabaseListener(
             PriceRepository priceRepository,
-            CustomLogger customLogger
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger
     ) {
         this.priceRepository = priceRepository;
         this.customLogger = customLogger;
@@ -52,7 +55,7 @@ public class PricesSaveToDatabaseListener implements Listener {
             case Ok<List<Price>, Exception> ok -> {
                 // Trigger a price calculation if the hour is divisible by 6.
                 if (event.getNow().getHour() % 6 == 0) {
-                    customLogger.sendDebug(String.format("[PricesSaveToDatabaseEvent] Calculating prices at %s!", event.getNow().atZone(Util.timeZone)));
+                    customLogger.sendDebug(String.format("[PricesSaveToDatabaseEvent] Calculating prices at %s!", event.getNow().atZone(TimeUtils.timeZone)));
                     customLogger.sendDebug("[PricesSaveToDatabaseEvent] calling PricesCalculateEvent.");
                     Bukkit.getPluginManager().callEvent(new PricesCalculateEvent(ok.value()));
                 } else {
