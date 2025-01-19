@@ -30,12 +30,12 @@ public class SessionRepository {
         try {
             // Query all rows from the database
             sessions = dao.queryForAll();
-            Util.sendFormattedLog("Loaded " + sessions.size() + " sessions from the database.");
+            customLogger.sendFormattedLog("Loaded " + sessions.size() + " sessions from the database.");
             return sessions;
         } catch (SQLException e) {
-            Util.sendFormattedLog("Failed to load sessions from the database: " + e.getMessage());
+            customLogger.sendFormattedLog("Failed to load sessions from the database: " + e.getMessage());
             e.printStackTrace();
-            Util.sendFormattedLog("Returning and empty list of sessions.");
+            customLogger.sendFormattedLog("Returning and empty list of sessions.");
         }
         return new ArrayList<>();
     }
@@ -51,7 +51,7 @@ public class SessionRepository {
             dao.createOrUpdate(session);
             return true;
         } catch (SQLException exception) {
-            Util.sendFormattedLog("Error on createOrUpdate Session: " + session.getSessionTime() + " " + session.getPlayerName() + " " + session.getPlayerUUID());
+            customLogger.sendFormattedLog("Error on createOrUpdate Session: " + session.getSessionTime() + " " + session.getPlayerName() + " " + session.getPlayerUUID());
             return false;
         }
     }
@@ -61,7 +61,7 @@ public class SessionRepository {
             dao.delete(dao.queryForAll());
             return true;
         } catch (SQLException e) {
-            Util.sendFormattedLog("Failed to purge all entries" + e.getMessage());
+            customLogger.sendFormattedLog("Failed to purge all entries" + e.getMessage());
             return false;
         }
     }

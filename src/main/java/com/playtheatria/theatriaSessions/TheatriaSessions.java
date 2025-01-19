@@ -73,14 +73,14 @@ public final class TheatriaSessions extends JavaPlugin {
         sessionManager = new SessionManager(sessionRepository.loadSessions(), customLogger);
         // If there is an exception
 
-        databaseTask = new DatabaseTask(sessionRepository, sessionManager);
+        databaseTask = new DatabaseTask(sessionRepository, sessionManager, customLogger);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
         OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(sessionManager, essentials);
         oneSecondTimerTask.runTaskTimer(this, 20, 20);
         Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, sessionManager, customLogger), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager), this);
-        Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager, customLogger), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, configManager, customLogger));
     }
 
