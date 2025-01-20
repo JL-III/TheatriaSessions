@@ -1,11 +1,11 @@
 package com.playtheatria.theatriaSessions.listeners;
 
-import com.playtheatria.jliii.generalutils.events.time.DayChangeEvent;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
+import com.playtheatria.theatriaTime.events.DayChangeEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 

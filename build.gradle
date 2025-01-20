@@ -15,6 +15,18 @@ tasks.build {
 
 group = 'com.playtheatria'
 version = 'v0.0.1-alpha.4'
+ext.generalUtilsVersion = 'v2.0.0-alpha.10'
+ext.theatriaTimeVersion = 'v0.0.1-alpha.3'
+
+tasks.processResources {
+    filesMatching("plugin.yml") {
+        expand(
+                version: project.version,
+                generalUtilsVersion: generalUtilsVersion,
+                theatriaTimeVersion: theatriaTimeVersion
+        )
+    }
+}
 
 repositories {
     mavenCentral()
@@ -38,13 +50,22 @@ repositories {
             password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
         }
     }
+    maven {
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/JL-III/TheatriaTime"
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
     compileOnly 'net.essentialsx:EssentialsX:2.21.0-SNAPSHOT'
     implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
-    implementation 'com.playtheatria.jl-iii:generalutils:v2.0.0-alpha.7'
+    implementation "com.playtheatria.jl-iii:generalutils:${generalUtilsVersion}"
+    compileOnly "com.playtheatria:theatriatime:${theatriaTimeVersion}"
 }
 
 def targetJavaVersion = 21

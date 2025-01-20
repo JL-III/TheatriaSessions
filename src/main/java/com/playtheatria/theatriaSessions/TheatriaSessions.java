@@ -82,6 +82,9 @@ public final class TheatriaSessions extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager, customLogger), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, configManager, customLogger));
+        customLogger.sendFormattedLog("Loaded plugin.");
+        customLogger.sendFormattedLog("Using GeneralUtils version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "general-utils-version"));
+        customLogger.sendFormattedLog("Using TheatriaTime version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "theatria-time-version"));
     }
 
     @Override
