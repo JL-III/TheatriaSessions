@@ -10,9 +10,7 @@ import com.playtheatria.theatriaSessions.database.data.ServerSession;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.repositories.ServerSessionRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
-import com.playtheatria.theatriaSessions.listeners.DayChangeListener;
-import com.playtheatria.theatriaSessions.listeners.PlayerJoinListener;
-import com.playtheatria.theatriaSessions.listeners.RewardPlayerListener;
+import com.playtheatria.theatriaSessions.listeners.*;
 import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.tasks.DatabaseTask;
@@ -90,11 +88,12 @@ public final class TheatriaSessions extends JavaPlugin {
         databaseTask = new DatabaseTask(sessionRepository, serverSessionRepository, sessionManager, serverSessionManager, customLogger);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
-        OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(sessionManager, essentials);
-        oneSecondTimerTask.runTaskTimer(this, 20, 20);
+        new OneSecondTimerTask(sessionManager, essentials).runTaskTimer(this, 20, 20);
         Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, serverSessionRepository, sessionManager, serverSessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new IncrementRewardCountListener(serverSessionManager, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new RewardCommunityListener(customLogger, configManager), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, configManager, customLogger));
         Objects.requireNonNull(getCommand("session")).setExecutor(new CommunityCommand(serverSessionManager, customLogger));
         customLogger.sendFormattedLog("Loaded plugin.");
