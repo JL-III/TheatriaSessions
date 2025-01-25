@@ -52,7 +52,7 @@ public final class TheatriaSessions extends JavaPlugin {
             }
         }
         try {
-            theatriaSessionsDB = new TheatriaSessionsDB(getDataFolder());
+            theatriaSessionsDB = new TheatriaSessionsDB(getDataFolder(), customLogger);
         } catch (IOException e) {
             customLogger.sendFormattedLog("Failed to create database: " + e.getMessage());
             e.printStackTrace();
