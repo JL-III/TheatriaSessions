@@ -1,7 +1,9 @@
 name: TheatriaSessions
-version: 'v0.0.1-alpha.4'
+version: ${version}
 main: com.playtheatria.theatriaSessions.TheatriaSessions
 api-version: '1.21'
+general-utils-version: ${generalUtilsVersion}
+theatria-time-version: ${theatriaTimeVersion}
 depend: [Essentials, TheatriaTime]
 commands:
   session:

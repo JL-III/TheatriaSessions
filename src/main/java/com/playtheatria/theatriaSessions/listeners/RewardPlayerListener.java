@@ -4,7 +4,6 @@ import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
-import com.playtheatria.theatriaSessions.utils.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
