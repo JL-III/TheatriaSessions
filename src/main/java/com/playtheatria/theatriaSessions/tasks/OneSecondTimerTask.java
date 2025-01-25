@@ -3,7 +3,7 @@ package com.playtheatria.theatriaSessions.tasks;
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
 import com.playtheatria.theatriaSessions.database.data.Session;
-import com.playtheatria.theatriaSessions.events.*;
+import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
