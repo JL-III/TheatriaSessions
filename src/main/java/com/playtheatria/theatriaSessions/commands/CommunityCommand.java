@@ -33,10 +33,10 @@ public class CommunityCommand implements CommandExecutor, TabCompleter {
                 customLogger.sendFormattedMessage(String.format("Date: %s", serverSession.getSessionDate()), sender);
                 customLogger.sendFormattedMessage(String.format("RewardsEarned: %s", serverSession.getRewardsEarned()), sender);
                 customLogger.sendFormattedMessage(String.format("PlayersJoined: %s", serverSession.getPlayersJoined()), sender);
+                return true;
             }
             default -> {return true;}
         }
-        return false;
     }
 
     @Override
