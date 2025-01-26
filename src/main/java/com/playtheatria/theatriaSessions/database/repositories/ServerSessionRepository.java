@@ -2,6 +2,7 @@ package com.playtheatria.theatriaSessions.database.repositories;
 
 import com.j256.ormlite.dao.Dao;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
@@ -35,10 +36,10 @@ public class ServerSessionRepository {
      */
     public ServerSession loadServerSession() {
         try {
-            ServerSession serverSession = dao.queryForId(LocalDate.now().toString());
+            ServerSession serverSession = dao.queryForId(LocalDate.now(TimeUtils.timeZone).toString());
             if (serverSession == null) {
-                customLogger.sendFormattedLog(String.format("No ServerSession found in database for today %s. Creating a new ServerSession.", LocalDate.now()));
-                serverSession = new ServerSession(LocalDate.now());
+                customLogger.sendFormattedLog(String.format("No ServerSession found in database for today %s. Creating a new ServerSession.", LocalDate.now(TimeUtils.timeZone)));
+                serverSession = new ServerSession(LocalDate.now(TimeUtils.timeZone));
                 dao.create(serverSession); // Save the new session to the database
                 // Warning - listener doesn't exist yet
                 Bukkit.getPluginManager().callEvent(new DayChangeEvent());
