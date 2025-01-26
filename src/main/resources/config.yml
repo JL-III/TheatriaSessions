@@ -10,3 +10,5 @@ initial-backup-duration: 600
 # Placeholders are {player}, {player_uuid}, {world}
 rewards:
   - "cc give p dailyrewardcrate 5 {player}"
+
+community-rewards-enabled: false

@@ -9,6 +9,9 @@ import java.time.LocalDate;
 public class ServerSession {
 
     @DatabaseField(id = true)
+    private final int id = 0;
+
+    @DatabaseField
     private String sessionDate;
 
     @DatabaseField

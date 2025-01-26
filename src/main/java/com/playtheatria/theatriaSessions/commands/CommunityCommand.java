@@ -17,10 +17,12 @@ import java.util.List;
 public class CommunityCommand implements CommandExecutor, TabCompleter {
     private final ServerSessionManager serverSessionManager;
     private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
+    private final ConfigManager configManager;
 
-    public CommunityCommand(ServerSessionManager serverSessionManager, CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
+    public CommunityCommand(ServerSessionManager serverSessionManager, CustomLogger<TheatriaSessions, ConfigManager> customLogger, ConfigManager configManager) {
         this.serverSessionManager = serverSessionManager;
         this.customLogger = customLogger;
+        this.configManager = configManager;
     }
 
     @Override
@@ -33,6 +35,8 @@ public class CommunityCommand implements CommandExecutor, TabCompleter {
                 customLogger.sendFormattedMessage(String.format("Date: %s", serverSession.getSessionDate()), sender);
                 customLogger.sendFormattedMessage(String.format("RewardsEarned: %s", serverSession.getRewardsEarned()), sender);
                 customLogger.sendFormattedMessage(String.format("PlayersJoined: %s", serverSession.getPlayersJoined()), sender);
+                customLogger.sendFormattedMessage(String.format("isDebug: %s", configManager.debug), sender);
+                customLogger.sendFormattedMessage(String.format("isCommunityRewardsEnabled: %s", configManager.isCommunityRewardsEnabled()), sender);
                 return true;
             }
             default -> {return true;}

@@ -36,9 +36,9 @@ public class ServerSessionRepository {
      */
     public ServerSession loadServerSession() {
         try {
-            ServerSession serverSession = dao.queryForId(LocalDate.now(TimeUtils.timeZone).toString());
+            ServerSession serverSession = dao.queryForId("0");
             if (serverSession == null) {
-                customLogger.sendFormattedLog(String.format("No ServerSession found in database for today %s. Creating a new ServerSession.", LocalDate.now(TimeUtils.timeZone)));
+                customLogger.sendFormattedLog("No ServerSession found in database with the id of 0. Creating a new ServerSession.");
                 serverSession = new ServerSession(LocalDate.now(TimeUtils.timeZone));
                 dao.create(serverSession); // Save the new session to the database
                 // Warning - listener doesn't exist yet
