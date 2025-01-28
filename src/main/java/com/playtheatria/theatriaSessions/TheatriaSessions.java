@@ -2,17 +2,20 @@ package com.playtheatria.theatriaSessions;
 
 import com.earth2me.essentials.Essentials;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.commands.CommunityCommand;
 import com.playtheatria.theatriaSessions.commands.SessionCommand;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
+import com.playtheatria.theatriaSessions.database.data.ServerSession;
 import com.playtheatria.theatriaSessions.database.data.Session;
+import com.playtheatria.theatriaSessions.database.repositories.ServerSessionRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
-import com.playtheatria.theatriaSessions.listeners.DayChangeListener;
-import com.playtheatria.theatriaSessions.listeners.PlayerJoinListener;
-import com.playtheatria.theatriaSessions.listeners.RewardPlayerListener;
+import com.playtheatria.theatriaSessions.listeners.*;
+import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.tasks.DatabaseTask;
 import com.playtheatria.theatriaSessions.tasks.OneSecondTimerTask;
+import com.playtheatria.theatriaSessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,7 +25,9 @@ import java.util.Objects;
 
 public final class TheatriaSessions extends JavaPlugin {
     private SessionManager sessionManager;
+    private ServerSessionManager serverSessionManager;
     private SessionRepository sessionRepository;
+    private ServerSessionRepository serverSessionRepository;
     private CustomLogger<TheatriaSessions, ConfigManager> customLogger;
     private DatabaseTask databaseTask;
 
@@ -32,9 +37,9 @@ public final class TheatriaSessions extends JavaPlugin {
         ConfigManager configManager = new ConfigManager(this);
         customLogger = new CustomLogger<>(
                 configManager,
-                "#f5428a",
-                "#42f598",
-                "#fff8bd"
+                Util.COLOR_ONE,
+                Util.COLOR_TWO,
+                Util.COLOR_THREE
         );
         Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
         if (essentials == null) {
@@ -68,20 +73,29 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-
-
         sessionManager = new SessionManager(sessionRepository.loadSessions(), customLogger);
-        // If there is an exception
 
-        databaseTask = new DatabaseTask(sessionRepository, sessionManager, customLogger);
+        try {
+            serverSessionRepository = new ServerSessionRepository(theatriaSessionsDB, customLogger);
+        } catch (SQLException e) {
+            customLogger.sendFormattedLog("Failed to create ServerSessionRepository: " + e.getMessage());
+            customLogger.sendFormattedLog("Shutting down...");
+            Bukkit.getPluginManager().disablePlugin(this);
+            return;
+        }
+        serverSessionManager = new ServerSessionManager(serverSessionRepository.loadServerSession());
+
+        databaseTask = new DatabaseTask(sessionRepository, serverSessionRepository, sessionManager, serverSessionManager, customLogger);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
-        OneSecondTimerTask oneSecondTimerTask = new OneSecondTimerTask(sessionManager, essentials);
-        oneSecondTimerTask.runTaskTimer(this, 20, 20);
-        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, sessionManager, customLogger), this);
+        new OneSecondTimerTask(sessionManager, serverSessionManager, essentials).runTaskTimer(this, 20, 20);
+        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, serverSessionRepository, sessionManager, serverSessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new IncrementRewardCountListener(serverSessionManager, customLogger), this);
+        Bukkit.getPluginManager().registerEvents(new RewardCommunityListener(customLogger, configManager), this);
         Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, configManager, customLogger));
+        Objects.requireNonNull(getCommand("community")).setExecutor(new CommunityCommand(serverSessionManager, customLogger, configManager));
         customLogger.sendFormattedLog("Loaded plugin.");
         customLogger.sendFormattedLog("Using GeneralUtils version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "general-utils-version"));
         customLogger.sendFormattedLog("Using TheatriaTime version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "theatria-time-version"));
@@ -89,12 +103,17 @@ public final class TheatriaSessions extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (databaseTask != null && sessionManager != null && sessionRepository != null) {
-            databaseTask.cancel();
+        if (databaseTask != null) databaseTask.cancel();
+        if (sessionManager != null && sessionRepository != null) {
             for (Session session : sessionManager.getSessions().values()) {
                 customLogger.sendFormattedLog("User: " + session.getPlayerName() + " had a session time of " + session.getSessionTime());
                 sessionRepository.createOrUpdate(session);
             }
+        }
+        if (serverSessionManager != null && serverSessionRepository != null) {
+            ServerSession serverSession = serverSessionManager.getServerSession();
+            customLogger.sendFormattedLog(String.format("ServerSession Date: %s, RewardsEarned: %s, PlayersJoined: %s", serverSession.getSessionDate(), serverSession.getRewardsEarned(), serverSession.getPlayersJoined()));
+            serverSessionRepository.createOrUpdate(serverSession);
         }
     }
 }

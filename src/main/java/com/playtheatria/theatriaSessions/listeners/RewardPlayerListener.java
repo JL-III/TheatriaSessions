@@ -3,6 +3,7 @@ package com.playtheatria.theatriaSessions.listeners;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.events.IncrementRewardCountEvent;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -29,7 +30,7 @@ public class RewardPlayerListener implements Listener {
         }
 
         event.getSession().setRewarded();
-        player.sendMessage(Component.text("Great work! You hit today’s session goal—thanks for making the server awesome!").color(NamedTextColor.GOLD));
+        player.sendMessage(Component.text("Great work! You hit today’s daily-reward goal! Thanks for making Theatria awesome!").color(NamedTextColor.GOLD));
         for (String reward : configManager.getRewards()) {
             String parsedCommand = reward
                     .replace("{player}", player.getName()) // Replace player name
@@ -38,5 +39,6 @@ public class RewardPlayerListener implements Listener {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
             customLogger.sendFormattedLog("Sent reward of: " + parsedCommand + " to " + player.getName());
         }
+        Bukkit.getPluginManager().callEvent(new IncrementRewardCountEvent());
     }
 }

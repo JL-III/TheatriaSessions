@@ -14,9 +14,9 @@ tasks.build {
 }
 
 group = 'com.playtheatria'
-version = 'v0.0.1-alpha.5'
+version = 'v0.0.2-alpha.1'
 ext.generalUtilsVersion = 'v2.0.0-alpha.10'
-ext.theatriaTimeVersion = 'v0.0.1-alpha.3'
+ext.theatriaTimeVersion = 'v0.0.1-alpha.4'
 
 tasks.processResources {
     filesMatching("plugin.yml") {

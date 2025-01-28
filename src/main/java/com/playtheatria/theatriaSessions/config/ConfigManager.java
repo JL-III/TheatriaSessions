@@ -10,6 +10,7 @@ public class ConfigManager extends AbstractConfigManager<TheatriaSessions> {
     private final long initialBackupDuration;
 
     private List<String> rewards;
+    private boolean communityRewardsEnabled;
 
     public ConfigManager(TheatriaSessions plugin) {
         super(plugin);
@@ -22,6 +23,7 @@ public class ConfigManager extends AbstractConfigManager<TheatriaSessions> {
     public void loadConfig() {
         this.debug = plugin.getConfig().getBoolean("debug");
         this.rewards = plugin.getConfig().getStringList("rewards");
+        this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
     }
 
     public long getBackupDuration() {
@@ -34,5 +36,9 @@ public class ConfigManager extends AbstractConfigManager<TheatriaSessions> {
 
     public List<String> getRewards() {
         return this.rewards;
+    }
+
+    public boolean isCommunityRewardsEnabled() {
+        return communityRewardsEnabled;
     }
 }

@@ -4,9 +4,8 @@ import com.j256.ormlite.dao.Dao;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
-import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
-import com.playtheatria.theatriaSessions.utils.Util;
+import com.playtheatria.theatriaSessions.database.data.Session;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
