@@ -38,12 +38,33 @@ public class DayChangeListener implements Listener {
 
     @EventHandler
     public void onDayChange(DayChangeEvent event) {
-        customLogger.sendDebug("[DayChangeEvent] Day change detected. Clearing sessions.");
+        customLogger.sendDebug("[DayChangeEvent] Day change detected. Resetting sessions.");
         sessionManager.resetSessions();
-        sessionRepository.purgeAll();
+        customLogger.sendDebug("[DayChangeEvent] Day change detected. Purging SessionRepository.");
+        if (sessionRepository.purgeAll()) {
+            customLogger.sendDebug("[DayChangeEvent] Purging SessionRepository succeeded.");
+        } else {
+            customLogger.sendDebug("[DayChangeEvent] Purging SessionRepository failed.");
+        }
+
+        ServerSession oldServerSession = serverSessionManager.getServerSession();
+        customLogger.sendDebug("[DayChangeEvent] Day change detected. Debug logs for oldServerSession:");
+        customLogger.sendDebug(String.format("[DayChangeEvent] SessionDate: %s", oldServerSession.getSessionDate()));
+        customLogger.sendDebug(String.format("[DayChangeEvent] RewardsEarned: %s", oldServerSession.getRewardsEarned()));
+        customLogger.sendDebug(String.format("[DayChangeEvent] PlayersJoined: %s", oldServerSession.getPlayersJoined()));
 
         ServerSession serverSession = new ServerSession(LocalDate.now(TimeUtils.timeZone));
+        customLogger.sendDebug("[DayChangeEvent] Day change detected. Setting new ServerSession");
+        customLogger.sendDebug(String.format("[DayChangeEvent] SessionDate: %s", serverSession.getSessionDate()));
+        customLogger.sendDebug(String.format("[DayChangeEvent] RewardsEarned: %s", serverSession.getRewardsEarned()));
+        customLogger.sendDebug(String.format("[DayChangeEvent] PlayersJoined: %s", serverSession.getPlayersJoined()));
         serverSessionManager.setServerSession(serverSession);
-        serverSessionRepository.purgeAll();
+
+        customLogger.sendDebug("[DayChangeEvent] Day change detected. Purging ServerSessionRepository.");
+        if (serverSessionRepository.purgeAll()) {
+            customLogger.sendDebug("[DayChangeEvent] Purging ServerSessionRepository succeeded.");
+        } else {
+            customLogger.sendDebug("[DayChangeEvent] Purging ServerSessionRepository failed.");
+        }
     }
 }
