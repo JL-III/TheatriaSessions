@@ -1,11 +1,11 @@
 package com.playtheatria.theatriaSessions.enums;
 
 public enum RewardTier {
-    TIER1(2, "Tier 1", "sell.multiplier.community-goal-1", "10%"),
-    TIER2(4, "Tier 2", "sell.multiplier.community-goal-2", "20%"),
-    TIER3(6, "Tier 3", "sell.multiplier.community-goal-3", "30%"),
-    TIER4(8, "Tier 4", "sell.multiplier.community-goal-4", "40%"),
-    TIER5(10, "Tier 5", "sell.multiplier.community-goal-5", "50%");
+    TIER1(4, "Tier 1", "sell.multiplier.community-goal-1", "10%"),
+    TIER2(6, "Tier 2", "sell.multiplier.community-goal-2", "20%"),
+    TIER3(8, "Tier 3", "sell.multiplier.community-goal-3", "30%"),
+    TIER4(10, "Tier 4", "sell.multiplier.community-goal-4", "40%"),
+    TIER5(12, "Tier 5", "sell.multiplier.community-goal-5", "50%");
 
     private final int threshold;
     private final String displayName;
