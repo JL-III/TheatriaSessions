@@ -35,8 +35,8 @@ public class ServerSession {
         return playersJoined;
     }
 
-    public void incrementPlayersJoined() {
-        playersJoined++;
+    public void setPlayersJoined(int amount) {
+        playersJoined = amount;
     }
 
     public int getRewardsEarned() {
