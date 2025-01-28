@@ -59,6 +59,8 @@ public class ServerSessionRepository {
 
     public boolean createOrUpdate(ServerSession serverSession) {
         customLogger.sendDebug(String.format("Create or update called on a ServerSession: %s", serverSession.getSessionDate()));
+        customLogger.sendDebug(String.format("PlayersJoined: %s", serverSession.getPlayersJoined()));
+        customLogger.sendDebug(String.format("RewardsEarned: %s", serverSession.getRewardsEarned()));
         try {
             dao.createOrUpdate(serverSession);
             return true;
@@ -70,6 +72,7 @@ public class ServerSessionRepository {
 
     public boolean purgeAll() {
         try {
+            customLogger.sendDebug("Attempting to purge all from database.");
             dao.delete(dao.queryForAll());
             return true;
         } catch (SQLException e) {
