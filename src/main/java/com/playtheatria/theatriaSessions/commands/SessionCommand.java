@@ -2,14 +2,21 @@ package com.playtheatria.theatriaSessions.commands;
 
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Session;
+import com.playtheatria.theatriaSessions.enums.RewardTier;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
+import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -27,16 +34,19 @@ import java.util.stream.Collectors;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final SessionManager sessionManager;
+    private final ServerSessionManager serverSessionManager;
     private final ConfigManager configManager;
     private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
     public SessionCommand(
             SessionManager sessionManager,
+            ServerSessionManager serverSessionManager,
             ConfigManager configManager,
             CustomLogger<TheatriaSessions, ConfigManager> customLogger
     ) {
         this.sessionManager = sessionManager;
+        this.serverSessionManager = serverSessionManager;
         this.configManager = configManager;
         this.customLogger = customLogger;
     }
@@ -47,12 +57,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
-                    String formattedDate = LocalDateTime.now(TimeUtils.timeZone).format(formatter);
                     switch (sessionManager.getSession(player.getUniqueId())) {
                         case Ok<Session, Exception> ok -> {
-                            player.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
-                            player.sendMessage(Util.formatPlayerMessage(ok.value()));
+                            sendSessionMessage(player, ok.value());
                         }
                         case Err<Session, Exception> err -> {
                             player.sendMessage(err.error().getMessage());
@@ -185,5 +192,25 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 return List.of();
             }
         }
+    }
+
+    public void sendSessionMessage(CommandSender sender, Session session) {
+        Result<RewardTier, Exception> rewardTier = RewardTier.getNearestTier(serverSessionManager.getServerSession().getRewardsEarned());
+        List.of(
+                Component.text(String.format("Daily-Reward - %s", serverSessionManager.getServerSession().getSessionDate().toString())).decorate(TextDecoration.UNDERLINED).color(TextColor.fromHexString(Util.COLOR_TWO)),
+                Component.text("⭐ Community Stats").color(TextColor.fromHexString(Util.COLOR_TWO)),
+                Component.text(String.format("  • Players Joined %s", serverSessionManager.getServerSession().getPlayersJoined())).color(TextColor.fromHexString(Util.COLOR_THREE))
+                                .hoverEvent(HoverEvent.showText(Component.text("The number of unique players that have joined the server today."))),
+                Component.text(String.format("  • Players Earned %s", serverSessionManager.getServerSession().getRewardsEarned())).color(TextColor.fromHexString(Util.COLOR_THREE))
+                        .hoverEvent(HoverEvent.showText(Component.text("The number of players that have earned a /daily-reward today."))),
+                Component.text(String.format("  • Community Reward Tier: %s", rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0")).color(TextColor.fromHexString(Util.COLOR_THREE))
+                        .hoverEvent(HoverEvent.showText(Component.text("The current reward tier for the community. More players earning their /daily-reward will increase this."))),
+                Component.text(String.format("      • Community Sell Hand Bonus: %s", rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().getPercentage() : "0%")).color(TextColor.fromHexString(Util.COLOR_THREE))
+                        .hoverEvent(HoverEvent.showText(Component.text("The bonus percentage players receive from the community reward tier when using /sell hand."))),
+                Component.text("⭐ Personal Stats").color(TextColor.fromHexString(Util.COLOR_TWO)),
+                Component.text(String.format("  • Progress: %s/%s", session.getSessionTime(), session.THRESHOLD)).color(TextColor.fromHexString(Util.COLOR_THREE)),
+                Component.text("  • Earned Reward: ").color(TextColor.fromHexString(Util.COLOR_THREE)).append(Util.formatIndicator(session))
+
+        ).forEach(sender::sendMessage);
     }
 }

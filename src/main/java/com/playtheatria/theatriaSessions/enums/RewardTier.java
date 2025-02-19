@@ -1,5 +1,9 @@
 package com.playtheatria.theatriaSessions.enums;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.result.Result;
+
 public enum RewardTier {
     TIER1(4, "Tier 1", "sell.multiplier.community-goal-1", "10%"),
     TIER2(6, "Tier 2", "sell.multiplier.community-goal-2", "20%"),
@@ -36,7 +40,7 @@ public enum RewardTier {
         return null; // No matching tier
     }
 
-    public static RewardTier getNearestTier(int rewardCount) {
+    public static Result<RewardTier, Exception> getNearestTier(int rewardCount) {
         RewardTier nearestTier = null;
 
         for (RewardTier tier : values()) {
@@ -47,8 +51,11 @@ public enum RewardTier {
                 }
             }
         }
-
-        return nearestTier; // Will be null if no tier is reached
+        if (nearestTier == null) {
+            return new Err<>(new Exception("No nearest tier found"));
+        } else {
+            return new Ok<>(nearestTier);
+        }
     }
 
 
