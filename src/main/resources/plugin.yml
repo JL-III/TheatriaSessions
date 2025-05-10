@@ -10,3 +10,5 @@ commands:
     usage: /<command>
   community:
     usage: /<command>
+  activity:
+    usage: /<command>

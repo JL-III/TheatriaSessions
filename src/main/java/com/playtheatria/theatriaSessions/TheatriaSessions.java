@@ -2,6 +2,7 @@ package com.playtheatria.theatriaSessions;
 
 import com.earth2me.essentials.Essentials;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
+import com.playtheatria.theatriaSessions.commands.ActivityCommand;
 import com.playtheatria.theatriaSessions.commands.CommunityCommand;
 import com.playtheatria.theatriaSessions.commands.SessionCommand;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
@@ -94,8 +95,9 @@ public final class TheatriaSessions extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new IncrementRewardCountListener(serverSessionManager, customLogger), this);
         Bukkit.getPluginManager().registerEvents(new RewardCommunityListener(customLogger, configManager), this);
-        Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, configManager, customLogger));
+        Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, serverSessionManager, configManager, customLogger));
         Objects.requireNonNull(getCommand("community")).setExecutor(new CommunityCommand(serverSessionManager, customLogger, configManager));
+        Objects.requireNonNull(getCommand("activity")).setExecutor(new ActivityCommand(sessionManager));
         customLogger.sendFormattedLog("Loaded plugin.");
         customLogger.sendFormattedLog("Using GeneralUtils version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "general-utils-version"));
         customLogger.sendFormattedLog("Using TheatriaTime version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "theatria-time-version"));
