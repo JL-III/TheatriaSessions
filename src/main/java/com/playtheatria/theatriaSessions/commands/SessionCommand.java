@@ -7,6 +7,7 @@ import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
+import com.playtheatria.theatriaSessions.database.data.ServerSession;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.enums.RewardTier;
 import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
@@ -195,22 +196,36 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     public void sendSessionMessage(CommandSender sender, Session session) {
+        ServerSession serverSession = serverSessionManager.getServerSession();
         Result<RewardTier, Exception> rewardTier = RewardTier.getNearestTier(serverSessionManager.getServerSession().getRewardsEarned());
-        List.of(
-                Component.text(String.format("Daily-Reward - %s", serverSessionManager.getServerSession().getSessionDate().toString())).decorate(TextDecoration.UNDERLINED).color(TextColor.fromHexString(Util.COLOR_TWO)),
-                Component.text("⭐ Community Stats").color(TextColor.fromHexString(Util.COLOR_TWO)),
-                Component.text(String.format("  • Players Joined %s", serverSessionManager.getServerSession().getPlayersJoined())).color(TextColor.fromHexString(Util.COLOR_THREE))
-                                .hoverEvent(HoverEvent.showText(Component.text("The number of unique players that have joined the server today."))),
-                Component.text(String.format("  • Players Earned %s", serverSessionManager.getServerSession().getRewardsEarned())).color(TextColor.fromHexString(Util.COLOR_THREE))
-                        .hoverEvent(HoverEvent.showText(Component.text("The number of players that have earned a /daily-reward today."))),
-                Component.text(String.format("  • Community Reward Tier: %s", rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0")).color(TextColor.fromHexString(Util.COLOR_THREE))
-                        .hoverEvent(HoverEvent.showText(Component.text("The current reward tier for the community. More players earning their /daily-reward will increase this."))),
-                Component.text(String.format("      • Community Sell Hand Bonus: %s", rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().getPercentage() : "0%")).color(TextColor.fromHexString(Util.COLOR_THREE))
-                        .hoverEvent(HoverEvent.showText(Component.text("The bonus percentage players receive from the community reward tier when using /sell hand."))),
-                Component.text("⭐ Personal Stats").color(TextColor.fromHexString(Util.COLOR_TWO)),
-                Component.text(String.format("  • Progress: %s/%s", session.getSessionTime(), session.THRESHOLD)).color(TextColor.fromHexString(Util.COLOR_THREE)),
-                Component.text("  • Earned Reward: ").color(TextColor.fromHexString(Util.COLOR_THREE)).append(Util.formatIndicator(session))
+        String rewardTierName = rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
+        String rewardBonus = rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().getPercentage() : "0%";
+        TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
+        TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
 
+        List.of(
+                Component.text(String.format("Daily-Reward - %s", serverSession.getSessionDate().toString())).decorate(TextDecoration.UNDERLINED)
+                        .color(textColorTwo),
+                Component.text("⭐ Community Stats")
+                        .color(textColorTwo),
+                Component.text(String.format("  • Players Joined %s", serverSession.getPlayersJoined()))
+                        .color(textColorThree)
+                        .hoverEvent(HoverEvent.showText(Component.text("The number of players that have joined the server today. Supporter Rank and above can use /activity to see who has joined today."))),
+                Component.text(String.format("  • Players Earned %s", serverSession.getRewardsEarned()))
+                        .color(textColorThree)
+                        .hoverEvent(HoverEvent.showText(Component.text("The number of players that have earned a /daily-reward today."))),
+//                Component.text(String.format("  • Community Reward Tier: %s", rewardTierName))
+//                        .color(textColorThree)
+//                        .hoverEvent(HoverEvent.showText(Component.text("The current reward tier for the community. More players earning their /daily-reward will increase this. The highest tier is 5."))),
+//                Component.text(String.format("      • Community Sell Hand Bonus: %s", rewardBonus))
+//                        .color(textColorThree)
+//                        .hoverEvent(HoverEvent.showText(Component.text("The bonus players receive from the community reward tier when using /sell hand. This resets daily."))),
+                Component.text("⭐ Personal Stats")
+                        .color(textColorTwo),
+                Component.text(String.format("  • Progress: %s/%s", session.getSessionTime(), session.THRESHOLD))
+                        .color(textColorThree),
+                Component.text("  • Earned Reward: ")
+                        .color(textColorThree).append(Util.formatIndicator(session))
         ).forEach(sender::sendMessage);
     }
 }
