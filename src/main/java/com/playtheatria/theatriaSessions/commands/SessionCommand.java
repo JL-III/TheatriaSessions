@@ -198,7 +198,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     public void sendSessionMessage(CommandSender sender, Session session) {
         ServerSession serverSession = serverSessionManager.getServerSession();
         Result<RewardTier, Exception> rewardTier = RewardTier.getNearestTier(serverSessionManager.getServerSession().getRewardsEarned());
+        @SuppressWarnings("unused")
         String rewardTierName = rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
+        @SuppressWarnings("unused")
         String rewardBonus = rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().getPercentage() : "0%";
         TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
         TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
