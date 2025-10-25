@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '9.0.0-beta4'
+    id 'idea'
 }
 
 shadowJar {
@@ -11,6 +12,13 @@ shadowJar {
 
 tasks.build {
     dependsOn shadowJar
+}
+
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }
 
 group = 'com.playtheatria'
