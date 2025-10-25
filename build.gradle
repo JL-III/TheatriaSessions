@@ -55,7 +55,7 @@ repositories {
 		name = "GitHubPackages"
 		url = "https://maven.pkg.github.com/JL-III/GeneralUtils"
 		credentials {
-			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
 			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
 		}
 	}
@@ -63,7 +63,7 @@ repositories {
 		name = "GitHubPackages"
 		url = "https://maven.pkg.github.com/JL-III/TheatriaTime"
 		credentials {
-			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
 			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
 		}
 	}

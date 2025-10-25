@@ -11,11 +11,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class IncrementRewardCountListener implements Listener {
+public class ServerSessionRewardCountListener implements Listener {
     private final ServerSessionManager serverSessionManager;
     private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public IncrementRewardCountListener(
+    public ServerSessionRewardCountListener(
             ServerSessionManager serverSessionManager,
             CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.serverSessionManager = serverSessionManager;

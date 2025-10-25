@@ -20,6 +20,7 @@ import com.playtheatria.theatriaSessions.utils.Util;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Objects;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -48,14 +49,16 @@ public final class TheatriaSessions extends JavaPlugin {
             boolean created = getDataFolder().mkdirs();
             if (created) {
                 getLogger()
-                        .info(
-                                "Plugin data folder created at: "
-                                        + getDataFolder().getAbsolutePath());
+                        .log(
+                                Level.INFO,
+                                "Plugin data folder created at: {0}",
+                                getDataFolder().getAbsolutePath());
             } else {
                 getLogger()
-                        .severe(
-                                "Failed to create plugin data folder: "
-                                        + getDataFolder().getAbsolutePath());
+                        .log(
+                                Level.SEVERE,
+                                "Failed to create plugin data folder: {0}",
+                                getDataFolder().getAbsolutePath());
             }
         }
         try {
@@ -118,7 +121,8 @@ public final class TheatriaSessions extends JavaPlugin {
                 .registerEvents(new RewardPlayerListener(configManager, customLogger), this);
         Bukkit.getPluginManager()
                 .registerEvents(
-                        new IncrementRewardCountListener(serverSessionManager, customLogger), this);
+                        new ServerSessionRewardCountListener(serverSessionManager, customLogger),
+                        this);
         Bukkit.getPluginManager()
                 .registerEvents(new RewardCommunityListener(customLogger, configManager), this);
         Objects.requireNonNull(getCommand("session"))
