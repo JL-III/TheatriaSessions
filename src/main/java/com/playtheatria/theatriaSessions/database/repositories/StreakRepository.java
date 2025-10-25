@@ -1,11 +1,5 @@
 package com.playtheatria.theatriaSessions.database.repositories;
 
-import java.sql.SQLException;
-import java.util.List;
-import java.util.UUID;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.j256.ormlite.dao.Dao;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
@@ -15,6 +9,10 @@ import com.playtheatria.theatriaSessions.database.data.Streak;
 import com.playtheatria.theatriaSessions.errors.NotFoundException;
 import com.playtheatria.theatriaSessions.errors.PersistenceException;
 import com.playtheatria.theatriaSessions.errors.RepositoryException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.UUID;
+import org.jetbrains.annotations.NotNull;
 
 public final class StreakRepository {
     private final Dao<Streak, UUID> dao;
@@ -31,7 +29,9 @@ public final class StreakRepository {
         try {
             return new Ok<>(dao.queryForAll());
         } catch (SQLException exception) {
-            return new Err<>(new PersistenceException("Failed to load streaks from the database", exception));
+            return new Err<>(
+                    new PersistenceException(
+                            "Failed to load streaks from the database", exception));
         }
     }
 
@@ -46,10 +46,13 @@ public final class StreakRepository {
             if (streak != null) {
                 return new Ok<>(streak);
             } else {
-                return new Err<>(new NotFoundException("No streak found for player UUID: " + playerUUID));
+                return new Err<>(
+                        new NotFoundException("No streak found for player UUID: " + playerUUID));
             }
         } catch (SQLException exception) {
-            return new Err<>(new PersistenceException("Failed to load streak for player UUID: " + playerUUID, exception));
+            return new Err<>(
+                    new PersistenceException(
+                            "Failed to load streak for player UUID: " + playerUUID, exception));
         }
     }
 
@@ -63,7 +66,10 @@ public final class StreakRepository {
             dao.createOrUpdate(streak);
             return new Ok<>(streak);
         } catch (SQLException exception) {
-            return new Err<>(new PersistenceException("Error on createOrUpdate Streak: " + streak.getPlayerUUID(), exception));
+            return new Err<>(
+                    new PersistenceException(
+                            "Error on createOrUpdate Streak: " + streak.getPlayerUUID(),
+                            exception));
         }
     }
 
@@ -76,7 +82,10 @@ public final class StreakRepository {
         try {
             return new Ok<>(dao.delete(streak) > 0);
         } catch (SQLException exception) {
-            return new Err<>(new PersistenceException("Failed to delete streak for player: " + streak.getPlayerUUID(), exception));
+            return new Err<>(
+                    new PersistenceException(
+                            "Failed to delete streak for player: " + streak.getPlayerUUID(),
+                            exception));
         }
     }
 }

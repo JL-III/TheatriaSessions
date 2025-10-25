@@ -2,7 +2,6 @@ package com.playtheatria.theatriaSessions.database.data;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
 import java.time.LocalDate;
 
 @DatabaseTable(tableName = "server_session")
@@ -11,17 +10,13 @@ public class ServerSession {
     @DatabaseField(id = true)
     private final int id = 0;
 
-    @DatabaseField
-    private String sessionDate;
+    @DatabaseField private String sessionDate;
 
-    @DatabaseField
-    private int playersJoined = 0;
+    @DatabaseField private int playersJoined = 0;
 
-    @DatabaseField
-    private int rewardsEarned = 0;
+    @DatabaseField private int rewardsEarned = 0;
 
-    protected ServerSession() {
-    }
+    protected ServerSession() {}
 
     public ServerSession(LocalDate date) {
         this.sessionDate = date.toString();

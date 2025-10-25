@@ -19,18 +19,24 @@ public class ActivityCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public boolean onCommand(
+            @NotNull CommandSender commandSender,
+            @NotNull Command command,
+            @NotNull String s,
+            @NotNull String[] args) {
         if (!commandSender.hasPermission("theatria.sessions.activity.command")) {
             commandSender.sendMessage("You do not have permission to use this command.");
             return true;
         }
 
         if (args.length == 0) {
-            commandSender.sendMessage(Component.text("Players Joined Today:")
-                    .color(TextColor.fromHexString(Util.COLOR_THREE)));
+            commandSender.sendMessage(
+                    Component.text("Players Joined Today:")
+                            .color(TextColor.fromHexString(Util.COLOR_THREE)));
             for (Session session : sessionManager.getSessions().values()) {
-                commandSender.sendMessage(Component.text("  • " + session.getPlayerName())
-                        .color(TextColor.fromHexString(Util.COLOR_TWO)));
+                commandSender.sendMessage(
+                        Component.text("  • " + session.getPlayerName())
+                                .color(TextColor.fromHexString(Util.COLOR_TWO)));
             }
             return true;
         }

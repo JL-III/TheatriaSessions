@@ -40,6 +40,8 @@ public class OneSecondTimerTask extends BukkitRunnable {
             if (!session.hasEarnedReward() || session.isRewarded()) continue;
             Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
         }
-        serverSessionManager.getServerSession().setPlayersJoined(sessionManager.getSessions().size());
+        serverSessionManager
+                .getServerSession()
+                .setPlayersJoined(sessionManager.getSessions().size());
     }
 }

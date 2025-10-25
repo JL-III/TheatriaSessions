@@ -15,7 +15,9 @@ public class IncrementRewardCountListener implements Listener {
     private final ServerSessionManager serverSessionManager;
     private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public IncrementRewardCountListener(ServerSessionManager serverSessionManager, CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
+    public IncrementRewardCountListener(
+            ServerSessionManager serverSessionManager,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.serverSessionManager = serverSessionManager;
         this.customLogger = customLogger;
     }
@@ -29,7 +31,11 @@ public class IncrementRewardCountListener implements Listener {
             customLogger.sendDebug("No RewardTier found for rewardCount: " + rewardCount);
             return;
         }
-        customLogger.sendDebug(String.format("Threshold found for reward count of: %s. Calling RewardCommunityEvent with: %s", rewardCount, rewardTier));
+        customLogger.sendDebug(
+                String.format(
+                        "Threshold found for reward count of: %s. Calling RewardCommunityEvent"
+                                + " with: %s",
+                        rewardCount, rewardTier));
         Bukkit.getPluginManager().callEvent(new RewardCommunityEvent(rewardTier));
     }
 }

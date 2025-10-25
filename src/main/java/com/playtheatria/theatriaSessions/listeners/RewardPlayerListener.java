@@ -16,7 +16,9 @@ public class RewardPlayerListener implements Listener {
     private final ConfigManager configManager;
     private final CustomLogger<TheatriaSessions, ConfigManager> customLogger;
 
-    public RewardPlayerListener(ConfigManager configManager, CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
+    public RewardPlayerListener(
+            ConfigManager configManager,
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.configManager = configManager;
         this.customLogger = customLogger;
     }
@@ -25,19 +27,28 @@ public class RewardPlayerListener implements Listener {
     public void onRewardPlayer(RewardPlayerEvent event) {
         Player player = Bukkit.getPlayer(event.getSession().getPlayerUUID());
         if (player == null || !player.isOnline()) {
-            customLogger.sendFormattedLog("Tried to reward a player but the player in the session returned as offline or null.");
+            customLogger.sendFormattedLog(
+                    "Tried to reward a player but the player in the session returned as offline or"
+                            + " null.");
             return;
         }
 
         event.getSession().setRewarded();
-        player.sendMessage(Component.text("Great work! You hit today’s daily-reward goal! Thanks for making Theatria awesome!").color(NamedTextColor.GOLD));
+        player.sendMessage(
+                Component.text(
+                                "Great work! You hit today’s daily-reward goal! Thanks for making"
+                                        + " Theatria awesome!")
+                        .color(NamedTextColor.GOLD));
         for (String reward : configManager.getRewards()) {
-            String parsedCommand = reward
-                    .replace("{player}", player.getName()) // Replace player name
-                    .replace("{player_uuid}", player.getUniqueId().toString()) // Replace UUID
-                    .replace("{world}", player.getWorld().getName()); // Replace world
+            String parsedCommand =
+                    reward.replace("{player}", player.getName()) // Replace player name
+                            .replace(
+                                    "{player_uuid}",
+                                    player.getUniqueId().toString()) // Replace UUID
+                            .replace("{world}", player.getWorld().getName()); // Replace world
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
-            customLogger.sendFormattedLog("Sent reward of: " + parsedCommand + " to " + player.getName());
+            customLogger.sendFormattedLog(
+                    "Sent reward of: " + parsedCommand + " to " + player.getName());
         }
         Bukkit.getPluginManager().callEvent(new IncrementRewardCountEvent());
     }

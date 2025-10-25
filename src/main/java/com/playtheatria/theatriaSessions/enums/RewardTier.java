@@ -58,7 +58,6 @@ public enum RewardTier {
         }
     }
 
-
     public String getPercentage() {
         return percentage;
     }
