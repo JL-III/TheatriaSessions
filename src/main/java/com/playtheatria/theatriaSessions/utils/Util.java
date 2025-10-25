@@ -13,7 +13,8 @@ public class Util {
 
     public static Component formatMessage(String label, Object value) {
         String template = "<color:%s>[<color:%s>%s<color:%s>]<color:%s> %s";
-        String message = String.format(template, COLOR_ONE, COLOR_TWO, label, COLOR_ONE, COLOR_THREE, value);
+        String message =
+                String.format(template, COLOR_ONE, COLOR_TWO, label, COLOR_ONE, COLOR_THREE, value);
 
         return MiniMessage.miniMessage().deserialize(message);
     }
@@ -27,23 +28,41 @@ public class Util {
         if (session.isRewarded()) {
             indicator = "✅";
         }
-        return Component.text("[").color(TextColor.fromHexString(Util.COLOR_ONE))
-                .append(Component.text(indicator).color(session.isRewarded() ? NamedTextColor.GREEN : NamedTextColor.DARK_RED))
+        return Component.text("[")
+                .color(TextColor.fromHexString(Util.COLOR_ONE))
+                .append(
+                        Component.text(indicator)
+                                .color(
+                                        session.isRewarded()
+                                                ? NamedTextColor.GREEN
+                                                : NamedTextColor.DARK_RED))
                 .append(Component.text("] ").color(TextColor.fromHexString(Util.COLOR_ONE)));
     }
 
     public static Component formatPlayerMessage(Session session) {
-        double sessionMinutes = Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
+        double sessionMinutes =
+                Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
         double thresholdMinutes = session.THRESHOLD / 60.0;
-        return Util.formatIndicator(session).append(Util.formatProgress(sessionMinutes, thresholdMinutes).color(TextColor.fromHexString(COLOR_THREE)));
+        return Util.formatIndicator(session)
+                .append(
+                        Util.formatProgress(sessionMinutes, thresholdMinutes)
+                                .color(TextColor.fromHexString(COLOR_THREE)));
     }
 
     public static Component formatAdminMessage(Session session) {
-        double sessionMinutes = Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
+        double sessionMinutes =
+                Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
         double thresholdMinutes = session.THRESHOLD / 60.0;
         return Util.formatIndicator(session)
-                .append(Component.text(Util.formatToLengthWithEllipsis(session.getPlayerName(), 12)).color(TextColor.fromHexString(Util.COLOR_TWO))
-                        .append(Component.text(" ").append(Util.formatProgress(sessionMinutes, thresholdMinutes))));
+                .append(
+                        Component.text(Util.formatToLengthWithEllipsis(session.getPlayerName(), 12))
+                                .color(TextColor.fromHexString(Util.COLOR_TWO))
+                                .append(
+                                        Component.text(" ")
+                                                .append(
+                                                        Util.formatProgress(
+                                                                sessionMinutes,
+                                                                thresholdMinutes))));
     }
 
     public static String formatToLengthWithEllipsis(String input, int length) {

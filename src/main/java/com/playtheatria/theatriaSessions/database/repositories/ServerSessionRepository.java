@@ -8,11 +8,10 @@ import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.data.ServerSession;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
-import org.bukkit.Bukkit;
-
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Objects;
+import org.bukkit.Bukkit;
 
 public class ServerSessionRepository {
     private final Dao<ServerSession, String> dao;
@@ -20,8 +19,8 @@ public class ServerSessionRepository {
 
     public ServerSessionRepository(
             TheatriaSessionsDB theatriaSessionsDB,
-            CustomLogger<TheatriaSessions, ConfigManager> customLogger
-    ) throws SQLException {
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger)
+            throws SQLException {
         this.dao = theatriaSessionsDB.getDao(ServerSession.class);
         this.customLogger = customLogger;
     }
@@ -38,7 +37,9 @@ public class ServerSessionRepository {
         try {
             ServerSession serverSession = dao.queryForId("0");
             if (serverSession == null) {
-                customLogger.sendFormattedLog("No ServerSession found in database with the id of 0. Creating a new ServerSession.");
+                customLogger.sendFormattedLog(
+                        "No ServerSession found in database with the id of 0. Creating a new"
+                                + " ServerSession.");
                 serverSession = new ServerSession(LocalDate.now(TimeUtils.timeZone));
                 dao.create(serverSession); // Save the new session to the database
                 // Warning - listener doesn't exist yet
@@ -48,24 +49,38 @@ public class ServerSessionRepository {
             }
             return serverSession;
         } catch (SQLException exception) {
-            customLogger.sendFormattedLog("Failed to load ServerSession from the database: " + exception.getMessage());
+            customLogger.sendFormattedLog(
+                    "Failed to load ServerSession from the database: " + exception.getMessage());
             exception.printStackTrace();
             customLogger.sendFormattedLog("Creating new ServerSession.");
-            Bukkit.getPluginManager().disablePlugin(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("TheatriaSessions")));
+            Bukkit.getPluginManager()
+                    .disablePlugin(
+                            Objects.requireNonNull(
+                                    Bukkit.getPluginManager().getPlugin("TheatriaSessions")));
             throw new IllegalStateException("SQLException while managing ServerSession", exception);
         }
     }
 
-
     public boolean createOrUpdate(ServerSession serverSession) {
-        customLogger.sendDebug(String.format("Create or update called on a ServerSession: %s", serverSession.getSessionDate()));
-        customLogger.sendDebug(String.format("PlayersJoined: %s", serverSession.getPlayersJoined()));
-        customLogger.sendDebug(String.format("RewardsEarned: %s", serverSession.getRewardsEarned()));
+        customLogger.sendDebug(
+                String.format(
+                        "Create or update called on a ServerSession: %s",
+                        serverSession.getSessionDate()));
+        customLogger.sendDebug(
+                String.format("PlayersJoined: %s", serverSession.getPlayersJoined()));
+        customLogger.sendDebug(
+                String.format("RewardsEarned: %s", serverSession.getRewardsEarned()));
         try {
             dao.createOrUpdate(serverSession);
             return true;
         } catch (SQLException exception) {
-            customLogger.sendFormattedLog("Error on createOrUpdate ServerSession: " + serverSession.getSessionDate() + " rewardsEarned: " + serverSession.getRewardsEarned() + "| playersJoined: " + serverSession.getPlayersJoined());
+            customLogger.sendFormattedLog(
+                    "Error on createOrUpdate ServerSession: "
+                            + serverSession.getSessionDate()
+                            + " rewardsEarned: "
+                            + serverSession.getRewardsEarned()
+                            + "| playersJoined: "
+                            + serverSession.getPlayersJoined());
             return false;
         }
     }

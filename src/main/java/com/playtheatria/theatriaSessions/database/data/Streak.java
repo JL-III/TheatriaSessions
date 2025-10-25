@@ -1,22 +1,19 @@
 package com.playtheatria.theatriaSessions.database.data;
 
-import java.util.UUID;
-
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import java.util.UUID;
 
 @DatabaseTable(tableName = "streaks")
 public class Streak {
     @DatabaseField(id = true, index = true)
     private UUID playerUUID;
 
-    @DatabaseField
-    private Integer currentStreak;
+    @DatabaseField private Integer currentStreak;
 
-    @DatabaseField
-    private Integer longestStreak;
+    @DatabaseField private Integer longestStreak;
 
-    protected Streak() { }
+    protected Streak() {}
 
     /**
      * Initializes a Streak object for a player with a given UUID.

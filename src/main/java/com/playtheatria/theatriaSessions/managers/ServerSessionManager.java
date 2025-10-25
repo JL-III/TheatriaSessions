@@ -1,6 +1,5 @@
 package com.playtheatria.theatriaSessions.managers;
 
-
 import com.playtheatria.theatriaSessions.database.data.ServerSession;
 
 public class ServerSessionManager {

@@ -2,7 +2,6 @@ package com.playtheatria.theatriaSessions.config;
 
 import com.playtheatria.jliii.generalutils.config.AbstractConfigManager;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
-
 import java.util.List;
 
 public class ConfigManager extends AbstractConfigManager<TheatriaSessions> {

@@ -18,8 +18,7 @@ public class RewardCommunityListener implements Listener {
 
     public RewardCommunityListener(
             CustomLogger<TheatriaSessions, ConfigManager> customLogger,
-            ConfigManager configManager
-            ) {
+            ConfigManager configManager) {
         this.customLogger = customLogger;
         this.configManager = configManager;
     }
@@ -29,10 +28,18 @@ public class RewardCommunityListener implements Listener {
         if (configManager.isCommunityRewardsEnabled()) {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.hasPermission(event.getRewardTier().getPermission())) continue;
-                player.sendMessage(customLogger.formatMessage("Alert!", "The community received a community reward!"));
-                player.sendMessage(Component.text("Use /daily-reward for more info!").color(TextColor.fromHexString(Util.COLOR_THREE)));
+                player.sendMessage(
+                        customLogger.formatMessage(
+                                "Alert!", "The community received a community reward!"));
+                player.sendMessage(
+                        Component.text("Use /daily-reward for more info!")
+                                .color(TextColor.fromHexString(Util.COLOR_THREE)));
             }
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp group default permission settemp " + event.getRewardTier().getPermission() + " true 1day");
+            Bukkit.dispatchCommand(
+                    Bukkit.getConsoleSender(),
+                    "lp group default permission settemp "
+                            + event.getRewardTier().getPermission()
+                            + " true 1day");
         } else {
             customLogger.sendDebug("Reward Community Event fired!");
         }

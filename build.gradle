@@ -1,24 +1,25 @@
 plugins {
-    id 'java'
-    id 'com.gradleup.shadow' version '9.0.0-beta4'
-    id 'idea'
+	id 'java'
+	id 'com.gradleup.shadow' version '9.0.0-beta4'
+	id 'idea'
+	id("com.diffplug.spotless") version "8.0.0"
 }
 
 shadowJar {
-    archiveClassifier.set('')
-    relocate 'com.j256.ormlite', 'com.playtheatria.theatriasessions.shaded.ormlite'
-    relocate 'com.playtheatria.jl-iii.generalutils', 'com.playtheatria.theatriasessions.shaded.generalutils'
+	archiveClassifier.set('')
+	relocate 'com.j256.ormlite', 'com.playtheatria.theatriasessions.shaded.ormlite'
+	relocate 'com.playtheatria.jl-iii.generalutils', 'com.playtheatria.theatriasessions.shaded.generalutils'
 }
 
 tasks.build {
-    dependsOn shadowJar
+	dependsOn shadowJar
 }
 
 idea {
-    module {
-        downloadSources = true
-        downloadJavadoc = true
-    }
+	module {
+		downloadSources = true
+		downloadJavadoc = true
+	}
 }
 
 group = 'com.playtheatria'
@@ -27,82 +28,101 @@ ext.generalUtilsVersion = 'v2.0.0-alpha.10'
 ext.theatriaTimeVersion = 'v0.0.1-alpha.4'
 
 tasks.processResources {
-    filesMatching("plugin.yml") {
-        expand(
-                version: project.version,
-                generalUtilsVersion: generalUtilsVersion,
-                theatriaTimeVersion: theatriaTimeVersion
-        )
-    }
+	filesMatching("plugin.yml") {
+		expand(
+				version: project.version,
+				generalUtilsVersion: generalUtilsVersion,
+				theatriaTimeVersion: theatriaTimeVersion
+		)
+	}
 }
 
 repositories {
-    mavenCentral()
-    maven {
-        name = "papermc-repo"
-        url = "https://repo.papermc.io/repository/maven-public/"
-    }
-    maven {
-        name = "sonatype"
-        url = "https://oss.sonatype.org/content/groups/public/"
-    }
-    maven {
-        name "essentialsx-snapshots"
-        url "https://repo.essentialsx.net/snapshots/"
-    }
-    maven {
-        name = "GitHubPackages"
-        url = "https://maven.pkg.github.com/JL-III/GeneralUtils"
-        credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
-    maven {
-        name = "GitHubPackages"
-        url = "https://maven.pkg.github.com/JL-III/TheatriaTime"
-        credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
+	mavenCentral()
+	maven {
+		name = "papermc-repo"
+		url = "https://repo.papermc.io/repository/maven-public/"
+	}
+	maven {
+		name = "sonatype"
+		url = "https://oss.sonatype.org/content/groups/public/"
+	}
+	maven {
+		name "essentialsx-snapshots"
+		url "https://repo.essentialsx.net/snapshots/"
+	}
+	maven {
+		name = "GitHubPackages"
+		url = "https://maven.pkg.github.com/JL-III/GeneralUtils"
+		credentials {
+			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+		}
+	}
+	maven {
+		name = "GitHubPackages"
+		url = "https://maven.pkg.github.com/JL-III/TheatriaTime"
+		credentials {
+			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
+		}
+	}
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
-    // Exclude transitive Spigot API from EssentialsX so compileClasspath resolves Paper’s API.
-    // Fixes VS Code/Java LS resolving Spigot’s CommandSender (no Adventure) instead of Paper.
-        compileOnly('net.essentialsx:EssentialsX:2.21.0-SNAPSHOT') {
-        exclude group: 'org.spigotmc', module: 'spigot-api'
-    }
-    implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
-    implementation "com.playtheatria.jl-iii:generalutils:${generalUtilsVersion}"
-    compileOnly "com.playtheatria:theatriatime:${theatriaTimeVersion}"
+	compileOnly("io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT")
+	// Exclude transitive Spigot API from EssentialsX so compileClasspath resolves Paper’s API.
+	// Fixes VS Code/Java LS resolving Spigot’s CommandSender (no Adventure) instead of Paper.
+		compileOnly('net.essentialsx:EssentialsX:2.21.0-SNAPSHOT') {
+		exclude group: 'org.spigotmc', module: 'spigot-api'
+	}
+	implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
+	implementation "com.playtheatria.jl-iii:generalutils:${generalUtilsVersion}"
+	compileOnly "com.playtheatria:theatriatime:${theatriaTimeVersion}"
 }
 
 def targetJavaVersion = 21
 java {
-    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-    if (JavaVersion.current() < javaVersion) {
-        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
-    }
+	def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+	sourceCompatibility = javaVersion
+	targetCompatibility = javaVersion
+	if (JavaVersion.current() < javaVersion) {
+		toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
+	options.encoding = 'UTF-8'
 
-    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
-        options.release.set(targetJavaVersion)
-    }
+	if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+		options.release.set(targetJavaVersion)
+	}
 }
 
 processResources {
-    def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
-    filesMatching('plugin.yml') {
-        expand props
-    }
+	def props = [version: version]
+	inputs.properties props
+	filteringCharset 'UTF-8'
+	filesMatching('plugin.yml') {
+		expand props
+	}
+}
+
+spotless {
+
+	format 'misc', {
+		// define the files to apply `misc` to
+		target '*.gradle', '.gitattributes', '.gitignore'
+
+		// define the steps to apply to those files
+		trimTrailingWhitespace()
+		leadingSpacesToTabs() // or leadingTabsToSpaces. Takes an integer argument if you don't like 4
+		endWithNewline()
+	}
+	java {
+		// apply a specific flavor of google-java-format
+		googleJavaFormat('1.17.0').aosp().reflowLongStrings().skipJavadocFormatting()
+		// fix formatting of type annotations
+		formatAnnotations()
+	}
 }

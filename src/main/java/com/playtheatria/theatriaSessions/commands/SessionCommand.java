@@ -14,6 +14,10 @@ import com.playtheatria.theatriaSessions.events.RewardPlayerEvent;
 import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.utils.Util;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
@@ -28,11 +32,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final SessionManager sessionManager;
     private final ServerSessionManager serverSessionManager;
@@ -44,8 +43,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             SessionManager sessionManager,
             ServerSessionManager serverSessionManager,
             ConfigManager configManager,
-            CustomLogger<TheatriaSessions, ConfigManager> customLogger
-    ) {
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.sessionManager = sessionManager;
         this.serverSessionManager = serverSessionManager;
         this.configManager = configManager;
@@ -53,7 +51,11 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(
+            @NotNull CommandSender sender,
+            @NotNull Command command,
+            @NotNull String label,
+            @NotNull String[] args) {
         if (!sender.hasPermission("theatria.sessions.allow")) return true;
         switch (args.length) {
             case 0 -> {
@@ -73,7 +75,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
                     case "show-all" -> {
-                        sender.sendMessage(Util.formatMessage("Number of Sessions", sessionManager.getSessions().size()));
+                        sender.sendMessage(
+                                Util.formatMessage(
+                                        "Number of Sessions", sessionManager.getSessions().size()));
                         for (Session session : sessionManager.getSessions().values()) {
                             sender.sendMessage(Util.formatAdminMessage(session));
                         }
@@ -90,14 +94,20 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
                 switch (args[0].toLowerCase()) {
                     case "check" -> {
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
-                        String formattedDate = LocalDateTime.now(TimeUtils.timeZone).format(formatter);
+                        DateTimeFormatter formatter =
+                                DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
+                        String formattedDate =
+                                LocalDateTime.now(TimeUtils.timeZone).format(formatter);
                         for (Session session : sessionManager.getSessions().values()) {
                             if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
                             sender.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
-                            sender.sendMessage(Util.formatMessage("Progress", session.getSessionTime() + "/" + session.THRESHOLD));
+                            sender.sendMessage(
+                                    Util.formatMessage(
+                                            "Progress",
+                                            session.getSessionTime() + "/" + session.THRESHOLD));
                             sender.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
-                            sender.sendMessage(Util.formatMessage("EarnedReward", session.isRewarded()));
+                            sender.sendMessage(
+                                    Util.formatMessage("EarnedReward", session.isRewarded()));
                             return true;
                         }
                     }
@@ -125,7 +135,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "create" -> {
                         try {
                             Integer integer = Integer.parseInt(args[2]);
-                            if (integer < 0) throw new NumberFormatException("Must be higher than 0");
+                            if (integer < 0)
+                                throw new NumberFormatException("Must be higher than 0");
                             for (Session session : sessionManager.getSessions().values()) {
                                 if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                     session.setSessionTime(integer);
@@ -134,12 +145,16 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             }
                             OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
                             if (offlinePlayer.getName() != null) {
-                                Session session = new Session(offlinePlayer.getUniqueId(), offlinePlayer.getName());
+                                Session session =
+                                        new Session(
+                                                offlinePlayer.getUniqueId(),
+                                                offlinePlayer.getName());
                                 session.setSessionTime(integer);
                                 sessionManager.addSession(session);
                                 return true;
                             }
-                            customLogger.sendFormattedMessage(String.format("Player returned null: %s", args[1]), sender);
+                            customLogger.sendFormattedMessage(
+                                    String.format("Player returned null: %s", args[1]), sender);
                         } catch (NumberFormatException exception) {
                             sender.sendMessage("Not a valid number: " + exception.getMessage());
                         }
@@ -147,7 +162,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "set-progress" -> {
                         try {
                             Integer integer = Integer.parseInt(args[2]);
-                            if (integer < 0) throw new NumberFormatException("Must be higher than 0");
+                            if (integer < 0)
+                                throw new NumberFormatException("Must be higher than 0");
                             for (Session session : sessionManager.getSessions().values()) {
                                 if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                     session.setSessionTime(integer);
@@ -165,7 +181,11 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(
+            @NotNull CommandSender sender,
+            @NotNull Command command,
+            @NotNull String label,
+            @NotNull String[] args) {
         if (!sender.hasPermission(ADMIN_PERMISSION)) return List.of();
         switch (args.length) {
             case 1 -> {
@@ -176,8 +196,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         "reload-config",
                         "reset-progress",
                         "set-progress",
-                        "show-all"
-                );
+                        "show-all");
             }
             case 2 -> {
                 if (args[0].equalsIgnoreCase("show-all")) return List.of();
@@ -186,7 +205,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         .collect(Collectors.toList());
             }
             case 3 -> {
-                if (args[1].equalsIgnoreCase("set-progress") || args[1].equalsIgnoreCase("create")) return List.of("<amount>");
+                if (args[1].equalsIgnoreCase("set-progress") || args[1].equalsIgnoreCase("create"))
+                    return List.of("<amount>");
                 return List.of();
             }
             default -> {
@@ -197,37 +217,73 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
 
     public void sendSessionMessage(CommandSender sender, Session session) {
         ServerSession serverSession = serverSessionManager.getServerSession();
-        Result<RewardTier, Exception> rewardTier = RewardTier.getNearestTier(serverSessionManager.getServerSession().getRewardsEarned());
+        Result<RewardTier, Exception> rewardTier =
+                RewardTier.getNearestTier(
+                        serverSessionManager.getServerSession().getRewardsEarned());
         @SuppressWarnings("unused")
-        String rewardTierName = rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
+        String rewardTierName =
+                rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
         @SuppressWarnings("unused")
-        String rewardBonus = rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().getPercentage() : "0%";
+        String rewardBonus =
+                rewardTier instanceof Ok<RewardTier, Exception> ok
+                        ? ok.value().getPercentage()
+                        : "0%";
         TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
         TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
 
         List.of(
-                Component.text(String.format("Daily-Reward - %s", serverSession.getSessionDate().toString())).decorate(TextDecoration.UNDERLINED)
-                        .color(textColorTwo),
-                Component.text("⭐ Community Stats")
-                        .color(textColorTwo),
-                Component.text(String.format("  • Players Joined %s", serverSession.getPlayersJoined()))
-                        .color(textColorThree)
-                        .hoverEvent(HoverEvent.showText(Component.text("The number of players that have joined the server today. Supporter Rank and above can use /activity to see who has joined today."))),
-                Component.text(String.format("  • Players Earned %s", serverSession.getRewardsEarned()))
-                        .color(textColorThree)
-                        .hoverEvent(HoverEvent.showText(Component.text("The number of players that have earned a /daily-reward today."))),
-//                Component.text(String.format("  • Community Reward Tier: %s", rewardTierName))
-//                        .color(textColorThree)
-//                        .hoverEvent(HoverEvent.showText(Component.text("The current reward tier for the community. More players earning their /daily-reward will increase this. The highest tier is 5."))),
-//                Component.text(String.format("      • Community Sell Hand Bonus: %s", rewardBonus))
-//                        .color(textColorThree)
-//                        .hoverEvent(HoverEvent.showText(Component.text("The bonus players receive from the community reward tier when using /sell hand. This resets daily."))),
-                Component.text("⭐ Personal Stats")
-                        .color(textColorTwo),
-                Component.text(String.format("  • Progress: %s/%s", session.getSessionTime(), session.THRESHOLD))
-                        .color(textColorThree),
-                Component.text("  • Earned Reward: ")
-                        .color(textColorThree).append(Util.formatIndicator(session))
-        ).forEach(sender::sendMessage);
+                        Component.text(
+                                        String.format(
+                                                "Daily-Reward - %s",
+                                                serverSession.getSessionDate().toString()))
+                                .decorate(TextDecoration.UNDERLINED)
+                                .color(textColorTwo),
+                        Component.text("⭐ Community Stats").color(textColorTwo),
+                        Component.text(
+                                        String.format(
+                                                "  • Players Joined %s",
+                                                serverSession.getPlayersJoined()))
+                                .color(textColorThree)
+                                .hoverEvent(
+                                        HoverEvent.showText(
+                                                Component.text(
+                                                        "The number of players that have joined the"
+                                                            + " server today. Supporter Rank and"
+                                                            + " above can use /activity to see who"
+                                                            + " has joined today."))),
+                        Component.text(
+                                        String.format(
+                                                "  • Players Earned %s",
+                                                serverSession.getRewardsEarned()))
+                                .color(textColorThree)
+                                .hoverEvent(
+                                        HoverEvent.showText(
+                                                Component.text(
+                                                        "The number of players that have earned a"
+                                                                + " /daily-reward today."))),
+                        //                Component.text(String.format("  • Community Reward Tier:
+                        // %s", rewardTierName))
+                        //                        .color(textColorThree)
+                        //
+                        // .hoverEvent(HoverEvent.showText(Component.text("The current reward tier
+                        // for the community. More players earning their /daily-reward will increase
+                        // this. The highest tier is 5."))),
+                        //                Component.text(String.format("      • Community Sell Hand
+                        // Bonus: %s", rewardBonus))
+                        //                        .color(textColorThree)
+                        //
+                        // .hoverEvent(HoverEvent.showText(Component.text("The bonus players receive
+                        // from the community reward tier when using /sell hand. This resets
+                        // daily."))),
+                        Component.text("⭐ Personal Stats").color(textColorTwo),
+                        Component.text(
+                                        String.format(
+                                                "  • Progress: %s/%s",
+                                                session.getSessionTime(), session.THRESHOLD))
+                                .color(textColorThree),
+                        Component.text("  • Earned Reward: ")
+                                .color(textColorThree)
+                                .append(Util.formatIndicator(session)))
+                .forEach(sender::sendMessage);
     }
 }

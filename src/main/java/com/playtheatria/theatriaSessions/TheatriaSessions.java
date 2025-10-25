@@ -17,12 +17,11 @@ import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.tasks.DatabaseTask;
 import com.playtheatria.theatriaSessions.tasks.OneSecondTimerTask;
 import com.playtheatria.theatriaSessions.utils.Util;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Objects;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TheatriaSessions extends JavaPlugin {
     private SessionManager sessionManager;
@@ -36,12 +35,8 @@ public final class TheatriaSessions extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         ConfigManager configManager = new ConfigManager(this);
-        customLogger = new CustomLogger<>(
-                configManager,
-                Util.COLOR_ONE,
-                Util.COLOR_TWO,
-                Util.COLOR_THREE
-        );
+        customLogger =
+                new CustomLogger<>(configManager, Util.COLOR_ONE, Util.COLOR_TWO, Util.COLOR_THREE);
         Essentials essentials = (Essentials) Bukkit.getPluginManager().getPlugin("Essentials");
         if (essentials == null) {
             customLogger.sendFormattedLog("Essentials returned null, shutting down.");
@@ -52,9 +47,15 @@ public final class TheatriaSessions extends JavaPlugin {
         if (!getDataFolder().exists()) {
             boolean created = getDataFolder().mkdirs();
             if (created) {
-                getLogger().info("Plugin data folder created at: " + getDataFolder().getAbsolutePath());
+                getLogger()
+                        .info(
+                                "Plugin data folder created at: "
+                                        + getDataFolder().getAbsolutePath());
             } else {
-                getLogger().severe("Failed to create plugin data folder: " + getDataFolder().getAbsolutePath());
+                getLogger()
+                        .severe(
+                                "Failed to create plugin data folder: "
+                                        + getDataFolder().getAbsolutePath());
             }
         }
         try {
@@ -79,28 +80,65 @@ public final class TheatriaSessions extends JavaPlugin {
         try {
             serverSessionRepository = new ServerSessionRepository(theatriaSessionsDB, customLogger);
         } catch (SQLException e) {
-            customLogger.sendFormattedLog("Failed to create ServerSessionRepository: " + e.getMessage());
+            customLogger.sendFormattedLog(
+                    "Failed to create ServerSessionRepository: " + e.getMessage());
             customLogger.sendFormattedLog("Shutting down...");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        serverSessionManager = new ServerSessionManager(serverSessionRepository.loadServerSession());
+        serverSessionManager =
+                new ServerSessionManager(serverSessionRepository.loadServerSession());
 
-        databaseTask = new DatabaseTask(sessionRepository, serverSessionRepository, sessionManager, serverSessionManager, customLogger);
+        databaseTask =
+                new DatabaseTask(
+                        sessionRepository,
+                        serverSessionRepository,
+                        sessionManager,
+                        serverSessionManager,
+                        customLogger);
         // start first backup after ~10 minutes, continue every ~10 minutes
-        databaseTask.runTaskTimer(this, 20 * configManager.getInitialBackupDuration(), 20 * configManager.getBackupDuration());
-        new OneSecondTimerTask(sessionManager, serverSessionManager, essentials).runTaskTimer(this, 20, 20);
-        Bukkit.getPluginManager().registerEvents(new DayChangeListener(sessionRepository, serverSessionRepository, sessionManager, serverSessionManager, customLogger), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager, customLogger), this);
-        Bukkit.getPluginManager().registerEvents(new RewardPlayerListener(configManager, customLogger), this);
-        Bukkit.getPluginManager().registerEvents(new IncrementRewardCountListener(serverSessionManager, customLogger), this);
-        Bukkit.getPluginManager().registerEvents(new RewardCommunityListener(customLogger, configManager), this);
-        Objects.requireNonNull(getCommand("session")).setExecutor(new SessionCommand(sessionManager, serverSessionManager, configManager, customLogger));
-        Objects.requireNonNull(getCommand("community")).setExecutor(new CommunityCommand(serverSessionManager, customLogger, configManager));
-        Objects.requireNonNull(getCommand("activity")).setExecutor(new ActivityCommand(sessionManager));
+        databaseTask.runTaskTimer(
+                this,
+                20 * configManager.getInitialBackupDuration(),
+                20 * configManager.getBackupDuration());
+        new OneSecondTimerTask(sessionManager, serverSessionManager, essentials)
+                .runTaskTimer(this, 20, 20);
+        Bukkit.getPluginManager()
+                .registerEvents(
+                        new DayChangeListener(
+                                sessionRepository,
+                                serverSessionRepository,
+                                sessionManager,
+                                serverSessionManager,
+                                customLogger),
+                        this);
+        Bukkit.getPluginManager()
+                .registerEvents(new PlayerJoinListener(sessionManager, customLogger), this);
+        Bukkit.getPluginManager()
+                .registerEvents(new RewardPlayerListener(configManager, customLogger), this);
+        Bukkit.getPluginManager()
+                .registerEvents(
+                        new IncrementRewardCountListener(serverSessionManager, customLogger), this);
+        Bukkit.getPluginManager()
+                .registerEvents(new RewardCommunityListener(customLogger, configManager), this);
+        Objects.requireNonNull(getCommand("session"))
+                .setExecutor(
+                        new SessionCommand(
+                                sessionManager, serverSessionManager, configManager, customLogger));
+        Objects.requireNonNull(getCommand("community"))
+                .setExecutor(
+                        new CommunityCommand(serverSessionManager, customLogger, configManager));
+        Objects.requireNonNull(getCommand("activity"))
+                .setExecutor(new ActivityCommand(sessionManager));
         customLogger.sendFormattedLog("Loaded plugin.");
-        customLogger.sendFormattedLog("Using GeneralUtils version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "general-utils-version"));
-        customLogger.sendFormattedLog("Using TheatriaTime version: " + customLogger.getGeneralUtilsVersionFromConfig(getResource("plugin.yml"), "theatria-time-version"));
+        customLogger.sendFormattedLog(
+                "Using GeneralUtils version: "
+                        + customLogger.getGeneralUtilsVersionFromConfig(
+                                getResource("plugin.yml"), "general-utils-version"));
+        customLogger.sendFormattedLog(
+                "Using TheatriaTime version: "
+                        + customLogger.getGeneralUtilsVersionFromConfig(
+                                getResource("plugin.yml"), "theatria-time-version"));
     }
 
     @Override
@@ -108,13 +146,22 @@ public final class TheatriaSessions extends JavaPlugin {
         if (databaseTask != null) databaseTask.cancel();
         if (sessionManager != null && sessionRepository != null) {
             for (Session session : sessionManager.getSessions().values()) {
-                customLogger.sendFormattedLog("User: " + session.getPlayerName() + " had a session time of " + session.getSessionTime());
+                customLogger.sendFormattedLog(
+                        "User: "
+                                + session.getPlayerName()
+                                + " had a session time of "
+                                + session.getSessionTime());
                 sessionRepository.createOrUpdate(session);
             }
         }
         if (serverSessionManager != null && serverSessionRepository != null) {
             ServerSession serverSession = serverSessionManager.getServerSession();
-            customLogger.sendFormattedLog(String.format("ServerSession Date: %s, RewardsEarned: %s, PlayersJoined: %s", serverSession.getSessionDate(), serverSession.getRewardsEarned(), serverSession.getPlayersJoined()));
+            customLogger.sendFormattedLog(
+                    String.format(
+                            "ServerSession Date: %s, RewardsEarned: %s, PlayersJoined: %s",
+                            serverSession.getSessionDate(),
+                            serverSession.getRewardsEarned(),
+                            serverSession.getPlayersJoined()));
             serverSessionRepository.createOrUpdate(serverSession);
         }
     }

@@ -22,8 +22,7 @@ public class DatabaseTask extends BukkitRunnable {
             ServerSessionRepository serverSessionRepository,
             SessionManager sessionManager,
             ServerSessionManager serverSessionManager,
-            CustomLogger<TheatriaSessions, ConfigManager> customLogger
-    ) {
+            CustomLogger<TheatriaSessions, ConfigManager> customLogger) {
         this.sessionRepository = sessionRepository;
         this.sessionManager = sessionManager;
         this.serverSessionRepository = serverSessionRepository;
@@ -33,10 +32,14 @@ public class DatabaseTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        customLogger.sendFormattedLog("Persisting data now. " + sessionManager.getSessions().size() + " sessions found." );
+        customLogger.sendFormattedLog(
+                "Persisting data now. " + sessionManager.getSessions().size() + " sessions found.");
         for (Session session : sessionManager.getSessions().values()) {
             if (!sessionRepository.createOrUpdate(session)) {
-                customLogger.sendFormattedLog("Error persisting session to database " + session.getPlayerName() + session.getSessionTime());
+                customLogger.sendFormattedLog(
+                        "Error persisting session to database "
+                                + session.getPlayerName()
+                                + session.getSessionTime());
             }
         }
         serverSessionRepository.createOrUpdate(serverSessionManager.getServerSession());
