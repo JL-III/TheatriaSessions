@@ -52,6 +52,7 @@ public final class TheatriaSessions extends JavaPlugin {
         if (essentials == null) {
             customLogger.sendFormattedLog("Essentials returned null, shutting down.");
             Bukkit.getPluginManager().disablePlugin(this);
+            return;
         }
         TheatriaSessionsDB theatriaSessionsDB;
         // Ensure the data folder exists
@@ -75,7 +76,6 @@ public final class TheatriaSessions extends JavaPlugin {
             theatriaSessionsDB = new TheatriaSessionsDB(getDataFolder(), customLogger);
         } catch (IOException e) {
             customLogger.sendFormattedLog("Failed to create database: " + e.getMessage());
-            e.printStackTrace();
             customLogger.sendFormattedLog("Shutting down...");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
