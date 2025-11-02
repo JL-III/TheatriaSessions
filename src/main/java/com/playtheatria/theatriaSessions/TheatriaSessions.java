@@ -1,6 +1,17 @@
 package com.playtheatria.theatriaSessions;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+
 import com.earth2me.essentials.Essentials;
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.commands.ActivityCommand;
 import com.playtheatria.theatriaSessions.commands.CommunityCommand;
@@ -11,18 +22,17 @@ import com.playtheatria.theatriaSessions.database.data.ServerSession;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.repositories.ServerSessionRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
-import com.playtheatria.theatriaSessions.listeners.*;
+import com.playtheatria.theatriaSessions.errors.RepositoryException;
+import com.playtheatria.theatriaSessions.listeners.DayChangeListener;
+import com.playtheatria.theatriaSessions.listeners.PlayerJoinListener;
+import com.playtheatria.theatriaSessions.listeners.RewardCommunityListener;
+import com.playtheatria.theatriaSessions.listeners.RewardPlayerListener;
+import com.playtheatria.theatriaSessions.listeners.ServerSessionRewardCountListener;
 import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaSessions.tasks.DatabaseTask;
 import com.playtheatria.theatriaSessions.tasks.OneSecondTimerTask;
 import com.playtheatria.theatriaSessions.utils.Util;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Objects;
-import java.util.logging.Level;
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TheatriaSessions extends JavaPlugin {
     private SessionManager sessionManager;
@@ -78,7 +88,21 @@ public final class TheatriaSessions extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        sessionManager = new SessionManager(sessionRepository.loadSessions(), customLogger);
+        
+        switch (sessionRepository.loadSessions()) {
+            case Ok<List<Session>, RepositoryException> ok -> {
+                customLogger.sendFormattedLog(
+                        "Loaded " + ok.value().size() + " sessions from the database.");
+                sessionManager = new SessionManager(ok.value(), customLogger);
+            }
+            case Err<List<Session>, RepositoryException> err -> {
+                customLogger.sendFormattedLog(
+                        "Failed to load sessions from the database: " + err.error().getMessage());
+                customLogger.sendFormattedLog("Shutting down...");
+                Bukkit.getPluginManager().disablePlugin(this);
+                return;
+            }
+        }
 
         try {
             serverSessionRepository = new ServerSessionRepository(theatriaSessionsDB, customLogger);

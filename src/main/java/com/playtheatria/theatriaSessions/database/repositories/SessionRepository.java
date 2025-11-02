@@ -12,7 +12,6 @@ import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.errors.PersistenceException;
 import com.playtheatria.theatriaSessions.errors.RepositoryException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SessionRepository {
@@ -27,57 +26,46 @@ public class SessionRepository {
         this.customLogger = customLogger;
     }
 
-    // Load all sessions from the database
-    public List<Session> loadSessions() {
-        List<Session> sessions;
+    // TODO
+    // Check behavior, does this load an empty list if no sessions exist?
+    public Result<List<Session>, RepositoryException> loadSessions() {
         try {
-            // Query all rows from the database
-            sessions = dao.queryForAll();
-            customLogger.sendFormattedLog(
-                    "Loaded " + sessions.size() + " sessions from the database.");
-            return sessions;
+            return new Ok<>(dao.queryForAll());
         } catch (SQLException e) {
-            customLogger.sendFormattedLog(
-                    "Failed to load sessions from the database: " + e.getMessage());
-            e.printStackTrace();
-            customLogger.sendFormattedLog("Returning and empty list of sessions.");
+            return new Err<>(
+                    new RepositoryException("Failed to load sessions from the database", e));
         }
-        return new ArrayList<>();
     }
 
     /**
-     * Creates or updates a session
-     * @param session the session we are going to persist in the database, this is used for persisting sessions between server resets.
-     * @return returns true if creation or update was successful, returns false if something failed.
+     * Creates or updates a Session in the database
+     * @param session The Session to create or update
+     * @return Result containing the CreateOrUpdateStatus if successful, or a PersistenceException if something failed.
      */
-    public boolean createOrUpdate(Session session) {
-        customLogger.sendDebug(
-                "Sending session to database for persistence. "
+    public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(Session session) {
+        String sessionSummary =
+                "time="
                         + session.getSessionTime()
-                        + " "
+                        + " name="
                         + session.getPlayerName()
-                        + " "
-                        + session.getPlayerUUID());
+                        + " uuid="
+                        + session.getPlayerUUID();
+
+        customLogger.sendDebug("Session Info | " + sessionSummary);
         try {
-            dao.createOrUpdate(session);
-            return true;
+            return new Ok<>(dao.createOrUpdate(session));
         } catch (SQLException exception) {
-            customLogger.sendFormattedLog(
-                    "Error on createOrUpdate Session: "
-                            + session.getSessionTime()
-                            + " "
-                            + session.getPlayerName()
-                            + " "
-                            + session.getPlayerUUID());
-            return false;
+            customLogger.sendFormattedLog("CreateOrUpdate failed | " + sessionSummary);
+            return new Err<>(
+                    new PersistenceException("Failed to create or update Session", exception));
         }
     }
 
     /**
      * Purges all entries from the Session table
-     * @return returns a Result containing the number of deleted entries if successful, or an Exception if something failed.
+     * @return Result containing the number of deleted entries if successful, or a PersistenceException if something failed.
      */
-    public Result<Integer, RepositoryException> purgeAll() {
+    public Result<Integer, PersistenceException> purgeAll() {
         try {
             return new Ok<>(dao.delete(dao.queryForAll()));
         } catch (SQLException e) {

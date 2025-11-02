@@ -9,7 +9,7 @@ import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.ServerSession;
 import com.playtheatria.theatriaSessions.database.repositories.ServerSessionRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
-import com.playtheatria.theatriaSessions.errors.RepositoryException;
+import com.playtheatria.theatriaSessions.errors.PersistenceException;
 import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
@@ -46,9 +46,9 @@ public class DayChangeListener implements Listener {
         customLogger.sendDebug("[DayChangeEvent] Resetting sessions.");
         sessionManager.resetSessions();
         switch (sessionRepository.purgeAll()) {
-            case Ok<Integer, RepositoryException> ok -> customLogger.sendDebug(
+            case Ok<Integer, PersistenceException> ok -> customLogger.sendDebug(
                     String.format("Deleted %d" + " entries.", ok.value()));
-            case Err<Integer, RepositoryException> err -> customLogger.sendDebug(
+            case Err<Integer, PersistenceException> err -> customLogger.sendDebug(
                     String.format("Purging SessionRepository failed %s", err.error().getMessage()));
         }
     }
@@ -69,9 +69,9 @@ public class DayChangeListener implements Listener {
 
         customLogger.sendDebug("Purging ServerSessionRepository.");
         switch (serverSessionRepository.purgeAll()) {
-            case Ok<Integer, RepositoryException> ok -> customLogger.sendDebug(
+            case Ok<Integer, PersistenceException> ok -> customLogger.sendDebug(
                     String.format("Deleted" + " %d entries.", ok.value()));
-            case Err<Integer, RepositoryException> err -> customLogger.sendDebug(
+            case Err<Integer, PersistenceException> err -> customLogger.sendDebug(
                     String.format("Purging ServerSession failed %s", err.error().getMessage()));
         }
     }

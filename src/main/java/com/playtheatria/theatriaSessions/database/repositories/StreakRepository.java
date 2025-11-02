@@ -23,9 +23,9 @@ public final class StreakRepository {
 
     /**
      * Load all streaks from the database
-     * @return returns a Result containing the list of streaks if successful, or an Exception if something failed.
+     * @return returns a Result containing the list of streaks if successful, or a PersistenceException if something failed.
      */
-    public Result<List<Streak>, RepositoryException> loadStreaks() {
+    public Result<List<Streak>, PersistenceException> loadStreaks() {
         try {
             return new Ok<>(dao.queryForAll());
         } catch (SQLException exception) {
@@ -78,7 +78,8 @@ public final class StreakRepository {
      * @param streak the streak we are going to delete from the database.
      * @return returns a Result containing true if deletion was successful, or an Exception if something failed.
      */
-    public Result<Boolean, RepositoryException> delete(@NotNull Streak streak) {
+    // TODO! Fix return type to int return value from dao.delete
+    public Result<Boolean, PersistenceException> delete(@NotNull Streak streak) {
         try {
             return new Ok<>(dao.delete(streak) > 0);
         } catch (SQLException exception) {

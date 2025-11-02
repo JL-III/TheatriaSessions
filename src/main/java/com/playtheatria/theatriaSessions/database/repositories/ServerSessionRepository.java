@@ -11,7 +11,6 @@ import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.data.ServerSession;
 import com.playtheatria.theatriaSessions.errors.PersistenceException;
-import com.playtheatria.theatriaSessions.errors.RepositoryException;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -66,35 +65,32 @@ public class ServerSessionRepository {
         }
     }
 
-    public boolean createOrUpdate(ServerSession serverSession) {
-        customLogger.sendDebug(
-                String.format(
-                        "Create or update called on a ServerSession: %s",
-                        serverSession.getSessionDate()));
-        customLogger.sendDebug(
-                String.format("PlayersJoined: %s", serverSession.getPlayersJoined()));
-        customLogger.sendDebug(
-                String.format("RewardsEarned: %s", serverSession.getRewardsEarned()));
+    /**
+     * Creates or updates a ServerSession
+     * @param serverSess the ServerSession we are going to persist in the database, this is used for persisting sessions between server resets.
+     * @return Result containing Dao.CreateOrUpdateStatus if successful, or a PersistenceException if something failed.
+     */
+    public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
+            ServerSession serverSess) {
+        customLogger.sendDebug("createOrUpdate called on a ServerSession");
+        customLogger.sendDebug(String.format("SessionDate %s", serverSess.getSessionDate()));
+        customLogger.sendDebug(String.format("PlayersJoined: %s", serverSess.getPlayersJoined()));
+        customLogger.sendDebug(String.format("RewardsEarned: %s", serverSess.getRewardsEarned()));
         try {
-            dao.createOrUpdate(serverSession);
-            return true;
+            return new Ok<>(dao.createOrUpdate(serverSess));
         } catch (SQLException exception) {
-            customLogger.sendFormattedLog(
-                    "Error on createOrUpdate ServerSession: "
-                            + serverSession.getSessionDate()
-                            + " rewardsEarned: "
-                            + serverSession.getRewardsEarned()
-                            + "| playersJoined: "
-                            + serverSession.getPlayersJoined());
-            return false;
+            return new Err<>(
+                    new PersistenceException(
+                            "Err persisting ServerSession " + serverSess.getSessionDate(),
+                            exception));
         }
     }
 
     /**
      * Purges all entries from the ServerSession table
-     * @return Result containing the number of deleted entries if successful, or a RepositoryException if something failed.
+     * @return Result containing the number of deleted entries if successful, or a PersistenceException if something failed.
      */
-    public Result<Integer, RepositoryException> purgeAll() {
+    public Result<Integer, PersistenceException> purgeAll() {
         try {
             return new Ok<>(dao.delete(dao.queryForAll()));
         } catch (SQLException e) {

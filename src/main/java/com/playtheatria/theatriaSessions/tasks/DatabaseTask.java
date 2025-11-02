@@ -1,11 +1,15 @@
 package com.playtheatria.theatriaSessions.tasks;
 
+import com.j256.ormlite.dao.Dao;
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.data.Session;
 import com.playtheatria.theatriaSessions.database.repositories.ServerSessionRepository;
 import com.playtheatria.theatriaSessions.database.repositories.SessionRepository;
+import com.playtheatria.theatriaSessions.errors.PersistenceException;
 import com.playtheatria.theatriaSessions.managers.ServerSessionManager;
 import com.playtheatria.theatriaSessions.managers.SessionManager;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -33,15 +37,27 @@ public class DatabaseTask extends BukkitRunnable {
     @Override
     public void run() {
         customLogger.sendFormattedLog(
-                "Persisting data now. " + sessionManager.getSessions().size() + " sessions found.");
+                "DatabaseTask: " + sessionManager.getSessions().size() + " sessions found.");
         for (Session session : sessionManager.getSessions().values()) {
-            if (!sessionRepository.createOrUpdate(session)) {
-                customLogger.sendFormattedLog(
-                        "Error persisting session to database "
-                                + session.getPlayerName()
-                                + session.getSessionTime());
+            switch (sessionRepository.createOrUpdate(session)) {
+                case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> customLogger
+                        .sendDebug(String.format("Session persisted successfully: %s", ok.value()));
+                case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> {
+                    customLogger.sendFormattedLog(
+                            String.format("Error persisting session %s", session.getPlayerName()));
+                    customLogger.sendFormattedLog(
+                            String.format("SessionTime: %s", session.getSessionTime()));
+                    customLogger.sendFormattedLog(
+                            String.format("Error: %s", err.error().getMessage()));
+                }
             }
         }
-        serverSessionRepository.createOrUpdate(serverSessionManager.getServerSession());
+
+        switch (serverSessionRepository.createOrUpdate(serverSessionManager.getServerSession())) {
+            case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> customLogger.sendDebug(
+                    String.format("ServerSession persisted successfully: %s", ok.value()));
+            case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> customLogger.sendDebug(
+                    String.format("Error persisting ServerSession: %s", err.error().getMessage()));
+        }
     }
 }
