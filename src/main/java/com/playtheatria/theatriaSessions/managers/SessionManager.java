@@ -58,7 +58,7 @@ public class SessionManager {
     }
 
     public void resetSessions() {
-        customLogger.sendDebug("Reset sessions started...");
+        customLogger.sendDebug("Purging sessions.");
         Set<UUID> onlinePlayers =
                 Bukkit.getOnlinePlayers().stream()
                         .map(Player::getUniqueId)

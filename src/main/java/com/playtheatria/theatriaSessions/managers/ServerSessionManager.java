@@ -1,19 +1,20 @@
 package com.playtheatria.theatriaSessions.managers;
 
 import com.playtheatria.theatriaSessions.database.data.ServerSession;
+import org.jetbrains.annotations.NotNull;
 
 public class ServerSessionManager {
     private ServerSession serverSession;
 
-    public ServerSessionManager(ServerSession serverSession) {
+    public ServerSessionManager(@NotNull ServerSession serverSession) {
         this.serverSession = serverSession;
     }
 
-    public void setServerSession(ServerSession serverSession) {
+    public void setServerSession(@NotNull ServerSession serverSession) {
         this.serverSession = serverSession;
     }
 
-    public ServerSession getServerSession() {
+    public @NotNull ServerSession getServerSession() {
         return serverSession;
     }
 }

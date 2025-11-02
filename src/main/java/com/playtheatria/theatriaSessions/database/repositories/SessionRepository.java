@@ -1,11 +1,16 @@
 package com.playtheatria.theatriaSessions.database.repositories;
 
 import com.j256.ormlite.dao.Dao;
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.jliii.generalutils.utils.CustomLogger;
 import com.playtheatria.theatriaSessions.TheatriaSessions;
 import com.playtheatria.theatriaSessions.config.ConfigManager;
 import com.playtheatria.theatriaSessions.database.TheatriaSessionsDB;
 import com.playtheatria.theatriaSessions.database.data.Session;
+import com.playtheatria.theatriaSessions.errors.PersistenceException;
+import com.playtheatria.theatriaSessions.errors.RepositoryException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,13 +73,16 @@ public class SessionRepository {
         }
     }
 
-    public boolean purgeAll() {
+    /**
+     * Purges all entries from the Session table
+     * @return returns a Result containing the number of deleted entries if successful, or an Exception if something failed.
+     */
+    public Result<Integer, RepositoryException> purgeAll() {
         try {
-            dao.delete(dao.queryForAll());
-            return true;
+            return new Ok<>(dao.delete(dao.queryForAll()));
         } catch (SQLException e) {
-            customLogger.sendFormattedLog("Failed to purge all entries" + e.getMessage());
-            return false;
+            return new Err<>(
+                    new PersistenceException("Failed to purge all entries from Session table", e));
         }
     }
 }

@@ -16,7 +16,7 @@ import java.sql.SQLException;
 public class TheatriaSessionsDB {
     private static final String DATABASE_NAME = "TheatriaSessions.db";
     private static final String URI_STRING = "jdbc:sqlite:%s";
-    private final File databaseFile;
+    private final File file;
 
     public TheatriaSessionsDB(
             File dataFolder, CustomLogger<TheatriaSessions, ConfigManager> customLogger)
@@ -32,13 +32,13 @@ public class TheatriaSessionsDB {
                     String.format(
                             "Found database file within %s named %s", dataFolder, DATABASE_NAME));
         }
-        this.databaseFile = databaseFile;
+        this.file = databaseFile;
     }
 
     public <E, I> Dao<E, I> getDao(Class<E> entity) throws SQLException {
         ConnectionSource connectionSource =
                 new JdbcConnectionSource(
-                        String.format(URI_STRING, databaseFile.getAbsolutePath()),
+                        String.format(URI_STRING, file.getAbsolutePath()),
                         new SqliteDatabaseType());
         Dao<E, I> dao = DaoManager.createDao(connectionSource, entity);
         TableUtils.createTableIfNotExists(dao.getConnectionSource(), entity);
