@@ -50,6 +50,7 @@ public class SessionManager {
     }
 
     public void createNewSession(@NotNull UUID playerUUID, @NotNull String playerName) {
+        customLogger.sendFormattedLog(String.format("Creating session for %s", playerName));
         mappedSessions.put(playerUUID, new Session(playerUUID, playerName));
     }
 

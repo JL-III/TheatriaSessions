@@ -18,17 +18,16 @@ public class TheatriaSessionsDB {
     private static final String URI_STRING = "jdbc:sqlite:%s";
     private final File file;
 
-    public TheatriaSessionsDB(
-            File dataFolder, CustomLogger<TheatriaSessions, ConfigManager> customLogger)
+    public TheatriaSessionsDB(File dataFolder, CustomLogger<TheatriaSessions, ConfigManager> logger)
             throws IOException {
         File databaseFile = new File(dataFolder, DATABASE_NAME);
         if (databaseFile.createNewFile()) {
-            customLogger.sendFormattedLog(
+            logger.sendFormattedLog(
                     String.format(
                             "Failed to find database file within %s named %s",
                             dataFolder, DATABASE_NAME));
         } else {
-            customLogger.sendFormattedLog(
+            logger.sendFormattedLog(
                     String.format(
                             "Found database file within %s named %s", dataFolder, DATABASE_NAME));
         }
@@ -36,11 +35,11 @@ public class TheatriaSessionsDB {
     }
 
     public <E, I> Dao<E, I> getDao(Class<E> entity) throws SQLException {
-        ConnectionSource connectionSource =
+        ConnectionSource conn =
                 new JdbcConnectionSource(
                         String.format(URI_STRING, file.getAbsolutePath()),
                         new SqliteDatabaseType());
-        Dao<E, I> dao = DaoManager.createDao(connectionSource, entity);
+        Dao<E, I> dao = DaoManager.createDao(conn, entity);
         TableUtils.createTableIfNotExists(dao.getConnectionSource(), entity);
         return dao;
     }
