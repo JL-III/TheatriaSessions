@@ -24,7 +24,7 @@ public class SessionRepository {
 
     // TODO
     // Check behavior, does this load an empty list if no sessions exist?
-    public Result<List<Session>, RepositoryException> loadSessions() {
+    public Result<List<Session>, RepositoryException> load() {
         try {
             return new Ok<>(dao.queryForAll());
         } catch (SQLException e) {

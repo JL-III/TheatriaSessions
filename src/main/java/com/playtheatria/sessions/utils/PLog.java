@@ -1,8 +1,10 @@
 package com.playtheatria.sessions.utils;
 
-import com.playtheatria.sessions.config.ConfigManager;
 import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
+
+import com.playtheatria.sessions.config.ConfigManager;
 
 public final class PLog {
     private final ConfigManager configManager;
@@ -12,15 +14,15 @@ public final class PLog {
     }
 
     public void info(String msg) {
-        Bukkit.getLogger().log(Level.INFO, "[TheatriaSessions]{0}", msg);
+        Bukkit.getLogger().log(Level.INFO, "[TheatriaSessions] {0}", msg);
     }
 
     public void warn(String msg) {
-        Bukkit.getLogger().log(Level.WARNING, "[TheatriaSessions]{0}", msg);
+        Bukkit.getLogger().log(Level.WARNING, "[TheatriaSessions] {0}", msg);
     }
 
     public void err(String msg) {
-        Bukkit.getLogger().log(Level.SEVERE, "[TheatriaSessions]{0}", msg);
+        Bukkit.getLogger().log(Level.SEVERE, "[TheatriaSessions] {0}", msg);
     }
 
     /**
