@@ -7,11 +7,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-public class PlayerJoinListener implements Listener {
+public class PlayerJoin implements Listener {
     private final SessionManager sessionManager;
     private final PLog log;
 
-    public PlayerJoinListener(SessionManager sessionManager, PLog log) {
+    public PlayerJoin(SessionManager sessionManager, PLog log) {
         this.sessionManager = sessionManager;
         this.log = log;
     }

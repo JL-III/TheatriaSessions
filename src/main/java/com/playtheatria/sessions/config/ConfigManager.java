@@ -1,8 +1,7 @@
 package com.playtheatria.sessions.config;
 
-import java.util.List;
-
 import com.playtheatria.sessions.TheatriaSessions;
+import java.util.List;
 
 public final class ConfigManager {
     private final TheatriaSessions plugin;

@@ -11,11 +11,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class RewardCommunityListener implements Listener {
+public class RewardCommunity implements Listener {
     private final ConfigManager configManager;
     private final PLog log;
 
-    public RewardCommunityListener(ConfigManager configManager, PLog log) {
+    public RewardCommunity(ConfigManager configManager, PLog log) {
         this.log = log;
         this.configManager = configManager;
     }

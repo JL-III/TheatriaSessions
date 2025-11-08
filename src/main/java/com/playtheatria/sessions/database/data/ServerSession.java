@@ -1,9 +1,8 @@
 package com.playtheatria.sessions.database.data;
 
-import java.time.LocalDate;
-
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import java.time.LocalDate;
 
 @DatabaseTable(tableName = "server_session")
 public class ServerSession {

@@ -13,11 +13,11 @@ import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.repositories.ServerSessionRepository;
 import com.playtheatria.sessions.database.repositories.SessionRepository;
 import com.playtheatria.sessions.errors.RepositoryException;
-import com.playtheatria.sessions.listeners.DayChangeListener;
-import com.playtheatria.sessions.listeners.PlayerJoinListener;
-import com.playtheatria.sessions.listeners.RewardCommunityListener;
-import com.playtheatria.sessions.listeners.RewardPlayerListener;
-import com.playtheatria.sessions.listeners.ServerSessionRewardCountListener;
+import com.playtheatria.sessions.listeners.DayChange;
+import com.playtheatria.sessions.listeners.PlayerJoin;
+import com.playtheatria.sessions.listeners.RewardCommunity;
+import com.playtheatria.sessions.listeners.RewardPlayer;
+import com.playtheatria.sessions.listeners.ServerSessionRewardCount;
 import com.playtheatria.sessions.managers.ServerSessionManager;
 import com.playtheatria.sessions.managers.SessionManager;
 import com.playtheatria.sessions.tasks.DatabaseTask;
@@ -125,21 +125,18 @@ public final class TheatriaSessions extends JavaPlugin {
                 .runTaskTimer(this, 20, 20);
         Bukkit.getPluginManager()
                 .registerEvents(
-                        new DayChangeListener(
+                        new DayChange(
                                 sessionRepository,
                                 serverSessionRepository,
                                 sessionManager,
                                 serverSessionManager,
                                 log),
                         this);
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(sessionManager, log), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoin(sessionManager, log), this);
+        Bukkit.getPluginManager().registerEvents(new RewardPlayer(configManager, log), this);
         Bukkit.getPluginManager()
-                .registerEvents(new RewardPlayerListener(configManager, log), this);
-        Bukkit.getPluginManager()
-                .registerEvents(
-                        new ServerSessionRewardCountListener(serverSessionManager, log), this);
-        Bukkit.getPluginManager()
-                .registerEvents(new RewardCommunityListener(configManager, log), this);
+                .registerEvents(new ServerSessionRewardCount(serverSessionManager, log), this);
+        Bukkit.getPluginManager().registerEvents(new RewardCommunity(configManager, log), this);
         Objects.requireNonNull(getCommand("session"))
                 .setExecutor(
                         new SessionCommand(sessionManager, serverSessionManager, configManager));

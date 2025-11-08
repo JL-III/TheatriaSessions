@@ -9,11 +9,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class ServerSessionRewardCountListener implements Listener {
+public class ServerSessionRewardCount implements Listener {
     private final ServerSessionManager serverSessionManager;
     private final PLog log;
 
-    public ServerSessionRewardCountListener(ServerSessionManager serverSessionManager, PLog log) {
+    public ServerSessionRewardCount(ServerSessionManager serverSessionManager, PLog log) {
         this.serverSessionManager = serverSessionManager;
         this.log = log;
     }

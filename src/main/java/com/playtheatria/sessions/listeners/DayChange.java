@@ -15,14 +15,14 @@ import java.time.LocalDate;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class DayChangeListener implements Listener {
+public class DayChange implements Listener {
     private final SessionRepository sessionRepository;
     private final ServerSessionRepository serverSessionRepository;
     private final ServerSessionManager serverSessionManager;
     private final SessionManager sessionManager;
     private final PLog log;
 
-    public DayChangeListener(
+    public DayChange(
             SessionRepository sessionRepository,
             ServerSessionRepository serverSessionRepository,
             SessionManager sessionManager,
