@@ -12,7 +12,7 @@ public final class PLog {
     }
 
     public void info(String msg) {
-        Bukkit.getLogger().log(Level.INFO, "[TheatriaSessions] {0}", msg);
+        Bukkit.getConsoleSender().sendMessage(Util.formatMessage("TheatriaSessions", msg));
     }
 
     public void warn(String msg) {

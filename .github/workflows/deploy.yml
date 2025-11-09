@@ -22,6 +22,7 @@ jobs:
             GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload JAR via signed URL
+      # https://github.com/pterodactyl/panel/issues/5393#issuecomment-3446548283
         run: |
           set -euo pipefail
 
@@ -30,7 +31,7 @@ jobs:
             -H "Accept: Application/vnd.pterodactyl.v1+json" \
             "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%2Fplugins%2F" \
             | jq -r '.attributes.url')
-
+          
           curl -X POST "$signed_url&directory=%2Fplugins%2F" \
             -F "files=@build/libs/TheatriaSessions.jar" \
             -F "directory=/plugins/"
