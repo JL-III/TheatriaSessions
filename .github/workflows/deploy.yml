@@ -17,10 +17,10 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - run: ./gradlew shadowJar --no-daemon
       - run: echo $GITHUB_TOKEN
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: ./gradlew shadowJar --no-daemon
       - name: Get signed upload URL
         id: sign
         run: |
