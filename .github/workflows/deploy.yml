@@ -2,6 +2,11 @@ name: Deploy via Pterodactyl API
 on:
   push:
     branches: [ stage ]
+    
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   build-deploye-restart:
     runs-on: ubuntu-latest
