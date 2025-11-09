@@ -22,20 +22,45 @@ jobs:
         env:
             GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Get signed upload URL
-        id: sign
+      - name: Upload JAR via signed URL
         run: |
-          echo "DIR='${{ secrets.TARGET_DIR }}'"
-          RESP=$(curl -v -s \
-             -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
-             -H "Accept: application/json" \
-             "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=${{ secrets.TARGET_DIR }}")
-          echo "RESPONSE:"
+          set -euo pipefail
+
+          FILE=$(ls build/libs/*.jar | head -n1)
+          NAME=$(basename "$FILE")
+
+          RESP=$(curl -sS \
+            -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
+            -H "Accept: application/json" \
+            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=${{ secrets.TARGET_DIR }}")
+
+          echo "Signed URL response:"
           echo "$RESP"
-      - name: Upload JAR to signed URL
-        run: |
-          FILE=$(ls build/libs/TheatriaSessions.jar | head -n1)
-          curl -s -X PUT -T "$FILE" "${{ steps.sign.outputs.url }}&filename=$(basename "$FILE")"
+
+          URL=$(echo "$RESP" | jq -r '.attributes.url')
+
+          # validate URL
+          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
+            echo "Failed to extract upload URL"
+            exit 1
+          fi
+
+          echo "Uploading $NAME to signed URL..."
+          code=$(curl -sS --fail-with-body \
+            -X PUT \
+            -T "$FILE" \
+            -H "Content-Type: application/java-archive" \
+            -o /tmp/upload_resp.txt \
+            -w '%{http_code}' \
+            "$URL&filename=$NAME") || {
+              echo "Upload failed, server response:"
+              cat /tmp/upload_resp.txt
+              exit 1
+            }
+
+          echo "Upload completed with HTTP status $code"
+          cat /tmp/upload_resp.txt
+
       - name: Restart server
         run: |
           curl -s -X POST \
