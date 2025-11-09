@@ -29,37 +29,15 @@ jobs:
           FILE=$(ls build/libs/*.jar | head -n1)
           NAME=$(basename "$FILE")
 
-          RESP=$(curl -sS \
+          signed_url=$(curl -s \
             -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
-            -H "Accept: application/json" \
-            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload")
+            -H "Accept: Application/vnd.pterodactyl.v1+json" \
+            ${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%2F" \
+            | jq -r '.attributes.url')
 
-          echo "Signed URL response:"
-          echo "$RESP"
-
-          URL=$(echo "$RESP" | jq -r '.attributes.url')
-
-          # validate URL
-          if [ -z "$URL" ] || [ "$URL" = "null" ]; then
-            echo "Failed to extract upload URL"
-            exit 1
-          fi
-
-          echo "Uploading $NAME to signed URL..."
-          code=$(curl -sS --fail-with-body \
-            -X PUT \
-            -T "$FILE" \
-            -H "Content-Type: application/java-archive" \
-            -o /tmp/upload_resp.txt \
-            -w '%{http_code}' \
-            "$URL&filename=$NAME") || {
-              echo "Upload failed, server response:"
-              cat /tmp/upload_resp.txt
-              exit 1
-            }
-
-          echo "Upload completed with HTTP status $code"
-          cat /tmp/upload_resp.txt
+          curl -X POST "$signed_url" \
+            -F "files=@/build/libs/TheatriaSessions.jar" \
+            -F "directory=plugins/"
 
       - name: Restart server
         run: |
