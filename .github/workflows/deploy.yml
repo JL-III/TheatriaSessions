@@ -17,7 +17,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - run: which jq || echo "jq not found"
       - run: ./gradlew shadowJar --no-daemon
         env:
             GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
@@ -36,7 +35,7 @@ jobs:
             | jq -r '.attributes.url')
 
           curl -X POST "$signed_url" \
-            -F "files=@/build/libs/TheatriaSessions.jar" \
+            -F "files=@build/libs/TheatriaSessions.jar" \
             -F "directory=plugins/"
 
       - name: Restart server
