@@ -9,7 +9,7 @@ permissions:
   packages: read
 
 jobs:
-  build-deploye-restart:
+  build-deploy-restart:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,6 +17,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - run: which jq || echo "jq not found"
       - run: ./gradlew shadowJar --no-daemon
         env:
             GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
