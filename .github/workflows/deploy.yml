@@ -32,7 +32,7 @@ jobs:
           signed_url=$(curl -s \
             -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
             -H "Accept: Application/vnd.pterodactyl.v1+json" \
-            ${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%2F" \
+            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%2F" \
             | jq -r '.attributes.url')
 
           curl -X POST "$signed_url" \
