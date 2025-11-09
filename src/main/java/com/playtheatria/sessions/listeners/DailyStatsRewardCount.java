@@ -3,26 +3,26 @@ package com.playtheatria.sessions.listeners;
 import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.IncrementRewardCountEvent;
 import com.playtheatria.sessions.events.RewardCommunityEvent;
-import com.playtheatria.sessions.managers.ServerSessionManager;
+import com.playtheatria.sessions.managers.DailyStatsCache;
 import com.playtheatria.sessions.utils.PLog;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-public class ServerSessionRewardCount implements Listener {
-    private final ServerSessionManager serverSessionManager;
+public class DailyStatsRewardCount implements Listener {
+    private final DailyStatsCache dailyStatsCache;
     private final PLog log;
 
-    public ServerSessionRewardCount(ServerSessionManager serverSessionManager, PLog log) {
-        this.serverSessionManager = serverSessionManager;
+    public DailyStatsRewardCount(DailyStatsCache dailyStatsCache, PLog log) {
+        this.dailyStatsCache = dailyStatsCache;
         this.log = log;
     }
 
     @EventHandler
     public void onIncrementRewardCount(IncrementRewardCountEvent event) {
-        serverSessionManager.getServerSession().incrementRewardsEarned();
+        dailyStatsCache.getDayStats().incrementRewardsEarned();
 
-        int rewardCount = serverSessionManager.getServerSession().getRewardsEarned();
+        int rewardCount = dailyStatsCache.getDayStats().getRewardsEarned();
         RewardTier rewardTier = RewardTier.getByThreshold(rewardCount);
 
         if (rewardTier == null) {

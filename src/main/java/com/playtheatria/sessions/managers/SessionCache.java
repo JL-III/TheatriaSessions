@@ -14,11 +14,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class SessionManager {
+public class SessionCache {
     private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
     private final PLog log;
 
-    public SessionManager(List<Session> sessions, PLog log) {
+    public SessionCache(List<Session> sessions, PLog log) {
         for (Session session : sessions) {
             mappedSessions.put(session.getPlayerUUID(), session);
         }

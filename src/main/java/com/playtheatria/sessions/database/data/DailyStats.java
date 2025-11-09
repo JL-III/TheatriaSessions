@@ -4,27 +4,27 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import java.time.LocalDate;
 
-@DatabaseTable(tableName = "server_session")
-public class ServerSession {
+@DatabaseTable(tableName = "daily_stats")
+public class DailyStats {
 
     @DatabaseField(id = true)
     @SuppressWarnings("unused")
     private final int id = 0;
 
-    @DatabaseField private String sessionDate;
+    @DatabaseField private String date;
 
     @DatabaseField private int playersJoined = 0;
 
     @DatabaseField private int rewardsEarned = 0;
 
-    protected ServerSession() {}
+    protected DailyStats() {}
 
-    public ServerSession(LocalDate date) {
-        this.sessionDate = date.toString();
+    public DailyStats(LocalDate date) {
+        this.date = date.toString();
     }
 
-    public LocalDate getSessionDate() {
-        return LocalDate.parse(sessionDate);
+    public LocalDate getDate() {
+        return LocalDate.parse(date);
     }
 
     public int getPlayersJoined() {

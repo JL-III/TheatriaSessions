@@ -3,12 +3,12 @@ package com.playtheatria.sessions.listeners;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
-import com.playtheatria.sessions.database.data.ServerSession;
-import com.playtheatria.sessions.database.repositories.ServerSessionRepository;
+import com.playtheatria.sessions.database.data.DailyStats;
+import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
 import com.playtheatria.sessions.database.repositories.SessionRepository;
 import com.playtheatria.sessions.errors.PersistenceException;
-import com.playtheatria.sessions.managers.ServerSessionManager;
-import com.playtheatria.sessions.managers.SessionManager;
+import com.playtheatria.sessions.managers.DailyStatsCache;
+import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
 import java.time.LocalDate;
@@ -17,21 +17,21 @@ import org.bukkit.event.Listener;
 
 public class DayChange implements Listener {
     private final SessionRepository sessionRepository;
-    private final ServerSessionRepository serverSessionRepository;
-    private final ServerSessionManager serverSessionManager;
-    private final SessionManager sessionManager;
+    private final SessionCache sessionCache;
+    private final DailyStatsRepo dailyStatsRepo;
+    private final DailyStatsCache dailyStatsCache;
     private final PLog log;
 
     public DayChange(
             SessionRepository sessionRepository,
-            ServerSessionRepository serverSessionRepository,
-            SessionManager sessionManager,
-            ServerSessionManager serverSessionManager,
+            DailyStatsRepo dailyStatsRepo,
+            SessionCache sessionCache,
+            DailyStatsCache dailyStatsCache,
             PLog log) {
         this.sessionRepository = sessionRepository;
-        this.serverSessionRepository = serverSessionRepository;
-        this.serverSessionManager = serverSessionManager;
-        this.sessionManager = sessionManager;
+        this.dailyStatsRepo = dailyStatsRepo;
+        this.dailyStatsCache = dailyStatsCache;
+        this.sessionCache = sessionCache;
         this.log = log;
     }
 
@@ -42,7 +42,7 @@ public class DayChange implements Listener {
     @EventHandler
     public void onDayChangeResetSessions(DayChangeEvent event) {
         log.debug("[DayChangeEvent] Resetting sessions.");
-        sessionManager.resetSessions();
+        sessionCache.resetSessions();
         switch (sessionRepository.purgeAll()) {
             case Ok<Integer, PersistenceException> ok -> log.debug(
                     String.format("Deleted %d" + " entries.", ok.value()));
@@ -56,17 +56,17 @@ public class DayChange implements Listener {
      * @param event DayChangeEvent instance
      */
     @EventHandler
-    public void onDayChangeResetServerSession(DayChangeEvent event) {
-        log.debug("[DayChangeEvent] resetting ServerSession.");
-        log.debug("Logs for oldServerSession");
-        printServerSessionDebugLogs(serverSessionManager.getServerSession());
+    public void onDayChangeResetDailyStats(DayChangeEvent event) {
+        log.debug("[DayChangeEvent] resetting DailyStats.");
+        log.debug("Logs for DailyStats");
+        printDailyStatsDebugLogs(dailyStatsCache.getDayStats());
 
-        log.debug(" Setting new ServerSession");
-        serverSessionManager.setServerSession(new ServerSession(LocalDate.now(TimeUtils.timeZone)));
-        printServerSessionDebugLogs(serverSessionManager.getServerSession());
+        log.debug("Setting new DailyStats for today.");
+        dailyStatsCache.setDayStats(new DailyStats(LocalDate.now(TimeUtils.timeZone)));
+        printDailyStatsDebugLogs(dailyStatsCache.getDayStats());
 
-        log.debug("Purging ServerSessionRepository.");
-        switch (serverSessionRepository.purgeAll()) {
+        log.debug("Purging DailyStatsRepo.");
+        switch (dailyStatsRepo.purgeAll()) {
             case Ok<Integer, PersistenceException> ok -> log.debug(
                     String.format("Deleted" + " %d entries.", ok.value()));
             case Err<Integer, PersistenceException> err -> log.debug(
@@ -76,11 +76,11 @@ public class DayChange implements Listener {
 
     /**
      * Prints debug logs for the provided ServerSession
-     * @param serverSession ServerSession to print debug logs for
+     * @param dailyStats ServerSession to print debug logs for
      */
-    private void printServerSessionDebugLogs(ServerSession serverSession) {
-        log.debug(String.format("SessionDate %s", serverSession.getSessionDate()));
-        log.debug(String.format("RewardsEarned %s", serverSession.getRewardsEarned()));
-        log.debug(String.format("PlayersJoined %s", serverSession.getPlayersJoined()));
+    private void printDailyStatsDebugLogs(DailyStats dailyStats) {
+        log.debug(String.format("Date %s", dailyStats.getDate()));
+        log.debug(String.format("RewardsEarned %s", dailyStats.getRewardsEarned()));
+        log.debug(String.format("PlayersJoined %s", dailyStats.getPlayersJoined()));
     }
 }

@@ -1,7 +1,7 @@
 package com.playtheatria.sessions.commands;
 
 import com.playtheatria.sessions.database.data.Session;
-import com.playtheatria.sessions.managers.SessionManager;
+import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -12,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class ActivityCommand implements CommandExecutor {
 
-    private final SessionManager sessionManager;
+    private final SessionCache sessionManager;
 
-    public ActivityCommand(SessionManager sessionManager) {
+    public ActivityCommand(SessionCache sessionManager) {
         this.sessionManager = sessionManager;
     }
 

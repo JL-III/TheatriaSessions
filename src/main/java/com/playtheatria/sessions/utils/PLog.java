@@ -1,10 +1,8 @@
 package com.playtheatria.sessions.utils;
 
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
-
 import com.playtheatria.sessions.config.ConfigManager;
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 
 public final class PLog {
     private final ConfigManager configManager;

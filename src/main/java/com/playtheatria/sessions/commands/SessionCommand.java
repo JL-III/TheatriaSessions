@@ -5,12 +5,12 @@ import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.config.ConfigManager;
-import com.playtheatria.sessions.database.data.ServerSession;
+import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
-import com.playtheatria.sessions.managers.ServerSessionManager;
-import com.playtheatria.sessions.managers.SessionManager;
+import com.playtheatria.sessions.managers.DailyStatsCache;
+import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.Util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,14 +31,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
-    private final SessionManager sessionManager;
-    private final ServerSessionManager serverSessionManager;
+    private final SessionCache sessionManager;
+    private final DailyStatsCache serverSessionManager;
     private final ConfigManager configManager;
     private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
     public SessionCommand(
-            SessionManager sessionManager,
-            ServerSessionManager serverSessionManager,
+            SessionCache sessionManager,
+            DailyStatsCache serverSessionManager,
             ConfigManager configManager) {
         this.sessionManager = sessionManager;
         this.serverSessionManager = serverSessionManager;
@@ -210,10 +210,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     public void sendSessionMessage(CommandSender sender, Session session) {
-        ServerSession serverSession = serverSessionManager.getServerSession();
+        DailyStats serverSession = serverSessionManager.getDayStats();
         Result<RewardTier, Exception> rewardTier =
-                RewardTier.getNearestTier(
-                        serverSessionManager.getServerSession().getRewardsEarned());
+                RewardTier.getNearestTier(serverSessionManager.getDayStats().getRewardsEarned());
         @SuppressWarnings("unused")
         String rewardTierName =
                 rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
@@ -229,7 +228,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Component.text(
                                         String.format(
                                                 "Daily-Reward - %s",
-                                                serverSession.getSessionDate().toString()))
+                                                serverSession.getDate().toString()))
                                 .decorate(TextDecoration.UNDERLINED)
                                 .color(textColorTwo),
                         Component.text("⭐ Community Stats").color(textColorTwo),

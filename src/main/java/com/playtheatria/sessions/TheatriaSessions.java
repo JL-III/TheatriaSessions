@@ -9,34 +9,36 @@ import com.playtheatria.sessions.commands.CommunityCommand;
 import com.playtheatria.sessions.commands.SessionCommand;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.TheatriaSessionsDB;
-import com.playtheatria.sessions.database.data.ServerSession;
+import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.database.data.Session;
-import com.playtheatria.sessions.database.repositories.ServerSessionRepository;
+import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
 import com.playtheatria.sessions.database.repositories.SessionRepository;
+import com.playtheatria.sessions.listeners.DailyStatsRewardCount;
 import com.playtheatria.sessions.listeners.DayChange;
 import com.playtheatria.sessions.listeners.PlayerJoin;
 import com.playtheatria.sessions.listeners.RewardCommunity;
 import com.playtheatria.sessions.listeners.RewardPlayer;
-import com.playtheatria.sessions.listeners.ServerSessionRewardCount;
-import com.playtheatria.sessions.managers.ServerSessionManager;
-import com.playtheatria.sessions.managers.SessionManager;
+import com.playtheatria.sessions.managers.DailyStatsCache;
+import com.playtheatria.sessions.managers.SessionCache;
+import com.playtheatria.sessions.records.CommandRecord;
 import com.playtheatria.sessions.tasks.DatabaseTask;
 import com.playtheatria.sessions.tasks.OneSecondTimerTask;
 import com.playtheatria.sessions.utils.PLog;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Objects;
+import java.util.List;
 import java.util.function.Consumer;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TheatriaSessions extends JavaPlugin {
-    private SessionManager sessionManager;
-    private ServerSessionManager serverSessionManager;
+    private SessionCache sessionManager;
+    private DailyStatsCache dailyStatsCache;
+    private DailyStatsRepo dailyStatsRepo;
     private SessionRepository sessionRepo;
-    private ServerSessionRepository serverSessionRepo;
     private DatabaseTask databaseTask;
     private PLog log;
     private Essentials essentials;
@@ -56,44 +58,41 @@ public final class TheatriaSessions extends JavaPlugin {
                 sessionRepo.load(),
                 v -> {
                     log.info("Loaded " + v.size() + " sessions from the database.");
-                    sessionManager = new SessionManager(v, log);
+                    sessionManager = new SessionCache(v, log);
                 })) {
             return;
         }
         if (!ok(
-                serverSessionRepo(),
+                dailyStatsRepo(),
                 v -> {
-                    serverSessionRepo = v;
+                    dailyStatsRepo = v;
                 })) {
             return;
         }
 
-        serverSessionManager = new ServerSessionManager(serverSessionRepo.loadServerSession());
+        dailyStatsCache = new DailyStatsCache(dailyStatsRepo.load());
 
         databaseTask =
-                new DatabaseTask(
-                        sessionRepo, serverSessionRepo, sessionManager, serverSessionManager, log);
+                new DatabaseTask(sessionRepo, dailyStatsRepo, sessionManager, dailyStatsCache, log);
         // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(
                 this,
                 20 * configManager.getInitialBackupDuration(),
                 20 * configManager.getBackupDuration());
-        new OneSecondTimerTask(sessionManager, serverSessionManager, essentials)
+        new OneSecondTimerTask(sessionManager, dailyStatsCache, essentials)
                 .runTaskTimer(this, 20, 20);
+
         registerEvents(
-                configManager,
-                serverSessionManager,
-                sessionManager,
-                sessionRepo,
-                serverSessionRepo,
-                log);
-        Objects.requireNonNull(getCommand("session"))
-                .setExecutor(
-                        new SessionCommand(sessionManager, serverSessionManager, configManager));
-        Objects.requireNonNull(getCommand("community"))
-                .setExecutor(new CommunityCommand(configManager, serverSessionManager));
-        Objects.requireNonNull(getCommand("activity"))
-                .setExecutor(new ActivityCommand(sessionManager));
+                configManager, sessionManager, sessionRepo, dailyStatsCache, dailyStatsRepo, log);
+
+        registerCommands(
+                List.of(
+                        new CommandRecord(
+                                "session",
+                                new SessionCommand(sessionManager, dailyStatsCache, configManager)),
+                        new CommandRecord(
+                                "community", new CommunityCommand(configManager, dailyStatsCache)),
+                        new CommandRecord("activity", new ActivityCommand(sessionManager))));
         log.info("Loaded plugin.");
     }
 
@@ -110,30 +109,43 @@ public final class TheatriaSessions extends JavaPlugin {
                 sessionRepo.createOrUpdate(session);
             }
         }
-        if (serverSessionManager != null && serverSessionRepo != null) {
-            ServerSession serverSession = serverSessionManager.getServerSession();
+        if (dailyStatsCache != null && dailyStatsRepo != null) {
+            DailyStats currDayStats = dailyStatsCache.getDayStats();
             log.info(
                     String.format(
                             "ServerSession Date: %s, RewardsEarned: %s, PlayersJoined: %s",
-                            serverSession.getSessionDate(),
-                            serverSession.getRewardsEarned(),
-                            serverSession.getPlayersJoined()));
-            serverSessionRepo.createOrUpdate(serverSession);
+                            currDayStats.getDate(),
+                            currDayStats.getRewardsEarned(),
+                            currDayStats.getPlayersJoined()));
+            dailyStatsRepo.createOrUpdate(currDayStats);
+        }
+    }
+
+    private void registerCommands(List<CommandRecord> records) {
+        for (CommandRecord record : records) {
+            PluginCommand cmd = getCommand(record.name());
+            if (cmd != null) {
+                cmd.setExecutor(record.executor());
+            } else {
+                log.err("Failed to register command: " + record.name());
+                log.err("Shutting down plugin.");
+                Bukkit.getPluginManager().disablePlugin(this);
+            }
         }
     }
 
     private void registerEvents(
             ConfigManager cm,
-            ServerSessionManager ssm,
-            SessionManager sm,
+            SessionCache sm,
             SessionRepository sr,
-            ServerSessionRepository ssr,
+            DailyStatsCache currDayStatsCache,
+            DailyStatsRepo currDayStatsRepo,
             PLog log) {
         PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(new DayChange(sr, ssr, sm, ssm, log), this);
+        pm.registerEvents(new DayChange(sr, currDayStatsRepo, sm, currDayStatsCache, log), this);
         pm.registerEvents(new PlayerJoin(sm, log), this);
         pm.registerEvents(new RewardPlayer(cm, log), this);
-        pm.registerEvents(new ServerSessionRewardCount(ssm, log), this);
+        pm.registerEvents(new DailyStatsRewardCount(currDayStatsCache, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
     }
 
@@ -190,11 +202,11 @@ public final class TheatriaSessions extends JavaPlugin {
         }
     }
 
-    private Result<ServerSessionRepository, Exception> serverSessionRepo() {
+    private Result<DailyStatsRepo, Exception> dailyStatsRepo() {
         try {
-            return new Ok<>(new ServerSessionRepository(sessionsDB, log));
+            return new Ok<>(new DailyStatsRepo(sessionsDB, log));
         } catch (SQLException e) {
-            return new Err<>(new SQLException("Failed to create ServerSessionRepository", e));
+            return new Err<>(new SQLException("Failed to create CurrentDayStatsRepo", e));
         }
     }
 

@@ -6,7 +6,7 @@ import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.database.TheatriaSessionsDB;
-import com.playtheatria.sessions.database.data.ServerSession;
+import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
@@ -15,12 +15,12 @@ import java.time.LocalDate;
 import java.util.Objects;
 import org.bukkit.Bukkit;
 
-public class ServerSessionRepository {
-    private final Dao<ServerSession, String> dao;
+public class DailyStatsRepo {
+    private final Dao<DailyStats, String> dao;
     private final PLog log;
 
-    public ServerSessionRepository(TheatriaSessionsDB sessionsDB, PLog log) throws SQLException {
-        this.dao = sessionsDB.getDao(ServerSession.class);
+    public DailyStatsRepo(TheatriaSessionsDB sessionsDB, PLog log) throws SQLException {
+        this.dao = sessionsDB.getDao(DailyStats.class);
         this.log = log;
     }
 
@@ -32,50 +32,47 @@ public class ServerSessionRepository {
      * @return ServerSession for the ServerRepository, returns the database ServerSession or returns a new one if one couldn't be loaded.
      * @throws IllegalStateException if the plugin can't save, propagates the SQLException
      */
-    public ServerSession loadServerSession() {
+    public DailyStats load() {
         try {
-            ServerSession serverSession = dao.queryForId("0");
-            if (serverSession == null) {
-                log.info(
-                        "No ServerSession found in database with the id of 0. Creating a new"
-                                + " ServerSession.");
-                serverSession = new ServerSession(LocalDate.now(TimeUtils.timeZone));
-                dao.create(serverSession); // Save the new session to the database
+            DailyStats dailyStats = dao.queryForId("0");
+            if (dailyStats == null) {
+                log.info("No DailyStats found in database with the id of 0. Creating a new entry.");
+                dailyStats = new DailyStats(LocalDate.now(TimeUtils.timeZone));
+                dao.create(dailyStats); // Save the new session to the database
                 // Warning - listener doesn't exist yet
                 Bukkit.getPluginManager().callEvent(new DayChangeEvent());
             } else {
-                log.info("Loaded ServerSession from the database.");
+                log.info("Loaded DailyStats from the database.");
             }
-            return serverSession;
+            return dailyStats;
         } catch (SQLException exception) {
-            log.info("Failed to load ServerSession from the database: " + exception.getMessage());
-            log.info("Creating new ServerSession.");
+            log.info("Failed to load DailyStats from the database: " + exception.getMessage());
+            log.info("Creating new DailyStats.");
             Bukkit.getPluginManager()
                     .disablePlugin(
                             Objects.requireNonNull(
                                     Bukkit.getPluginManager().getPlugin("TheatriaSessions")));
-            throw new IllegalStateException("SQLException while managing ServerSession", exception);
+            throw new IllegalStateException("SQLException while managing DailyStats", exception);
         }
     }
 
     /**
      * Creates or updates a ServerSession
-     * @param serverSess the ServerSession we are going to persist in the database, this is used for persisting sessions between server resets.
+     * @param dailyStats the ServerSession we are going to persist in the database, this is used for persisting sessions between server resets.
      * @return Result containing Dao.CreateOrUpdateStatus if successful, or a PersistenceException if something failed.
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
-            ServerSession serverSess) {
-        log.debug("createOrUpdate called on a ServerSession");
-        log.debug(String.format("SessionDate %s", serverSess.getSessionDate()));
-        log.debug(String.format("PlayersJoined: %s", serverSess.getPlayersJoined()));
-        log.debug(String.format("RewardsEarned: %s", serverSess.getRewardsEarned()));
+            DailyStats dailyStats) {
+        log.debug("createOrUpdate called on a dailyStats");
+        log.debug(String.format("Date %s", dailyStats.getDate()));
+        log.debug(String.format("PlayersJoined: %s", dailyStats.getPlayersJoined()));
+        log.debug(String.format("RewardsEarned: %s", dailyStats.getRewardsEarned()));
         try {
-            return new Ok<>(dao.createOrUpdate(serverSess));
+            return new Ok<>(dao.createOrUpdate(dailyStats));
         } catch (SQLException exception) {
             return new Err<>(
                     new PersistenceException(
-                            "Err persisting ServerSession " + serverSess.getSessionDate(),
-                            exception));
+                            "Err persisting daily_stats " + dailyStats.getDate(), exception));
         }
     }
 
@@ -89,7 +86,7 @@ public class ServerSessionRepository {
         } catch (SQLException e) {
             return new Err<>(
                     new PersistenceException(
-                            "Failed to purge all entries from ServerSession table", e));
+                            "Failed to purge all entries from daily_stats table", e));
         }
     }
 }

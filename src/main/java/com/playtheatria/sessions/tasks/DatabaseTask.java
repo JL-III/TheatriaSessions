@@ -4,39 +4,39 @@ import com.j256.ormlite.dao.Dao;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.sessions.database.data.Session;
-import com.playtheatria.sessions.database.repositories.ServerSessionRepository;
+import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
 import com.playtheatria.sessions.database.repositories.SessionRepository;
 import com.playtheatria.sessions.errors.PersistenceException;
-import com.playtheatria.sessions.managers.ServerSessionManager;
-import com.playtheatria.sessions.managers.SessionManager;
+import com.playtheatria.sessions.managers.DailyStatsCache;
+import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class DatabaseTask extends BukkitRunnable {
     private final SessionRepository sessionRepository;
-    private final ServerSessionRepository serverSessionRepository;
-    private final SessionManager sessionManager;
-    private final ServerSessionManager serverSessionManager;
+    private final DailyStatsRepo dailyStatsRepo;
+    private final SessionCache sessionCache;
+    private final DailyStatsCache dailyStatsCache;
     private final PLog log;
 
     public DatabaseTask(
             SessionRepository sessionRepository,
-            ServerSessionRepository serverSessionRepository,
-            SessionManager sessionManager,
-            ServerSessionManager serverSessionManager,
+            DailyStatsRepo dailyStatsRepo,
+            SessionCache sessionCache,
+            DailyStatsCache dailyStatsCache,
             PLog log) {
         this.sessionRepository = sessionRepository;
-        this.sessionManager = sessionManager;
-        this.serverSessionRepository = serverSessionRepository;
-        this.serverSessionManager = serverSessionManager;
+        this.sessionCache = sessionCache;
+        this.dailyStatsRepo = dailyStatsRepo;
+        this.dailyStatsCache = dailyStatsCache;
         this.log = log;
     }
 
     @Override
     public void run() {
-        log.debug("DatabaseTask: " + sessionManager.getSessions().size() + " sessions.");
-        for (Session session : sessionManager.getSessions().values()) {
+        log.debug("DatabaseTask: " + sessionCache.getSessions().size() + " sessions.");
+        for (Session session : sessionCache.getSessions().values()) {
             switch (sessionRepository.createOrUpdate(session)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
                     log.debug(
@@ -55,11 +55,11 @@ public class DatabaseTask extends BukkitRunnable {
             }
         }
 
-        switch (serverSessionRepository.createOrUpdate(serverSessionManager.getServerSession())) {
+        switch (dailyStatsRepo.createOrUpdate(dailyStatsCache.getDayStats())) {
             case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> log.debug(
-                    String.format("ServerSession persisted successfully: %s", ok.value()));
+                    String.format("DailyStats persisted successfully: %s", ok.value()));
             case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> log.info(
-                    String.format("Error persisting ServerSession: %s", err.error().getMessage()));
+                    String.format("Error persisting DailyStats: %s", err.error().getMessage()));
         }
     }
 }
