@@ -36,7 +36,7 @@ jobs:
 
           curl -X POST "$signed_url" \
             -F "files=@build/libs/TheatriaSessions.jar" \
-            -F "directory=plugins/"
+            -F "directory=/plugins/"
 
       - name: Restart server
         run: |
