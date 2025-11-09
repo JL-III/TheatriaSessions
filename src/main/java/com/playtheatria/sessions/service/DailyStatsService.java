@@ -58,11 +58,17 @@ public class DailyStatsService {
         cache.get().setPlayersJoined(count);
     }
 
-    public void persist() {
+    public void persist(boolean verbose) {
         switch (repo.createOrUpdate(cache.get())) {
-            case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> log.debug(
-                    String.format("DailyStats persisted successfully: %s", ok.value()));
-            case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> log.info(
+            case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
+                String msg = String.format("DailyStats persisted successfully: %s", ok.value());
+                if (verbose) {
+                    log.info(msg);
+                } else {
+                    log.debug(msg);
+                }
+            }
+            case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> log.err(
                     String.format("Error persisting DailyStats: %s", err.error().getMessage()));
         }
     }

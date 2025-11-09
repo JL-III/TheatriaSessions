@@ -58,22 +58,21 @@ public class SessionService {
         cache.addSession(session);
     }
 
-    public void persist() {
-        for (Session session : cache.getSessions().values()) {
+    public void persist(boolean verbose) {
+        for (Session session : getSessions()) {
             switch (repo.createOrUpdate(session)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
-                    log.debug(
-                            Util.summary(
-                                    String.format("Session persisted successfully: %s", ok.value()),
-                                    session));
+                    String msg = String.format("Session persisted successfully: %s", ok.value());
+                    if (verbose) {
+                        log.info(Util.summary(msg, session));
+                    } else {
+                        log.debug(Util.summary(msg, session));
+                    }
                 }
                 case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> {
-                    log.debug(
-                            Util.summary(
-                                    String.format(
-                                            "Error persisting session: %s",
-                                            err.error().getMessage()),
-                                    session));
+                    String msg =
+                            String.format("Error persisting session: %s", err.error().getMessage());
+                    log.err(Util.summary(msg, session));
                 }
             }
         }

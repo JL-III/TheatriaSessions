@@ -38,7 +38,7 @@ public final class ConfigManager {
         return this.backupDuration;
     }
 
-    public long getInitialBackupDuration() {
+    public long getInitDelay() {
         return this.initialBackupDuration;
     }
 

@@ -46,8 +46,8 @@ public class Session {
         this.sessionTime = amount;
     }
 
-    public void incrementSessionTime() {
-        sessionTime++;
+    public int incrementSessionTime() {
+        return ++sessionTime;
     }
 
     public void incrementAfkTime() {

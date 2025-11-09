@@ -9,11 +9,8 @@ import com.playtheatria.sessions.database.TheatriaSessionsDB;
 import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.utils.PLog;
-import com.playtheatria.theatriaTime.events.DayChangeEvent;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Objects;
-import org.bukkit.Bukkit;
 
 public class DailyStatsRepo {
     private final Dao<DailyStats, String> dao;
@@ -32,27 +29,21 @@ public class DailyStatsRepo {
      * @return DailyStats for the ServerRepository, returns the database DailyStats or returns a new one if one couldn't be loaded.
      * @throws IllegalStateException if the plugin can't save, propagates the SQLException
      */
-    public DailyStats load() {
+    public Result<DailyStats, Exception> load() {
         try {
             DailyStats dailyStats = dao.queryForId("0");
             if (dailyStats == null) {
                 log.info("No DailyStats found in database with the id of 0. Creating a new entry.");
                 dailyStats = new DailyStats(LocalDate.now(TimeUtils.timeZone));
-                dao.create(dailyStats); // Save the new session to the database
-                // Warning - listener doesn't exist yet
-                Bukkit.getPluginManager().callEvent(new DayChangeEvent());
+                dao.create(dailyStats);
             } else {
                 log.info("Loaded DailyStats from the database.");
             }
-            return dailyStats;
+            return new Ok<>(dailyStats);
         } catch (SQLException exception) {
             log.info("Failed to load DailyStats from the database: " + exception.getMessage());
-            log.info("Creating new DailyStats.");
-            Bukkit.getPluginManager()
-                    .disablePlugin(
-                            Objects.requireNonNull(
-                                    Bukkit.getPluginManager().getPlugin("TheatriaSessions")));
-            throw new IllegalStateException("SQLException while managing DailyStats", exception);
+            return new Err<>(
+                    new IllegalStateException("SQLException while managing DailyStats", exception));
         }
     }
 

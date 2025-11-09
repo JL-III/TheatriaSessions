@@ -12,7 +12,6 @@ import com.playtheatria.sessions.commands.SessionCommand;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.TheatriaSessionsDB;
 import com.playtheatria.sessions.database.data.DailyStats;
-import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
 import com.playtheatria.sessions.database.repositories.SessionRepo;
 import com.playtheatria.sessions.listeners.DailyStatsRewardCount;
@@ -46,60 +45,46 @@ public final class TheatriaSessions extends JavaPlugin {
     private SessionService sessionService;
 
     private DatabaseTask databaseTask;
+    private OneSecondTimerTask oneSecondTimerTask;
     private Essentials essentials;
     private TheatriaSessionsDB sessionsDB;
+    private DailyStats dailyStats;
     private PLog log;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        ConfigManager configManager = new ConfigManager(this);
-        log = new PLog(configManager);
+        ConfigManager cm = new ConfigManager(this);
+
+        log = new PLog(cm);
 
         if (!ok(essentials(), v -> essentials = v)) return;
         if (!ok(dataFolder(), v -> log.info(v))) return;
         if (!ok(sessionsDB(), v -> sessionsDB = v)) return;
         if (!ok(sessionRepo(), v -> sessionRepo = v)) return;
-        if (!ok(
-                sessionRepo.load(),
-                v -> {
-                    log.info("Loaded " + v.size() + " sessions from the database.");
-                    sessionCache = new SessionCache(v, log);
-                })) {
-            return;
-        }
-        if (!ok(
-                dailyStatsRepo(),
-                v -> {
-                    dailyStatsRepo = v;
-                })) {
-            return;
-        }
+        if (!ok(dailyStatsRepo(), v -> dailyStatsRepo = v)) return;
+        if (!ok(sessionRepo.load(), v -> sessionCache = new SessionCache(v, log))) return;
+        if (!ok(dailyStatsRepo.load(), v -> dailyStats = v)) return;
 
-        dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
         sessionService = new SessionService(sessionCache, sessionRepo, log);
-        dailyStatsCache = new DailyStatsCache(dailyStatsRepo.load());
+        dailyStatsCache = new DailyStatsCache(dailyStats);
+        dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
+
         databaseTask = new DatabaseTask(dailyStatsService, sessionService, log);
+        oneSecondTimerTask =
+                new OneSecondTimerTask(dailyStatsService, sessionService, essentials, log);
 
-        databaseTask.runTaskTimer(
-                this,
-                20 * configManager.getInitialBackupDuration(),
-                20 * configManager.getBackupDuration());
+        oneSecondTimerTask.runTaskTimer(this, 20, 20);
+        databaseTask.runTaskTimer(this, 20 * cm.getInitDelay(), 20 * cm.getBackupDuration());
 
-        new OneSecondTimerTask(dailyStatsService, sessionService, essentials)
-                .runTaskTimer(this, 20, 20);
-
-        registerEvents(configManager, dailyStatsService, sessionService, log);
+        registerEvents(cm, dailyStatsService, sessionService, log);
 
         registerCommands(
                 List.of(
                         new CommandRecord(
                                 "session",
-                                new SessionCommand(
-                                        dailyStatsService, sessionService, configManager)),
-                        new CommandRecord(
-                                "community",
-                                new CommunityCommand(configManager, dailyStatsService)),
+                                new SessionCommand(dailyStatsService, sessionService, cm)),
+                        new CommandRecord("community", new CommunityCommand(cm, dailyStatsService)),
                         new CommandRecord("activity", new ActivityCommand(sessionService))));
         log.info("Loaded plugin.");
     }
@@ -107,26 +92,9 @@ public final class TheatriaSessions extends JavaPlugin {
     @Override
     public void onDisable() {
         if (databaseTask != null) databaseTask.cancel();
-        if (sessionCache != null && sessionRepo != null) {
-            for (Session session : sessionCache.getSessions().values()) {
-                log.info(
-                        "User: "
-                                + session.getPlayerName()
-                                + " had a session time of "
-                                + session.getSessionTime());
-                sessionRepo.createOrUpdate(session);
-            }
-        }
-        if (dailyStatsCache != null && dailyStatsRepo != null) {
-            DailyStats currDayStats = dailyStatsCache.get();
-            log.info(
-                    String.format(
-                            "Date: %s, RewardsEarned: %s, PlayersJoined: %s",
-                            currDayStats.getDate(),
-                            currDayStats.getRewardsEarned(),
-                            currDayStats.getPlayersJoined()));
-            dailyStatsRepo.createOrUpdate(currDayStats);
-        }
+        if (oneSecondTimerTask != null) oneSecondTimerTask.cancel();
+        sessionService.persist(true);
+        dailyStatsService.persist(true);
     }
 
     private void registerCommands(List<CommandRecord> records) {

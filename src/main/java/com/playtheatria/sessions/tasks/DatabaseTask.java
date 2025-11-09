@@ -20,7 +20,7 @@ public class DatabaseTask extends BukkitRunnable {
     @Override
     public void run() {
         log.debug("DatabaseTask: " + sessionService.getSessionsCount() + " sessions.");
-        sessionService.persist();
-        dailyStatsService.persist();
+        sessionService.persist(false);
+        dailyStatsService.persist(false);
     }
 }

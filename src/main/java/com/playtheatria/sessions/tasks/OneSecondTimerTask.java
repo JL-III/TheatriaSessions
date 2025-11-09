@@ -6,6 +6,7 @@ import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
+import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -15,14 +16,17 @@ public class OneSecondTimerTask extends BukkitRunnable {
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
     private final Essentials essentials;
+    private final PLog log;
 
     public OneSecondTimerTask(
             DailyStatsService dailyStatsService,
             SessionService sessionService,
-            Essentials essentials) {
+            Essentials essentials,
+            PLog log) {
         this.dailyStatsService = dailyStatsService;
         this.sessionService = sessionService;
         this.essentials = essentials;
+        this.log = log;
     }
 
     @Override
@@ -38,7 +42,11 @@ public class OneSecondTimerTask extends BukkitRunnable {
                 continue;
             }
 
-            session.incrementSessionTime();
+            log.debug(
+                    String.format(
+                            "session for %s time: %s",
+                            session.getPlayerName(), session.incrementSessionTime()));
+
             if (!session.hasEarnedReward() || session.isRewarded()) continue;
             Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
         }
