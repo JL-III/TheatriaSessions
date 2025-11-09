@@ -1,14 +1,16 @@
 package com.playtheatria.sessions.commands;
 
-import com.playtheatria.sessions.database.data.Session;
-import com.playtheatria.sessions.managers.SessionCache;
-import com.playtheatria.sessions.utils.Util;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
+
+import com.playtheatria.sessions.database.data.Session;
+import com.playtheatria.sessions.managers.SessionCache;
+import com.playtheatria.sessions.utils.Util;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 
 public class ActivityCommand implements CommandExecutor {
 
@@ -24,7 +26,7 @@ public class ActivityCommand implements CommandExecutor {
             @NotNull Command command,
             @NotNull String s,
             @NotNull String[] args) {
-        if (!commandSender.hasPermission("theatria.sessions.activity.command")) {
+        if (!commandSender.hasPermission(Util.PERMISSION_ACTIVITY_COMMAND)) {
             commandSender.sendMessage("You do not have permission to use this command.");
             return true;
         }

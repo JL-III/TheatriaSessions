@@ -1,5 +1,20 @@
 package com.playtheatria.sessions.commands;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
@@ -12,36 +27,23 @@ import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.managers.DailyStatsCache;
 import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.Util;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final SessionCache sessionManager;
-    private final DailyStatsCache serverSessionManager;
+    private final DailyStatsCache dailyStatsCache;
     private final ConfigManager configManager;
-    private final String ADMIN_PERMISSION = "theatria.sessions.admin";
 
     public SessionCommand(
             SessionCache sessionManager,
-            DailyStatsCache serverSessionManager,
+            DailyStatsCache dailyStatsCache,
             ConfigManager configManager) {
         this.sessionManager = sessionManager;
-        this.serverSessionManager = serverSessionManager;
+        this.dailyStatsCache = dailyStatsCache;
         this.configManager = configManager;
     }
 
@@ -51,7 +53,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull Command command,
             @NotNull String label,
             @NotNull String[] args) {
-        if (!sender.hasPermission("theatria.sessions.allow")) return true;
+        if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
@@ -67,7 +69,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case 1 -> {
-                if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
+                if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
                 switch (args[0].toLowerCase()) {
                     case "show-all" -> {
                         sender.sendMessage(
@@ -86,7 +88,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case 2 -> {
-                if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
+                if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
                 switch (args[0].toLowerCase()) {
                     case "check" -> {
                         DateTimeFormatter formatter =
@@ -125,7 +127,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case 3 -> {
-                if (!sender.hasPermission(ADMIN_PERMISSION)) return true;
+                if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
                 switch (args[0].toLowerCase()) {
                     case "create" -> {
                         try {
@@ -180,7 +182,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull Command command,
             @NotNull String label,
             @NotNull String[] args) {
-        if (!sender.hasPermission(ADMIN_PERMISSION)) return List.of();
+        if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return List.of();
         switch (args.length) {
             case 1 -> {
                 return List.of(
@@ -210,9 +212,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     public void sendSessionMessage(CommandSender sender, Session session) {
-        DailyStats serverSession = serverSessionManager.getDayStats();
+        DailyStats dailyStats = dailyStatsCache.getDayStats();
         Result<RewardTier, Exception> rewardTier =
-                RewardTier.getNearestTier(serverSessionManager.getDayStats().getRewardsEarned());
+                RewardTier.getNearestTier(dailyStatsCache.getDayStats().getRewardsEarned());
         @SuppressWarnings("unused")
         String rewardTierName =
                 rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
@@ -224,18 +226,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
         TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
 
-        List.of(
-                        Component.text(
-                                        String.format(
-                                                "Daily-Reward - %s",
-                                                serverSession.getDate().toString()))
+        List.of(Component.text(String.format("Daily-Reward - %s",
+                                                dailyStats.getDate().toString()))
                                 .decorate(TextDecoration.UNDERLINED)
                                 .color(textColorTwo),
                         Component.text("⭐ Community Stats").color(textColorTwo),
-                        Component.text(
-                                        String.format(
-                                                "  • Players Joined %s",
-                                                serverSession.getPlayersJoined()))
+                        Component.text(String.format("  • Players Joined %s",
+                                                dailyStats.getPlayersJoined()))
                                 .color(textColorThree)
                                 .hoverEvent(
                                         HoverEvent.showText(
@@ -244,10 +241,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                             + " server today. Supporter Rank and"
                                                             + " above can use /activity to see who"
                                                             + " has joined today."))),
-                        Component.text(
-                                        String.format(
-                                                "  • Players Earned %s",
-                                                serverSession.getRewardsEarned()))
+                        Component.text(String.format("  • Players Earned %s",
+                                                dailyStats.getRewardsEarned()))
                                 .color(textColorThree)
                                 .hoverEvent(
                                         HoverEvent.showText(

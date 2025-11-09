@@ -1,5 +1,11 @@
 package com.playtheatria.sessions.database.repositories;
 
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Objects;
+
+import org.bukkit.Bukkit;
+
 import com.j256.ormlite.dao.Dao;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
@@ -10,10 +16,6 @@ import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.Objects;
-import org.bukkit.Bukkit;
 
 public class DailyStatsRepo {
     private final Dao<DailyStats, String> dao;
@@ -25,11 +27,11 @@ public class DailyStatsRepo {
     }
 
     /**
-     * This method checks for a ServerSession inside the database that matches today's date.
+     * This method checks for a DailyStats inside the database that matches today's date.
      * If one isn't found a new one is created and stored in the database.
-     * If one isn't able to save, we still return a new ServerSession for the plugin to continue.
+     * If one isn't able to save, we still return a new DailyStats for the plugin to continue.
      * The plugin shuts down if there is an SQLException
-     * @return ServerSession for the ServerRepository, returns the database ServerSession or returns a new one if one couldn't be loaded.
+     * @return DailyStats for the ServerRepository, returns the database DailyStats or returns a new one if one couldn't be loaded.
      * @throws IllegalStateException if the plugin can't save, propagates the SQLException
      */
     public DailyStats load() {
@@ -57,8 +59,8 @@ public class DailyStatsRepo {
     }
 
     /**
-     * Creates or updates a ServerSession
-     * @param dailyStats the ServerSession we are going to persist in the database, this is used for persisting sessions between server resets.
+     * Creates or updates DailyStats
+     * @param dailyStats the DailyStats we are going to persist in the database, this is used for persisting sessions between server resets.
      * @return Result containing Dao.CreateOrUpdateStatus if successful, or a PersistenceException if something failed.
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
@@ -77,7 +79,7 @@ public class DailyStatsRepo {
     }
 
     /**
-     * Purges all entries from the ServerSession table
+     * Purges all entries from the DailyStats table
      * @return Result containing the number of deleted entries if successful, or a PersistenceException if something failed.
      */
     public Result<Integer, PersistenceException> purgeAll() {

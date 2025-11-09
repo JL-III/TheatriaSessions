@@ -1,14 +1,16 @@
 package com.playtheatria.sessions.tasks;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.managers.DailyStatsCache;
 import com.playtheatria.sessions.managers.SessionCache;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
+import com.playtheatria.sessions.utils.Util;
 
 public class OneSecondTimerTask extends BukkitRunnable {
     private final SessionCache sessionCache;
@@ -28,7 +30,7 @@ public class OneSecondTimerTask extends BukkitRunnable {
             User user = essentials.getUser(session.getPlayerUUID());
             Player player = Bukkit.getPlayer(session.getPlayerUUID());
             if (user == null || player == null || player.isDead()) continue;
-            if (!player.hasPermission("theatria.sessions.allow")) continue;
+            if (!player.hasPermission(Util.PERMISSION_ALLOW)) continue;
             if (user.isAfk()) {
                 session.incrementAfkTime();
                 continue;

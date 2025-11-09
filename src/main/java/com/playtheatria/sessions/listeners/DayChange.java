@@ -1,5 +1,10 @@
 package com.playtheatria.sessions.listeners;
 
+import java.time.LocalDate;
+
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
@@ -11,9 +16,6 @@ import com.playtheatria.sessions.managers.DailyStatsCache;
 import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
-import java.time.LocalDate;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 
 public class DayChange implements Listener {
     private final SessionRepository sessionRepository;
@@ -70,13 +72,13 @@ public class DayChange implements Listener {
             case Ok<Integer, PersistenceException> ok -> log.debug(
                     String.format("Deleted" + " %d entries.", ok.value()));
             case Err<Integer, PersistenceException> err -> log.debug(
-                    String.format("Purging ServerSession failed %s", err.error().getMessage()));
+                    String.format("Purging DailyStats failed %s", err.error().getMessage()));
         }
     }
 
     /**
-     * Prints debug logs for the provided ServerSession
-     * @param dailyStats ServerSession to print debug logs for
+     * Prints debug logs for the provided DailyStats
+     * @param dailyStats DailyStats to print debug logs for
      */
     private void printDailyStatsDebugLogs(DailyStats dailyStats) {
         log.debug(String.format("Date %s", dailyStats.getDate()));

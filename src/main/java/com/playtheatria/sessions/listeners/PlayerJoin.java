@@ -1,11 +1,14 @@
 package com.playtheatria.sessions.listeners;
 
-import com.playtheatria.sessions.managers.SessionCache;
-import com.playtheatria.sessions.utils.PLog;
 import java.util.UUID;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+
+import com.playtheatria.sessions.managers.SessionCache;
+import com.playtheatria.sessions.utils.PLog;
+import com.playtheatria.sessions.utils.Util;
 
 public class PlayerJoin implements Listener {
     private final SessionCache sessionCache;
@@ -23,7 +26,7 @@ public class PlayerJoin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         // Check if player has permission to have a session
-        if (!event.getPlayer().hasPermission("theatria.sessions.allow")) return;
+        if (!event.getPlayer().hasPermission(Util.PERMISSION_ALLOW)) return;
 
         UUID playerUUID = event.getPlayer().getUniqueId();
         String playerName = event.getPlayer().getName();

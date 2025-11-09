@@ -1,10 +1,7 @@
 package com.playtheatria.sessions.commands;
 
-import com.playtheatria.sessions.config.ConfigManager;
-import com.playtheatria.sessions.database.data.DailyStats;
-import com.playtheatria.sessions.managers.DailyStatsCache;
-import com.playtheatria.sessions.utils.Util;
 import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,13 +9,18 @@ import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.playtheatria.sessions.config.ConfigManager;
+import com.playtheatria.sessions.database.data.DailyStats;
+import com.playtheatria.sessions.managers.DailyStatsCache;
+import com.playtheatria.sessions.utils.Util;
+
 public class CommunityCommand implements CommandExecutor, TabCompleter {
     private final ConfigManager configManager;
-    private final DailyStatsCache dayStatsCache;
+    private final DailyStatsCache dailyStatsCache;
 
     public CommunityCommand(ConfigManager configManager, DailyStatsCache dayStateCache) {
         this.configManager = configManager;
-        this.dayStatsCache = dayStateCache;
+        this.dailyStatsCache = dayStateCache;
     }
 
     @Override
@@ -27,17 +29,15 @@ public class CommunityCommand implements CommandExecutor, TabCompleter {
             @NotNull Command command,
             @NotNull String label,
             @NotNull String[] args) {
-        if (!sender.hasPermission("theatria.sessions.community.command")) return true;
+        if (!sender.hasPermission(Util.PERMISSION_COMMUNITY_COMMAND)) return true;
         switch (args.length) {
             case 0 -> {
-                DailyStats currDayStats = dayStatsCache.getDayStats();
-                Util.msg("ServerSession", sender);
-                Util.msg(String.format("Date: %s", currDayStats.getDate()), sender);
-                Util.msg(
-                        String.format("RewardsEarned: %s", currDayStats.getRewardsEarned()),
+                DailyStats dailyStats = dailyStatsCache.getDayStats();
+                Util.msg("DailyStats", sender);
+                Util.msg(String.format("Date: %s", dailyStats.getDate()), sender);
+                Util.msg(String.format("RewardsEarned: %s", dailyStats.getRewardsEarned()),
                         sender);
-                Util.msg(
-                        String.format("PlayersJoined: %s", currDayStats.getPlayersJoined()),
+                Util.msg(String.format("PlayersJoined: %s", dailyStats.getPlayersJoined()),
                         sender);
                 Util.msg(String.format("isDebug: %s", configManager.isDebug()), sender);
                 Util.msg(
