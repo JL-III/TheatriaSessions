@@ -25,14 +25,13 @@ jobs:
       - name: Get signed upload URL
         id: sign
         run: |
-          RESP=$(curl -s --fail \
-            -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
-            -H "Accept: application/json" \
-            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=${DIR_ENC}")
+          echo "DIR='${{ secrets.TARGET_DIR }}'"
+          RESP=$(curl -v -s \
+             -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
+             -H "Accept: application/json" \
+             "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=${{ secrets.TARGET_DIR }}")
+          echo "RESPONSE:"
           echo "$RESP"
-          URL=$(echo "$RESP" | jq -r '.attributes.url')
-          [ -n "$URL" ] && [ "$URL" != "null" ] || { echo "No upload URL"; exit 1; }
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
       - name: Upload JAR to signed URL
         run: |
           FILE=$(ls build/libs/TheatriaSessions.jar | head -n1)
