@@ -31,7 +31,7 @@ jobs:
             "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%2Fplugins%2F" \
             | jq -r '.attributes.url')
 
-          curl -X POST "$signed_url" \
+          curl -X POST "$signed_url&directory=%2Fplugins%2F" \
             -F "files=@build/libs/TheatriaSessions.jar" \
             -F "directory=/plugins/"
 
