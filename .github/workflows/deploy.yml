@@ -19,16 +19,19 @@ jobs:
           java-version: '21'
       - run: ./gradlew shadowJar --no-daemon
         env:
+            GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get signed upload URL
         id: sign
         run: |
-          RESP=$(curl -s -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
-                      -H "Accept: application/json" \
-                      "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%{{ secrets.TARGET_DIR }}")
+          RESP=$(curl -s --fail \
+            -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
+            -H "Accept: application/json" \
+            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=${DIR_ENC}")
           echo "$RESP"
           URL=$(echo "$RESP" | jq -r '.attributes.url')
-          echo "url=$URL" >> $GITHUB_OUTPUT
+          [ -n "$URL" ] && [ "$URL" != "null" ] || { echo "No upload URL"; exit 1; }
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
       - name: Upload JAR to signed URL
         run: |
           FILE=$(ls build/libs/TheatriaSessions.jar | head -n1)
