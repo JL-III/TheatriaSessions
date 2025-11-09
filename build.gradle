@@ -6,6 +6,8 @@ plugins {
 }
 
 shadowJar {
+	archiveBaseName.set('TheatriaSessions')
+	archiveVersion.set('')
 	archiveClassifier.set('')
 	relocate 'com.j256.ormlite', 'com.playtheatria.theatriasessions.shaded.ormlite'
 	relocate 'com.playtheatria.jl-iii.generalutils', 'com.playtheatria.theatriasessions.shaded.generalutils'
