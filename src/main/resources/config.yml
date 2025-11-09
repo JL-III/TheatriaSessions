@@ -12,3 +12,5 @@ rewards:
   - "cc give p dailyrewardcrate 5 {player}"
 
 community-rewards-enabled: false
+
+reward-message: "Great work! You hit today’s daily-reward goal! Thanks for making Theatria awesome!"
