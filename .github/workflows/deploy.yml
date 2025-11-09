@@ -25,9 +25,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          FILE=$(ls build/libs/*.jar | head -n1)
-          NAME=$(basename "$FILE")
-
           signed_url=$(curl -s \
             -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
             -H "Accept: Application/vnd.pterodactyl.v1+json" \
@@ -36,7 +33,7 @@ jobs:
 
           curl -X POST "$signed_url" \
             -F "files=@build/libs/TheatriaSessions.jar" \
-            -F "directory=/plugins/"
+            -F "directory=plugins/"
 
       - name: Restart server
         run: |
