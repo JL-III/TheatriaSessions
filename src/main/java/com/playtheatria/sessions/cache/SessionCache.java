@@ -1,4 +1,4 @@
-package com.playtheatria.sessions.managers;
+package com.playtheatria.sessions.cache;
 
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;

@@ -39,7 +39,7 @@ public class DailyStats {
         return rewardsEarned;
     }
 
-    public void incrementRewardsEarned() {
-        rewardsEarned++;
+    public int incrementRewardsEarned() {
+        return ++rewardsEarned;
     }
 }

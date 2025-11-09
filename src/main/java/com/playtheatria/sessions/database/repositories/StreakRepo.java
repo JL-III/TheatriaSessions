@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
-public final class StreakRepository {
+public final class StreakRepo {
     private final Dao<Streak, UUID> dao;
 
-    public StreakRepository(@NotNull TheatriaSessionsDB sessionsDB) throws SQLException {
+    public StreakRepo(@NotNull TheatriaSessionsDB sessionsDB) throws SQLException {
         this.dao = sessionsDB.getDao(Streak.class);
     }
 

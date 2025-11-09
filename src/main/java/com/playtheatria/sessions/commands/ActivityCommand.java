@@ -1,7 +1,7 @@
 package com.playtheatria.sessions.commands;
 
 import com.playtheatria.sessions.database.data.Session;
-import com.playtheatria.sessions.managers.SessionCache;
+import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.utils.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class ActivityCommand implements CommandExecutor {
 
-    private final SessionCache sessionManager;
+    private final SessionService sessionService;
 
-    public ActivityCommand(SessionCache sessionManager) {
-        this.sessionManager = sessionManager;
+    public ActivityCommand(SessionService sessionService) {
+        this.sessionService = sessionService;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class ActivityCommand implements CommandExecutor {
             commandSender.sendMessage(
                     Component.text("Players Joined Today:")
                             .color(TextColor.fromHexString(Util.COLOR_THREE)));
-            for (Session session : sessionManager.getSessions().values()) {
+            for (Session session : sessionService.getSessions()) {
                 commandSender.sendMessage(
                         Component.text("  • " + session.getPlayerName())
                                 .color(TextColor.fromHexString(Util.COLOR_TWO)));

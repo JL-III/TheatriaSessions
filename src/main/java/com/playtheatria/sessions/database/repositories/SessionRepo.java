@@ -13,11 +13,11 @@ import com.playtheatria.sessions.utils.Util;
 import java.sql.SQLException;
 import java.util.List;
 
-public class SessionRepository {
+public class SessionRepo {
     private final Dao<Session, String> dao;
     private final PLog log;
 
-    public SessionRepository(TheatriaSessionsDB sessionsDB, PLog log) throws SQLException {
+    public SessionRepo(TheatriaSessionsDB sessionsDB, PLog log) throws SQLException {
         dao = sessionsDB.getDao(Session.class);
         this.log = log;
     }

@@ -1,6 +1,6 @@
 package com.playtheatria.sessions.listeners;
 
-import com.playtheatria.sessions.managers.SessionCache;
+import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
 import java.util.UUID;
@@ -9,11 +9,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerJoin implements Listener {
-    private final SessionCache sessionCache;
+    private final SessionService sessionService;
     private final PLog log;
 
-    public PlayerJoin(SessionCache sessionCache, PLog log) {
-        this.sessionCache = sessionCache;
+    public PlayerJoin(SessionService sessionService, PLog log) {
+        this.sessionService = sessionService;
         this.log = log;
     }
 
@@ -29,9 +29,9 @@ public class PlayerJoin implements Listener {
         UUID playerUUID = event.getPlayer().getUniqueId();
         String playerName = event.getPlayer().getName();
 
-        if (!sessionCache.hasSession(playerUUID)) {
+        if (!sessionService.hasSession(playerUUID)) {
             log.info("No session found for " + playerName);
-            sessionCache.createNewSession(playerUUID, playerName);
+            sessionService.createNewSession(playerUUID, playerName);
         }
     }
 }

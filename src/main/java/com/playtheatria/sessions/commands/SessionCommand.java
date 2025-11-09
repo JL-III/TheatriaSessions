@@ -5,12 +5,11 @@ import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.config.ConfigManager;
-import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
-import com.playtheatria.sessions.managers.DailyStatsCache;
-import com.playtheatria.sessions.managers.SessionCache;
+import com.playtheatria.sessions.service.DailyStatsService;
+import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.utils.Util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,16 +30,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
-    private final SessionCache sessionManager;
-    private final DailyStatsCache dailyStatsCache;
+    private final DailyStatsService dailyStatsService;
+
+    private final SessionService sessionService;
     private final ConfigManager configManager;
 
     public SessionCommand(
-            SessionCache sessionManager,
-            DailyStatsCache dailyStatsCache,
+            DailyStatsService dailyStatsService,
+            SessionService sessionService,
             ConfigManager configManager) {
-        this.sessionManager = sessionManager;
-        this.dailyStatsCache = dailyStatsCache;
+        this.dailyStatsService = dailyStatsService;
+
+        this.sessionService = sessionService;
         this.configManager = configManager;
     }
 
@@ -54,7 +55,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
-                    switch (sessionManager.getSession(player.getUniqueId())) {
+                    switch (sessionService.getSession(player.getUniqueId())) {
                         case Ok<Session, Exception> ok -> {
                             sendSessionMessage(player, ok.value());
                         }
@@ -71,8 +72,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "show-all" -> {
                         sender.sendMessage(
                                 Util.formatMessage(
-                                        "Number of Sessions", sessionManager.getSessions().size()));
-                        for (Session session : sessionManager.getSessions().values()) {
+                                        "Number of Sessions", sessionService.getSessionsCount()));
+                        for (Session session : sessionService.getSessions()) {
                             sender.sendMessage(Util.formatAdminMessage(session));
                         }
                         return true;
@@ -92,7 +93,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
                         String formattedDate =
                                 LocalDateTime.now(TimeUtils.timeZone).format(formatter);
-                        for (Session session : sessionManager.getSessions().values()) {
+                        for (Session session : sessionService.getSessions()) {
                             if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
                             sender.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
                             sender.sendMessage(
@@ -106,7 +107,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     case "force-reward" -> {
-                        for (Session session : sessionManager.getSessions().values()) {
+                        for (Session session : sessionService.getSessions()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                 Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
                                 return true;
@@ -114,7 +115,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         }
                     }
                     case "reset-progress" -> {
-                        for (Session session : sessionManager.getSessions().values()) {
+                        for (Session session : sessionService.getSessions()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                 session.setSessionTime(0);
                                 return true;
@@ -131,7 +132,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             Integer integer = Integer.valueOf(args[2]);
                             if (integer < 0)
                                 throw new NumberFormatException("Must be higher than 0");
-                            for (Session session : sessionManager.getSessions().values()) {
+                            for (Session session : sessionService.getSessions()) {
                                 if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                     session.setSessionTime(integer);
                                     return true;
@@ -144,7 +145,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                 offlinePlayer.getUniqueId(),
                                                 offlinePlayer.getName());
                                 session.setSessionTime(integer);
-                                sessionManager.addSession(session);
+                                sessionService.addSession(session);
                                 return true;
                             }
                             Util.msg(String.format("Player returned null: %s", args[1]), sender);
@@ -157,7 +158,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             Integer integer = Integer.valueOf(args[2]);
                             if (integer < 0)
                                 throw new NumberFormatException("Must be higher than 0");
-                            for (Session session : sessionManager.getSessions().values()) {
+                            for (Session session : sessionService.getSessions()) {
                                 if (session.getPlayerName().equalsIgnoreCase(args[1])) {
                                     session.setSessionTime(integer);
                                     return true;
@@ -193,7 +194,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             }
             case 2 -> {
                 if (args[0].equalsIgnoreCase("show-all")) return List.of();
-                return sessionManager.getSessions().values().stream()
+                return sessionService.getSessions().stream()
                         .map(Session::getPlayerName)
                         .collect(Collectors.toList());
             }
@@ -209,9 +210,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     public void sendSessionMessage(CommandSender sender, Session session) {
-        DailyStats dailyStats = dailyStatsCache.getDayStats();
         Result<RewardTier, Exception> rewardTier =
-                RewardTier.getNearestTier(dailyStatsCache.getDayStats().getRewardsEarned());
+                RewardTier.getNearestTier(dailyStatsService.getRewardsEarned());
         @SuppressWarnings("unused")
         String rewardTierName =
                 rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
@@ -227,14 +227,14 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Component.text(
                                         String.format(
                                                 "Daily-Reward - %s",
-                                                dailyStats.getDate().toString()))
+                                                dailyStatsService.getDate().toString()))
                                 .decorate(TextDecoration.UNDERLINED)
                                 .color(textColorTwo),
                         Component.text("⭐ Community Stats").color(textColorTwo),
                         Component.text(
                                         String.format(
                                                 "  • Players Joined %s",
-                                                dailyStats.getPlayersJoined()))
+                                                dailyStatsService.getPlayersJoined()))
                                 .color(textColorThree)
                                 .hoverEvent(
                                         HoverEvent.showText(
@@ -246,7 +246,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Component.text(
                                         String.format(
                                                 "  • Players Earned %s",
-                                                dailyStats.getRewardsEarned()))
+                                                dailyStatsService.getRewardsEarned()))
                                 .color(textColorThree)
                                 .hoverEvent(
                                         HoverEvent.showText(

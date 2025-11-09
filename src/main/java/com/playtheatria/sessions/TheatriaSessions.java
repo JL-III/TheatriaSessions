@@ -4,6 +4,8 @@ import com.earth2me.essentials.Essentials;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
+import com.playtheatria.sessions.cache.DailyStatsCache;
+import com.playtheatria.sessions.cache.SessionCache;
 import com.playtheatria.sessions.commands.ActivityCommand;
 import com.playtheatria.sessions.commands.CommunityCommand;
 import com.playtheatria.sessions.commands.SessionCommand;
@@ -12,15 +14,15 @@ import com.playtheatria.sessions.database.TheatriaSessionsDB;
 import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
-import com.playtheatria.sessions.database.repositories.SessionRepository;
+import com.playtheatria.sessions.database.repositories.SessionRepo;
 import com.playtheatria.sessions.listeners.DailyStatsRewardCount;
 import com.playtheatria.sessions.listeners.DayChange;
 import com.playtheatria.sessions.listeners.PlayerJoin;
 import com.playtheatria.sessions.listeners.RewardCommunity;
 import com.playtheatria.sessions.listeners.RewardPlayer;
-import com.playtheatria.sessions.managers.DailyStatsCache;
-import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.records.CommandRecord;
+import com.playtheatria.sessions.service.DailyStatsService;
+import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.tasks.DatabaseTask;
 import com.playtheatria.sessions.tasks.OneSecondTimerTask;
 import com.playtheatria.sessions.utils.PLog;
@@ -35,14 +37,18 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TheatriaSessions extends JavaPlugin {
-    private SessionCache sessionManager;
     private DailyStatsCache dailyStatsCache;
     private DailyStatsRepo dailyStatsRepo;
-    private SessionRepository sessionRepo;
+    private DailyStatsService dailyStatsService;
+
+    private SessionCache sessionCache;
+    private SessionRepo sessionRepo;
+    private SessionService sessionService;
+
     private DatabaseTask databaseTask;
-    private PLog log;
     private Essentials essentials;
     private TheatriaSessionsDB sessionsDB;
+    private PLog log;
 
     @Override
     public void onEnable() {
@@ -58,7 +64,7 @@ public final class TheatriaSessions extends JavaPlugin {
                 sessionRepo.load(),
                 v -> {
                     log.info("Loaded " + v.size() + " sessions from the database.");
-                    sessionManager = new SessionCache(v, log);
+                    sessionCache = new SessionCache(v, log);
                 })) {
             return;
         }
@@ -70,37 +76,39 @@ public final class TheatriaSessions extends JavaPlugin {
             return;
         }
 
+        dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
+        sessionService = new SessionService(sessionCache, sessionRepo, log);
         dailyStatsCache = new DailyStatsCache(dailyStatsRepo.load());
+        databaseTask = new DatabaseTask(dailyStatsService, sessionService, log);
 
-        databaseTask =
-                new DatabaseTask(sessionRepo, dailyStatsRepo, sessionManager, dailyStatsCache, log);
-        // start first backup after ~10 minutes, continue every ~10 minutes
         databaseTask.runTaskTimer(
                 this,
                 20 * configManager.getInitialBackupDuration(),
                 20 * configManager.getBackupDuration());
-        new OneSecondTimerTask(sessionManager, dailyStatsCache, essentials)
+
+        new OneSecondTimerTask(dailyStatsService, sessionService, essentials)
                 .runTaskTimer(this, 20, 20);
 
-        registerEvents(
-                configManager, sessionManager, sessionRepo, dailyStatsCache, dailyStatsRepo, log);
+        registerEvents(configManager, dailyStatsService, sessionService, log);
 
         registerCommands(
                 List.of(
                         new CommandRecord(
                                 "session",
-                                new SessionCommand(sessionManager, dailyStatsCache, configManager)),
+                                new SessionCommand(
+                                        dailyStatsService, sessionService, configManager)),
                         new CommandRecord(
-                                "community", new CommunityCommand(configManager, dailyStatsCache)),
-                        new CommandRecord("activity", new ActivityCommand(sessionManager))));
+                                "community",
+                                new CommunityCommand(configManager, dailyStatsService)),
+                        new CommandRecord("activity", new ActivityCommand(sessionService))));
         log.info("Loaded plugin.");
     }
 
     @Override
     public void onDisable() {
         if (databaseTask != null) databaseTask.cancel();
-        if (sessionManager != null && sessionRepo != null) {
-            for (Session session : sessionManager.getSessions().values()) {
+        if (sessionCache != null && sessionRepo != null) {
+            for (Session session : sessionCache.getSessions().values()) {
                 log.info(
                         "User: "
                                 + session.getPlayerName()
@@ -110,7 +118,7 @@ public final class TheatriaSessions extends JavaPlugin {
             }
         }
         if (dailyStatsCache != null && dailyStatsRepo != null) {
-            DailyStats currDayStats = dailyStatsCache.getDayStats();
+            DailyStats currDayStats = dailyStatsCache.get();
             log.info(
                     String.format(
                             "Date: %s, RewardsEarned: %s, PlayersJoined: %s",
@@ -135,17 +143,12 @@ public final class TheatriaSessions extends JavaPlugin {
     }
 
     private void registerEvents(
-            ConfigManager cm,
-            SessionCache sm,
-            SessionRepository sr,
-            DailyStatsCache currDayStatsCache,
-            DailyStatsRepo currDayStatsRepo,
-            PLog log) {
+            ConfigManager cm, DailyStatsService dss, SessionService ss, PLog log) {
         PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(new DayChange(sr, currDayStatsRepo, sm, currDayStatsCache, log), this);
-        pm.registerEvents(new PlayerJoin(sm, log), this);
+        pm.registerEvents(new DayChange(dss, ss, log), this);
+        pm.registerEvents(new PlayerJoin(ss, log), this);
         pm.registerEvents(new RewardPlayer(cm, log), this);
-        pm.registerEvents(new DailyStatsRewardCount(currDayStatsCache, log), this);
+        pm.registerEvents(new DailyStatsRewardCount(dss, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
     }
 
@@ -194,9 +197,9 @@ public final class TheatriaSessions extends JavaPlugin {
      * Utility method to get a SessionRepository
      * @return Result containing SessionRepository if successful, or an Exception if failed
      */
-    private Result<SessionRepository, Exception> sessionRepo() {
+    private Result<SessionRepo, Exception> sessionRepo() {
         try {
-            return new Ok<>(new SessionRepository(sessionsDB, log));
+            return new Ok<>(new SessionRepo(sessionsDB, log));
         } catch (SQLException e) {
             return new Err<>(new SQLException("Failed to get new session repository", e));
         }

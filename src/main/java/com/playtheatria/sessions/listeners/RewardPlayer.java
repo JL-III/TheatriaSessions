@@ -12,11 +12,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 public class RewardPlayer implements Listener {
-    private final ConfigManager configManager;
+    private final ConfigManager cm;
     private final PLog log;
 
     public RewardPlayer(ConfigManager configManager, PLog log) {
-        this.configManager = configManager;
+        this.cm = configManager;
         this.log = log;
     }
 
@@ -24,28 +24,27 @@ public class RewardPlayer implements Listener {
     public void onRewardPlayer(RewardPlayerEvent event) {
         Player player = Bukkit.getPlayer(event.getSession().getPlayerUUID());
         if (player == null || !player.isOnline()) {
-            log.info(
-                    "Tried to reward a player but the player in the session returned as offline or"
-                            + " null.");
+            log.warn("Player reward returned offline or null");
+            log.warn(String.format("Player UUID: %s", event.getSession().getPlayerUUID()));
             return;
         }
 
         event.getSession().setRewarded();
-        player.sendMessage(
-                Component.text(
-                                "Great work! You hit today’s daily-reward goal! Thanks for making"
-                                        + " Theatria awesome!")
-                        .color(NamedTextColor.GOLD));
-        for (String reward : configManager.getRewards()) {
-            String parsedCommand =
-                    reward.replace("{player}", player.getName()) // Replace player name
-                            .replace(
-                                    "{player_uuid}",
-                                    player.getUniqueId().toString()) // Replace UUID
-                            .replace("{world}", player.getWorld().getName()); // Replace world
+        player.sendMessage(Component.text(cm.getRewardMessage()).color(NamedTextColor.GOLD));
+
+        for (String rewardString : cm.getRewards()) {
+            String parsedCommand = parseCommand(player, rewardString);
+
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
             log.info("Sent reward of: " + parsedCommand + " to " + player.getName());
         }
         Bukkit.getPluginManager().callEvent(new IncrementRewardCountEvent());
+    }
+
+    private static String parseCommand(Player player, String rewardString) {
+        return rewardString
+                .replace("{player}", player.getName())
+                .replace("{player_uuid}", player.getUniqueId().toString())
+                .replace("{world}", player.getWorld().getName());
     }
 }
