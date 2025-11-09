@@ -32,7 +32,7 @@ jobs:
           RESP=$(curl -sS \
             -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
             -H "Accept: application/json" \
-            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=${{ secrets.TARGET_DIR }}")
+            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=plugins")
 
           echo "Signed URL response:"
           echo "$RESP"
