@@ -1,14 +1,12 @@
 package com.playtheatria.sessions.listeners;
 
-import java.util.UUID;
-
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-
 import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
+import java.util.UUID;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerJoin implements Listener {
     private final SessionCache sessionCache;

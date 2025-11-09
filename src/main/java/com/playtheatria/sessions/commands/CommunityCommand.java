@@ -1,18 +1,16 @@
 package com.playtheatria.sessions.commands;
 
+import com.playtheatria.sessions.config.ConfigManager;
+import com.playtheatria.sessions.database.data.DailyStats;
+import com.playtheatria.sessions.managers.DailyStatsCache;
+import com.playtheatria.sessions.utils.Util;
 import java.util.List;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import com.playtheatria.sessions.config.ConfigManager;
-import com.playtheatria.sessions.database.data.DailyStats;
-import com.playtheatria.sessions.managers.DailyStatsCache;
-import com.playtheatria.sessions.utils.Util;
 
 public class CommunityCommand implements CommandExecutor, TabCompleter {
     private final ConfigManager configManager;
@@ -35,10 +33,8 @@ public class CommunityCommand implements CommandExecutor, TabCompleter {
                 DailyStats dailyStats = dailyStatsCache.getDayStats();
                 Util.msg("DailyStats", sender);
                 Util.msg(String.format("Date: %s", dailyStats.getDate()), sender);
-                Util.msg(String.format("RewardsEarned: %s", dailyStats.getRewardsEarned()),
-                        sender);
-                Util.msg(String.format("PlayersJoined: %s", dailyStats.getPlayersJoined()),
-                        sender);
+                Util.msg(String.format("RewardsEarned: %s", dailyStats.getRewardsEarned()), sender);
+                Util.msg(String.format("PlayersJoined: %s", dailyStats.getPlayersJoined()), sender);
                 Util.msg(String.format("isDebug: %s", configManager.isDebug()), sender);
                 Util.msg(
                         String.format(

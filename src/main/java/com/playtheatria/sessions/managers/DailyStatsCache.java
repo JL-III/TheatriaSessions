@@ -1,8 +1,7 @@
 package com.playtheatria.sessions.managers;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.playtheatria.sessions.database.data.DailyStats;
+import org.jetbrains.annotations.NotNull;
 
 public class DailyStatsCache {
     private DailyStats dailyStats;

@@ -1,9 +1,5 @@
 package com.playtheatria.sessions.tasks;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
-
 import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.User;
 import com.playtheatria.sessions.database.data.Session;
@@ -11,6 +7,9 @@ import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.managers.DailyStatsCache;
 import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.Util;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class OneSecondTimerTask extends BukkitRunnable {
     private final SessionCache sessionCache;

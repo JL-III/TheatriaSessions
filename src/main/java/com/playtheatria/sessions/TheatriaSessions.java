@@ -1,16 +1,5 @@
 package com.playtheatria.sessions;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.function.Consumer;
-
-import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import com.earth2me.essentials.Essentials;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
@@ -35,6 +24,15 @@ import com.playtheatria.sessions.records.CommandRecord;
 import com.playtheatria.sessions.tasks.DatabaseTask;
 import com.playtheatria.sessions.tasks.OneSecondTimerTask;
 import com.playtheatria.sessions.utils.PLog;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.function.Consumer;
+import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public final class TheatriaSessions extends JavaPlugin {
     private SessionCache sessionManager;

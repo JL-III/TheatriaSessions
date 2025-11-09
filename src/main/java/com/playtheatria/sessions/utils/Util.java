@@ -1,14 +1,12 @@
 package com.playtheatria.sessions.utils;
 
-import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
-
 import com.playtheatria.sessions.database.data.Session;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 
 public class Util {
     public static final String COLOR_ONE = "#f5428a";

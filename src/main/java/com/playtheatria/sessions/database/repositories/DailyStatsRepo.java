@@ -1,11 +1,5 @@
 package com.playtheatria.sessions.database.repositories;
 
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.Objects;
-
-import org.bukkit.Bukkit;
-
 import com.j256.ormlite.dao.Dao;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
@@ -16,6 +10,10 @@ import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.theatriaTime.events.DayChangeEvent;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.Objects;
+import org.bukkit.Bukkit;
 
 public class DailyStatsRepo {
     private final Dao<DailyStats, String> dao;

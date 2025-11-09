@@ -1,20 +1,5 @@
 package com.playtheatria.sessions.commands;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
@@ -27,11 +12,23 @@ import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.managers.DailyStatsCache;
 import com.playtheatria.sessions.managers.SessionCache;
 import com.playtheatria.sessions.utils.Util;
-
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final SessionCache sessionManager;
@@ -226,12 +223,17 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
         TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
 
-        List.of(Component.text(String.format("Daily-Reward - %s",
+        List.of(
+                        Component.text(
+                                        String.format(
+                                                "Daily-Reward - %s",
                                                 dailyStats.getDate().toString()))
                                 .decorate(TextDecoration.UNDERLINED)
                                 .color(textColorTwo),
                         Component.text("⭐ Community Stats").color(textColorTwo),
-                        Component.text(String.format("  • Players Joined %s",
+                        Component.text(
+                                        String.format(
+                                                "  • Players Joined %s",
                                                 dailyStats.getPlayersJoined()))
                                 .color(textColorThree)
                                 .hoverEvent(
@@ -241,7 +243,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                             + " server today. Supporter Rank and"
                                                             + " above can use /activity to see who"
                                                             + " has joined today."))),
-                        Component.text(String.format("  • Players Earned %s",
+                        Component.text(
+                                        String.format(
+                                                "  • Players Earned %s",
                                                 dailyStats.getRewardsEarned()))
                                 .color(textColorThree)
                                 .hoverEvent(
