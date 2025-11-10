@@ -71,15 +71,15 @@ public class SessionService {
                                     status.isUpdated(),
                                     status.getNumLinesChanged());
                     if (verbose) {
-                        log.info(Util.summary(msg, session));
+                        log.info(msg + session);
                     } else {
-                        log.debug(Util.summary(msg, session));
+                        log.debug(msg + session);
                     }
                 }
                 case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> {
                     String msg =
                             String.format("Error persisting session: %s", err.error().getMessage());
-                    log.err(Util.summary(msg, session));
+                    log.err(msg + session);
                 }
             }
         }

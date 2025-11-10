@@ -64,7 +64,7 @@ public class DailyStatsService {
                 Dao.CreateOrUpdateStatus status = ok.value();
                 String msg =
                         String.format(
-                                "Session persisted successfully | created: %s, updated: %s,"
+                                "DailyStats persisted successfully | created: %s, updated: %s,"
                                         + " lines updated: %s",
                                 status.isCreated(),
                                 status.isUpdated(),
