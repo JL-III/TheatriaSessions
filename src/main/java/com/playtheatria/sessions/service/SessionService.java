@@ -62,7 +62,14 @@ public class SessionService {
         for (Session session : getSessions()) {
             switch (repo.createOrUpdate(session)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
-                    String msg = String.format("Session persisted successfully: %s", ok.value());
+                    Dao.CreateOrUpdateStatus status = ok.value();
+                    String msg =
+                            String.format(
+                                    "Session persisted successfully | created: %s, updated: %s,"
+                                            + " lines updated: %s",
+                                    status.isCreated(),
+                                    status.isUpdated(),
+                                    status.getNumLinesChanged());
                     if (verbose) {
                         log.info(Util.summary(msg, session));
                     } else {

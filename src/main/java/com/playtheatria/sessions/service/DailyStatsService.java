@@ -61,7 +61,14 @@ public class DailyStatsService {
     public void persist(boolean verbose) {
         switch (repo.createOrUpdate(cache.get())) {
             case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
-                String msg = String.format("DailyStats persisted successfully: %s", ok.value());
+                Dao.CreateOrUpdateStatus status = ok.value();
+                String msg =
+                        String.format(
+                                "Session persisted successfully | created: %s, updated: %s,"
+                                        + " lines updated: %s",
+                                status.isCreated(),
+                                status.isUpdated(),
+                                status.getNumLinesChanged());
                 if (verbose) {
                     log.info(msg);
                 } else {

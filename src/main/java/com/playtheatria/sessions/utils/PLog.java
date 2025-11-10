@@ -31,6 +31,7 @@ public final class PLog {
         if (!configManager.isDebug()) {
             return;
         }
-        Bukkit.getConsoleSender().sendMessage(Util.formatMessage("TheatriaSessions", "[Debug] " + msg));
+        Bukkit.getConsoleSender()
+                .sendMessage(Util.formatMessage("TheatriaSessions", "[Debug] " + msg));
     }
 }
