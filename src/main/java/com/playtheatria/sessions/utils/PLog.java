@@ -31,11 +31,6 @@ public final class PLog {
         if (!configManager.isDebug()) {
             return;
         }
-        Bukkit.getLogger()
-                .log(
-                        Level.INFO,
-                        "[TheatriaSessions] {0}",
-                        msg); // setting to info since this is plugin debug setting not server debug
-        // setting
+        Bukkit.getConsoleSender().sendMessage(Util.formatMessage("TheatriaSessions", msg));
     }
 }
