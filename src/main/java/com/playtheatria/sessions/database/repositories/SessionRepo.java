@@ -9,7 +9,6 @@ import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.errors.RepositoryException;
 import com.playtheatria.sessions.utils.PLog;
-import com.playtheatria.sessions.utils.Util;
 import java.sql.SQLException;
 import java.util.List;
 
