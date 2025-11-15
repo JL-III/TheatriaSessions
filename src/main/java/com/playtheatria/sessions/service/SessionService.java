@@ -9,7 +9,6 @@ import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.repositories.SessionRepo;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.utils.PLog;
-import com.playtheatria.sessions.utils.Util;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -62,17 +61,24 @@ public class SessionService {
         for (Session session : getSessions()) {
             switch (repo.createOrUpdate(session)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
-                    String msg = String.format("Session persisted successfully: %s", ok.value());
+                    Dao.CreateOrUpdateStatus status = ok.value();
+                    String msg =
+                            String.format(
+                                    "Session persisted successfully | created: %s, updated: %s,"
+                                            + " lines updated: %s",
+                                    status.isCreated(),
+                                    status.isUpdated(),
+                                    status.getNumLinesChanged());
                     if (verbose) {
-                        log.info(Util.summary(msg, session));
+                        log.info(msg + session);
                     } else {
-                        log.debug(Util.summary(msg, session));
+                        log.debug(msg + session);
                     }
                 }
                 case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> {
                     String msg =
                             String.format("Error persisting session: %s", err.error().getMessage());
-                    log.err(Util.summary(msg, session));
+                    log.err(msg + session);
                 }
             }
         }

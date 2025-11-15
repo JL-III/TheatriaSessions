@@ -1,9 +1,15 @@
 name: Deploy via Pterodactyl API
 on:
-  push:
-    branches: [ stage ]
+  pull_request:
+    branches:
+      - stage
+    
+permissions:
+  contents: read
+  packages: read
+
 jobs:
-  build-deploye-restart:
+  build-deploy-restart:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,19 +18,24 @@ jobs:
           distribution: temurin
           java-version: '21'
       - run: ./gradlew shadowJar --no-daemon
-      - name: Get signed upload URL
-        id: sign
+        env:
+            GITHUB_ACTOR: ${{ secrets.GITHUB_ACTOR }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload JAR via signed URL
+      # https://github.com/pterodactyl/panel/issues/5393#issuecomment-3446548283
         run: |
-          RESP=$(curl -s -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
-                      -H "Accept: application/json" \
-                      "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%{{ secrets.TARGET_DIR }}")
-          echo "$RESP"
-          URL=$(echo "$RESP" | jq -r '.attributes.url')
-          echo "url=$URL" >> $GITHUB_OUTPUT
-      - name: Upload JAR to signed URL
-        run: |
-          FILE=$(ls build/libs/TheatriaSessions.jar | head -n1)
-          curl -s -X PUT -T "$FILE" "${{ steps.sign.outputs.url }}&filename=$(basename "$FILE")"
+          set -euo pipefail
+
+          signed_url=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.PTERO_TOKEN }}" \
+            -H "Accept: Application/vnd.pterodactyl.v1+json" \
+            "${{ secrets.PTERO_PANEL }}/api/client/servers/${{ secrets.PTERO_SERVER_ID }}/files/upload?directory=%2Fplugins%2F" \
+            | jq -r '.attributes.url')
+          
+          curl -X POST "$signed_url&directory=%2Fplugins%2F" \
+            -F "files=@build/libs/TheatriaSessions.jar" \
+            -F "directory=/plugins/"
+
       - name: Restart server
         run: |
           curl -s -X POST \

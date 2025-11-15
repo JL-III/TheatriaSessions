@@ -9,7 +9,6 @@ import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.errors.RepositoryException;
 import com.playtheatria.sessions.utils.PLog;
-import com.playtheatria.sessions.utils.Util;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -41,11 +40,11 @@ public class SessionRepo {
      * @return Result containing the CreateOrUpdateStatus if successful, or a PersistenceException if something failed.
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(Session session) {
-        log.debug(Util.summary("Persisting Session", session));
+        log.debug("Persisting Session" + session);
         try {
             return new Ok<>(dao.createOrUpdate(session));
         } catch (SQLException exception) {
-            log.info(Util.summary("CreateOrUpdate failed", session));
+            log.info("CreateOrUpdate failed" + session);
             return new Err<>(
                     new PersistenceException("Failed to create or update Session", exception));
         }

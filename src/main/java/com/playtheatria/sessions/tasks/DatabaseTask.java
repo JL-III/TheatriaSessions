@@ -19,8 +19,15 @@ public class DatabaseTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        long start = System.nanoTime();
+
         log.debug("DatabaseTask: " + sessionService.getSessionsCount() + " sessions.");
         sessionService.persist(false);
         dailyStatsService.persist(false);
+
+        long end = System.nanoTime();
+        long ms = (end - start) / 1_000_000L;
+
+        log.debug("DatabaseTask duration: " + ms + "ms");
     }
 }
