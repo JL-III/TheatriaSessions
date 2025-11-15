@@ -6,6 +6,8 @@ plugins {
 }
 
 shadowJar {
+	archiveBaseName.set('TheatriaSessions')
+	archiveVersion.set('')
 	archiveClassifier.set('')
 	relocate 'com.j256.ormlite', 'com.playtheatria.theatriasessions.shaded.ormlite'
 	relocate 'com.playtheatria.jl-iii.generalutils', 'com.playtheatria.theatriasessions.shaded.generalutils'
@@ -23,9 +25,9 @@ idea {
 }
 
 group = 'com.playtheatria'
-version = 'v0.0.2-alpha.2'
+version = 'v0.0.2-alpha.3'
 ext.generalUtilsVersion = 'v2.0.0-alpha.10'
-ext.theatriaTimeVersion = 'v0.0.1-alpha.4'
+ext.theatriaTimeVersion = 'v0.0.1-alpha.7'
 
 tasks.processResources {
 	filesMatching("plugin.yml") {
@@ -55,7 +57,7 @@ repositories {
 		name = "GitHubPackages"
 		url = "https://maven.pkg.github.com/JL-III/GeneralUtils"
 		credentials {
-			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
 			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
 		}
 	}
@@ -63,7 +65,7 @@ repositories {
 		name = "GitHubPackages"
 		url = "https://maven.pkg.github.com/JL-III/TheatriaTime"
 		credentials {
-			username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+			username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
 			password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
 		}
 	}

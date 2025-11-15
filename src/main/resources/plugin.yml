@@ -1,6 +1,6 @@
 name: TheatriaSessions
 version: ${version}
-main: com.playtheatria.theatriaSessions.TheatriaSessions
+main: com.playtheatria.sessions.TheatriaSessions
 api-version: '1.21'
 general-utils-version: ${generalUtilsVersion}
 theatria-time-version: ${theatriaTimeVersion}
