@@ -4,25 +4,27 @@ import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.sessions.database.data.Session;
-import com.playtheatria.sessions.utils.PLog;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class SessionCache {
     private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
-    private final PLog log;
+    private static final Logger logger = Logger.getLogger(SessionCache.class.getName());
 
-    public SessionCache(List<Session> sessions, PLog log) {
+    public SessionCache(List<Session> sessions) {
         for (Session session : sessions) {
             mappedSessions.put(session.getPlayerUUID(), session);
         }
-        this.log = log;
     }
 
     public boolean hasSession(@NotNull UUID playerUUID) {
@@ -47,7 +49,7 @@ public class SessionCache {
     }
 
     public void createNewSession(@NotNull UUID playerUUID, @NotNull String playerName) {
-        log.info(String.format("Creating session for %s", playerName));
+        logger.log(Level.INFO, String.format("Creating session for %s", playerName));
         mappedSessions.put(playerUUID, new Session(playerUUID, playerName));
     }
 
@@ -56,7 +58,7 @@ public class SessionCache {
     }
 
     public void resetSessions() {
-        log.debug("Purging sessions.");
+        logger.log(Level.INFO, "Purging sessions.");
         Set<UUID> onlinePlayers =
                 Bukkit.getOnlinePlayers().stream()
                         .map(Player::getUniqueId)
@@ -79,6 +81,6 @@ public class SessionCache {
         }
 
         mappedSessions = updatedSessions;
-        log.debug("Reset mapped sessions size: " + mappedSessions.size());
+        logger.log(Level.INFO, "Reset mapped sessions size: {0}", mappedSessions.size());
     }
 }

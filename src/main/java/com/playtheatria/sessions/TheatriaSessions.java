@@ -63,7 +63,7 @@ public final class TheatriaSessions extends JavaPlugin {
         if (!ok(sessionsDB(), v -> sessionsDB = v)) return;
         if (!ok(sessionRepo(), v -> sessionRepo = v)) return;
         if (!ok(dailyStatsRepo(), v -> dailyStatsRepo = v)) return;
-        if (!ok(sessionRepo.load(), v -> sessionCache = new SessionCache(v, log))) return;
+        if (!ok(sessionRepo.load(), v -> sessionCache = new SessionCache(v))) return;
         if (!ok(dailyStatsRepo.load(), v -> dailyStats = v)) return;
 
         sessionService = new SessionService(sessionCache, sessionRepo);
@@ -176,7 +176,7 @@ public final class TheatriaSessions extends JavaPlugin {
 
     private Result<DailyStatsRepo, Exception> dailyStatsRepo() {
         try {
-            return new Ok<>(new DailyStatsRepo(sessionsDB, log));
+            return new Ok<>(new DailyStatsRepo(sessionsDB));
         } catch (SQLException e) {
             return new Err<>(new SQLException("Failed to create CurrentDayStatsRepo", e));
         }
