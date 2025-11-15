@@ -66,11 +66,11 @@ public final class TheatriaSessions extends JavaPlugin {
         if (!ok(sessionRepo.load(), v -> sessionCache = new SessionCache(v, log))) return;
         if (!ok(dailyStatsRepo.load(), v -> dailyStats = v)) return;
 
-        sessionService = new SessionService(sessionCache, sessionRepo, log);
+        sessionService = new SessionService(sessionCache, sessionRepo);
         dailyStatsCache = new DailyStatsCache(dailyStats);
-        dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
+        dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo);
 
-        databaseTask = new DatabaseTask(dailyStatsService, sessionService, log);
+        databaseTask = new DatabaseTask(dailyStatsService, sessionService);
         oneSecondTimerTask =
                 new OneSecondTimerTask(dailyStatsService, sessionService, essentials, log);
 
