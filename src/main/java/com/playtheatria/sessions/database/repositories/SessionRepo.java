@@ -8,17 +8,18 @@ import com.playtheatria.sessions.database.TheatriaSessionsDB;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.errors.RepositoryException;
-import com.playtheatria.sessions.utils.PLog;
+
 import java.sql.SQLException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SessionRepo {
     private final Dao<Session, String> dao;
-    private final PLog log;
+    private static final Logger logger = Logger.getLogger(SessionRepo.class.getName());
 
-    public SessionRepo(TheatriaSessionsDB sessionsDB, PLog log) throws SQLException {
+    public SessionRepo(TheatriaSessionsDB sessionsDB) throws SQLException {
         dao = sessionsDB.getDao(Session.class);
-        this.log = log;
     }
 
     // TODO
@@ -26,7 +27,7 @@ public class SessionRepo {
     public Result<List<Session>, RepositoryException> load() {
         try {
             List<Session> items = dao.queryForAll();
-            log.debug("Loaded " + items.size() + " sessions from the database.");
+            logger.log(Level.INFO, "Loaded {0} sessions from the database.", items.size());
             return new Ok<>(items);
         } catch (SQLException e) {
             return new Err<>(
@@ -40,11 +41,12 @@ public class SessionRepo {
      * @return Result containing the CreateOrUpdateStatus if successful, or a PersistenceException if something failed.
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(Session session) {
-        log.debug("Persisting Session" + session);
+        logger.log(Level.INFO, "Persisting Session{0}", session);
+        logger.log(Level.INFO, "[createOrUpdate] Running on thread: {0}", Thread.currentThread().getName());
         try {
             return new Ok<>(dao.createOrUpdate(session));
         } catch (SQLException exception) {
-            log.info("CreateOrUpdate failed" + session);
+            logger.log(Level.INFO, "CreateOrUpdate failed{0}", session);
             return new Err<>(
                     new PersistenceException("Failed to create or update Session", exception));
         }

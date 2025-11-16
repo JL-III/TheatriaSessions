@@ -55,6 +55,7 @@ public class DailyStatsRepo {
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
             DailyStats dailyStats) {
+        logger.log(Level.INFO, "[createOrUpdate] Running on thread: {0}", Thread.currentThread().getName());
         logger.log(Level.INFO, "createOrUpdate called on a dailyStats");
         logger.log(Level.INFO, String.format("Date %s", dailyStats.getDate()));
         logger.log(Level.INFO, String.format("PlayersJoined: %s", dailyStats.getPlayersJoined()));

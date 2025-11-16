@@ -25,11 +25,15 @@ import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.tasks.DatabaseTask;
 import com.playtheatria.sessions.tasks.OneSecondTimerTask;
 import com.playtheatria.sessions.utils.PLog;
+
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
@@ -49,6 +53,7 @@ public final class TheatriaSessions extends JavaPlugin {
     private Essentials essentials;
     private TheatriaSessionsDB sessionsDB;
     private DailyStats dailyStats;
+    private static final Logger logger = Logger.getLogger(TheatriaSessions.class.getName());
     private PLog log;
 
     @Override
@@ -74,6 +79,7 @@ public final class TheatriaSessions extends JavaPlugin {
         oneSecondTimerTask =
                 new OneSecondTimerTask(dailyStatsService, sessionService, essentials, log);
 
+        logger.log(Level.INFO, "[onEnable] Running on thread: {0}", Thread.currentThread().getName());
         oneSecondTimerTask.runTaskTimer(this, 20, 20);
         databaseTask.runTaskTimerAsynchronously(
                 this, 20 * cm.getInitDelay(), 20 * cm.getBackupDuration());
@@ -168,7 +174,7 @@ public final class TheatriaSessions extends JavaPlugin {
      */
     private Result<SessionRepo, Exception> sessionRepo() {
         try {
-            return new Ok<>(new SessionRepo(sessionsDB, log));
+            return new Ok<>(new SessionRepo(sessionsDB));
         } catch (SQLException e) {
             return new Err<>(new SQLException("Failed to get new session repository", e));
         }

@@ -59,6 +59,7 @@ public class SessionService {
     }
 
     public void persist(boolean verbose) {
+        logger.log(Level.INFO, "[persist] Running on thread: {0}", Thread.currentThread().getName());
         for (Session session : getSessions()) {
             switch (repo.createOrUpdate(session)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {

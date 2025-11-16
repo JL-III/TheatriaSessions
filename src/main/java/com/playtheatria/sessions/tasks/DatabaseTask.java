@@ -22,7 +22,7 @@ public class DatabaseTask extends BukkitRunnable {
     @Override
     public void run() {
         long start = System.nanoTime();
-
+        logger.log(Level.INFO, "[run] Running on thread: {0}", Thread.currentThread().getName());
         logger.log(Level.INFO, "DatabaseTask: {0} sessions.", sessionService.getSessionsCount());
         sessionService.persist(false);
         dailyStatsService.persist(false);

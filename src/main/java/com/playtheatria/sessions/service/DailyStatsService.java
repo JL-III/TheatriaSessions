@@ -60,6 +60,7 @@ public class DailyStatsService {
     }
 
     public void persist(boolean verbose) {
+        logger.log(Level.INFO, "[persist] Running on thread: {0}", Thread.currentThread().getName());
         switch (repo.createOrUpdate(cache.get())) {
             case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
                 Dao.CreateOrUpdateStatus status = ok.value();
