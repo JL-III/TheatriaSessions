@@ -11,7 +11,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class DatabaseTask extends BukkitRunnable {
     private final SessionService sessionService;
     private final DailyStatsService dailyStatsService;
-    private static final Logger logger = Logger.getLogger(DatabaseTask.class.getName());
+    private static final Logger logger = Logger.getLogger(DatabaseTask.class.getCanonicalName());
 
     public DatabaseTask(
             DailyStatsService dailyStatsService, SessionService sessionService) {
