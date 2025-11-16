@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class DailyStatsService {
     private final DailyStatsCache cache;
     private final DailyStatsRepo repo;
-    private static final Logger logger = Logger.getLogger(DailyStatsService.class.getName());
+    private static final Logger logger = Logger.getLogger("TheatriaSessions " + DailyStatsService.class.getSimpleName());
 
     public DailyStatsService(DailyStatsCache cache, DailyStatsRepo repo) {
         this.cache = cache;

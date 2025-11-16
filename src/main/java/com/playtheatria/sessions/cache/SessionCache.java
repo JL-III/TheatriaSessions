@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class SessionCache {
     private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
-    private static final Logger logger = Logger.getLogger(SessionCache.class.getName());
+    private static final Logger logger = Logger.getLogger("TheatriaSessions " + SessionCache.class.getSimpleName());
 
     public SessionCache(List<Session> sessions) {
         for (Session session : sessions) {

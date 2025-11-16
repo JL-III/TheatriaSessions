@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 public class SessionRepo {
     private final Dao<Session, String> dao;
-    private static final Logger logger = Logger.getLogger(SessionRepo.class.getName());
+    private static final Logger logger = Logger.getLogger("TheatriaSessions " + SessionRepo.class.getSimpleName());
 
     public SessionRepo(TheatriaSessionsDB sessionsDB) throws SQLException {
         dao = sessionsDB.getDao(Session.class);

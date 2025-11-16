@@ -53,7 +53,7 @@ public final class TheatriaSessions extends JavaPlugin {
     private Essentials essentials;
     private TheatriaSessionsDB sessionsDB;
     private DailyStats dailyStats;
-    private static final Logger logger = Logger.getLogger(TheatriaSessions.class.getName());
+    private static final Logger logger = Logger.getLogger("TheatriaSessions " + TheatriaSessions.class.getSimpleName());
     private PLog log;
 
     @Override

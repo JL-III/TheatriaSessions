@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 public class SessionService {
     private final SessionCache cache;
     private final SessionRepo repo;
-    private static final Logger logger = Logger.getLogger(SessionService.class.getName());
+    private static final Logger logger = Logger.getLogger("TheatriaSessions " + SessionService.class.getSimpleName());
 
     public SessionService(SessionCache cache, SessionRepo repo) {
         this.cache = cache;
