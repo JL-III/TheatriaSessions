@@ -8,18 +8,17 @@ import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.database.TheatriaSessionsDB;
 import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.errors.PersistenceException;
-
+import com.playtheatria.sessions.utils.PLog;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class DailyStatsRepo {
     private final Dao<DailyStats, String> dao;
-    private static final Logger logger = Logger.getLogger("TheatriaSessions " + DailyStatsRepo.class.getSimpleName());
+    private final PLog log;
 
-    public DailyStatsRepo(TheatriaSessionsDB sessionsDB) throws SQLException {
+    public DailyStatsRepo(TheatriaSessionsDB sessionsDB, PLog log) throws SQLException {
         this.dao = sessionsDB.getDao(DailyStats.class);
+        this.log = log;
     }
 
     /**
@@ -34,15 +33,17 @@ public class DailyStatsRepo {
         try {
             DailyStats dailyStats = dao.queryForId("0");
             if (dailyStats == null) {
-                logger.log(Level.INFO, "No DailyStats found in database with the id of 0. Creating a new entry.");
+                log.debug(
+                        "No DailyStats found in database with the id of 0. Creating a new entry.");
                 dailyStats = new DailyStats(LocalDate.now(TimeUtils.timeZone));
                 dao.create(dailyStats);
             } else {
-                logger.log(Level.INFO, "Loaded DailyStats from the database.");
+                log.debug("Loaded DailyStats from the database.");
             }
             return new Ok<>(dailyStats);
         } catch (SQLException exception) {
-            logger.log(Level.INFO, "Failed to load DailyStats from the database: {0}", exception.getMessage());
+            log.debugFmt(
+                    "Failed to load DailyStats from the database: {0}", exception.getMessage());
             return new Err<>(
                     new IllegalStateException("SQLException while managing DailyStats", exception));
         }
@@ -55,11 +56,11 @@ public class DailyStatsRepo {
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
             DailyStats dailyStats) {
-        logger.log(Level.INFO, "[createOrUpdate] Running on thread: {0}", Thread.currentThread().getName());
-        logger.log(Level.INFO, "createOrUpdate called on a dailyStats");
-        logger.log(Level.INFO, String.format("Date %s", dailyStats.getDate()));
-        logger.log(Level.INFO, String.format("PlayersJoined: %s", dailyStats.getPlayersJoined()));
-        logger.log(Level.INFO, String.format("RewardsEarned: %s", dailyStats.getRewardsEarned()));
+        log.debugFmt("[createOrUpdate] Running on thread: {0}", Thread.currentThread().getName());
+        log.debug("createOrUpdate called on a dailyStats");
+        log.debugFmt("Date %s", dailyStats.getDate().toString());
+        log.debugFmt("PlayersJoined: %s", dailyStats.getPlayersJoined());
+        log.debugFmt("RewardsEarned: %s", dailyStats.getRewardsEarned());
         try {
             return new Ok<>(dao.createOrUpdate(dailyStats));
         } catch (SQLException exception) {

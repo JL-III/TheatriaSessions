@@ -23,17 +23,13 @@ import com.playtheatria.sessions.records.CommandRecord;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.tasks.DatabaseTask;
-import com.playtheatria.sessions.tasks.OneSecondTimerTask;
+import com.playtheatria.sessions.tasks.OneSecondTimer;
 import com.playtheatria.sessions.utils.PLog;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginManager;
@@ -49,18 +45,16 @@ public final class TheatriaSessions extends JavaPlugin {
     private SessionService sessionService;
 
     private DatabaseTask databaseTask;
-    private OneSecondTimerTask oneSecondTimerTask;
+    private OneSecondTimer oneSecondTimer;
     private Essentials essentials;
     private TheatriaSessionsDB sessionsDB;
     private DailyStats dailyStats;
-    private static final Logger logger = Logger.getLogger("TheatriaSessions " + TheatriaSessions.class.getSimpleName());
     private PLog log;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
         ConfigManager cm = new ConfigManager(this);
-
         log = new PLog(cm);
 
         if (!ok(essentials(), v -> essentials = v)) return;
@@ -68,19 +62,18 @@ public final class TheatriaSessions extends JavaPlugin {
         if (!ok(sessionsDB(), v -> sessionsDB = v)) return;
         if (!ok(sessionRepo(), v -> sessionRepo = v)) return;
         if (!ok(dailyStatsRepo(), v -> dailyStatsRepo = v)) return;
-        if (!ok(sessionRepo.load(), v -> sessionCache = new SessionCache(v))) return;
+        if (!ok(sessionRepo.load(), v -> sessionCache = new SessionCache(v, log))) return;
         if (!ok(dailyStatsRepo.load(), v -> dailyStats = v)) return;
 
-        sessionService = new SessionService(sessionCache, sessionRepo);
+        sessionService = new SessionService(sessionCache, sessionRepo, log);
         dailyStatsCache = new DailyStatsCache(dailyStats);
         dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo);
 
-        databaseTask = new DatabaseTask(dailyStatsService, sessionService);
-        oneSecondTimerTask =
-                new OneSecondTimerTask(dailyStatsService, sessionService, essentials, log);
+        databaseTask = new DatabaseTask(dailyStatsService, sessionService, log);
+        oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, log);
 
-        logger.log(Level.INFO, "[onEnable] Running on thread: {0}", Thread.currentThread().getName());
-        oneSecondTimerTask.runTaskTimer(this, 20, 20);
+        log.debugFmt("[onEnable] Running on thread: {0}", Thread.currentThread().getName());
+        oneSecondTimer.runTaskTimer(this, 20, 20);
         databaseTask.runTaskTimerAsynchronously(
                 this, 20 * cm.getInitDelay(), 20 * cm.getBackupDuration());
 
@@ -99,7 +92,7 @@ public final class TheatriaSessions extends JavaPlugin {
     @Override
     public void onDisable() {
         if (databaseTask != null) databaseTask.cancel();
-        if (oneSecondTimerTask != null) oneSecondTimerTask.cancel();
+        if (oneSecondTimer != null) oneSecondTimer.cancel();
         sessionService.persist(true);
         dailyStatsService.persist(true);
     }
@@ -174,7 +167,7 @@ public final class TheatriaSessions extends JavaPlugin {
      */
     private Result<SessionRepo, Exception> sessionRepo() {
         try {
-            return new Ok<>(new SessionRepo(sessionsDB));
+            return new Ok<>(new SessionRepo(sessionsDB, log));
         } catch (SQLException e) {
             return new Err<>(new SQLException("Failed to get new session repository", e));
         }
@@ -182,7 +175,7 @@ public final class TheatriaSessions extends JavaPlugin {
 
     private Result<DailyStatsRepo, Exception> dailyStatsRepo() {
         try {
-            return new Ok<>(new DailyStatsRepo(sessionsDB));
+            return new Ok<>(new DailyStatsRepo(sessionsDB, log));
         } catch (SQLException e) {
             return new Err<>(new SQLException("Failed to create CurrentDayStatsRepo", e));
         }

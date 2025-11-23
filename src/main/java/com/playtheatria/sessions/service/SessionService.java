@@ -8,28 +8,27 @@ import com.playtheatria.sessions.cache.SessionCache;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.repositories.SessionRepo;
 import com.playtheatria.sessions.errors.PersistenceException;
-
+import com.playtheatria.sessions.utils.PLog;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SessionService {
     private final SessionCache cache;
     private final SessionRepo repo;
-    private static final Logger logger = Logger.getLogger("TheatriaSessions " + SessionService.class.getSimpleName());
+    private final PLog log;
 
-    public SessionService(SessionCache cache, SessionRepo repo) {
+    public SessionService(SessionCache cache, SessionRepo repo, PLog log) {
         this.cache = cache;
         this.repo = repo;
+        this.log = log;
     }
 
     public void reset() {
         cache.resetSessions();
         switch (repo.purgeAll()) {
-            case Ok<Integer, PersistenceException> ok -> logger.log(Level.INFO,
+            case Ok<Integer, PersistenceException> ok -> log.debug(
                     String.format("Deleted %d" + " entries.", ok.value()));
-            case Err<Integer, PersistenceException> err -> logger.log(Level.SEVERE,
+            case Err<Integer, PersistenceException> err -> log.err(
                     String.format("Purging SessionRepository failed %s", err.error().getMessage()));
         }
     }
@@ -59,7 +58,7 @@ public class SessionService {
     }
 
     public void persist(boolean verbose) {
-        logger.log(Level.INFO, "[persist] Running on thread: {0}", Thread.currentThread().getName());
+        log.debugFmt("[persist] Running on thread: {0}", Thread.currentThread().getName());
         for (Session session : getSessions()) {
             switch (repo.createOrUpdate(session)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
@@ -72,15 +71,13 @@ public class SessionService {
                                     status.isUpdated(),
                                     status.getNumLinesChanged());
                     if (verbose) {
-                        logger.log(Level.INFO, "{0}{1}", new Object[]{msg, session});
+                        log.info(msg + session);
                     } else {
-                        logger.log(Level.INFO, "{0}{1}", new Object[]{msg, session});
+                        log.debug(msg + session);
                     }
                 }
                 case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> {
-                    String msg =
-                            String.format("Error persisting session: %s", err.error().getMessage());
-                    logger.log(Level.SEVERE, "{0}{1}", new Object[]{msg, session});
+                    log.errFmt("Error persisting session: %s", err.error().getMessage() + session);
                 }
             }
         }
