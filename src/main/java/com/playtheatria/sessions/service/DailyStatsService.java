@@ -8,16 +8,18 @@ import com.playtheatria.sessions.cache.DailyStatsCache;
 import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
 import com.playtheatria.sessions.errors.PersistenceException;
+import com.playtheatria.sessions.utils.PLog;
 import java.time.LocalDate;
-import java.util.logging.Level;
 
 public class DailyStatsService {
     private final DailyStatsCache cache;
     private final DailyStatsRepo repo;
+    private final PLog logger;
 
-    public DailyStatsService(DailyStatsCache cache, DailyStatsRepo repo) {
+    public DailyStatsService(DailyStatsCache cache, DailyStatsRepo repo, PLog logger) {
         this.cache = cache;
         this.repo = repo;
+        this.logger = logger;
     }
 
     public int incrementRewardsEarned() {
@@ -39,17 +41,16 @@ public class DailyStatsService {
     public void reset() {
         printDailyStatsDebugLogs(cache.get());
 
-        logger.log(Level.INFO, "Setting new DailyStats for today.");
+        logger.debug("Setting new DailyStats for today.");
         cache.set(new DailyStats(LocalDate.now(TimeUtils.timeZone)));
         printDailyStatsDebugLogs(cache.get());
 
-        logger.log(Level.INFO, "Purging DailyStatsRepo.");
+        logger.debug("Purging DailyStatsRepo.");
         switch (repo.purgeAll()) {
-            case Ok<Integer, PersistenceException> ok -> logger.log(
-                    Level.INFO, String.format("Deleted" + " %d entries.", ok.value()));
-            case Err<Integer, PersistenceException> err -> logger.log(
-                    Level.INFO,
-                    String.format("Purging DailyStats failed %s", err.error().getMessage()));
+            case Ok<Integer, PersistenceException> ok -> logger.debugFmt(
+                    "Deleted" + " %d entries.", ok.value());
+            case Err<Integer, PersistenceException> err -> logger.errFmt(
+                    "Purging DailyStats failed %s", err.error().getMessage());
         }
     }
 
@@ -58,8 +59,7 @@ public class DailyStatsService {
     }
 
     public void persist(boolean verbose) {
-        logger.log(
-                Level.INFO, "[persist] Running on thread: {0}", Thread.currentThread().getName());
+        logger.debugFmt("[persist] Running on thread: {0}", Thread.currentThread().getName());
         switch (repo.createOrUpdate(cache.get())) {
             case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {
                 Dao.CreateOrUpdateStatus status = ok.value();
@@ -71,14 +71,13 @@ public class DailyStatsService {
                                 status.isUpdated(),
                                 status.getNumLinesChanged());
                 if (verbose) {
-                    logger.log(Level.INFO, msg);
+                    logger.debug(msg);
                 } else {
-                    logger.log(Level.INFO, msg);
+                    logger.debug(msg);
                 }
             }
-            case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> logger.log(
-                    Level.SEVERE,
-                    String.format("Error persisting DailyStats: %s", err.error().getMessage()));
+            case Err<Dao.CreateOrUpdateStatus, PersistenceException> err -> logger.errFmt(
+                    "Error persisting DailyStats: %s", err.error().getMessage());
         }
     }
 
@@ -87,8 +86,7 @@ public class DailyStatsService {
      * @param stats DailyStats to print debug logs for
      */
     public void printDailyStatsDebugLogs(DailyStats stats) {
-        logger.log(
-                Level.INFO,
+        logger.debug(
                 String.format(
                         "Date %s\nRewardsEarned %s\nPlayersJoined %s",
                         stats.getDate(), stats.getRewardsEarned(), stats.getPlayersJoined()));
