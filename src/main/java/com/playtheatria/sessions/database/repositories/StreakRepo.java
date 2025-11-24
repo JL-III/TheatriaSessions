@@ -67,8 +67,7 @@ public final class StreakRepo {
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
             @NotNull Streak streak) {
         logger.debugFmt("Persisting Streak %s", streak);
-        logger.debugFmt(
-                "[createOrUpdate] Running on thread: %s", Thread.currentThread().getName());
+        logger.debugFmt("[createOrUpdate] Running on thread: %s", Thread.currentThread().getName());
         try {
             return new Ok<>(dao.createOrUpdate(streak));
         } catch (SQLException exception) {

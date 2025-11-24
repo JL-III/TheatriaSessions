@@ -42,8 +42,7 @@ public class DailyStatsRepo {
             }
             return new Ok<>(dailyStats);
         } catch (SQLException exception) {
-            log.debugFmt(
-                    "Failed to load DailyStats from the database: %s", exception.getMessage());
+            log.debugFmt("Failed to load DailyStats from the database: %s", exception.getMessage());
             return new Err<>(
                     new IllegalStateException("SQLException while managing DailyStats", exception));
         }
