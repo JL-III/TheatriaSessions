@@ -27,7 +27,9 @@ public class StreakCommand implements CommandExecutor, TabCompleter {
                                     + " | Current Streak: "
                                     + streak.getCurrentStreak()
                                     + " | Longest Streak: "
-                                    + streak.getLongestStreak());
+                                    + streak.getLongestStreak()
+                                    + " | Last Earned: "
+                                    + streak.getLastEarnedDate());
                 }
                 return true;
             }
