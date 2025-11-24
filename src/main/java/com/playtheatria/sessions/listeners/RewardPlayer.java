@@ -76,17 +76,28 @@ public class RewardPlayer implements Listener {
                     if (lastDate == null) {
                         ok.value().incrementCurrentStreak();
                         ok.value().setLastEarnedDate(today);
+                        log.debugFmt("Set initial streak for player %s to 1", player.getName());
                         return;
                     }
                     if (lastDate.isEqual(today)) {
+                        log.debugFmt(
+                                "Player %s has already earned a reward today, not incrementing"
+                                        + " streak.",
+                                player.getName());
                         return;
                     }
                     if (lastDate.plusDays(1).isEqual(today)) {
                         ok.value().incrementCurrentStreak();
+                        log.debugFmt("Incremented streak %s", ok.value());
                     } else {
                         ok.value().setCurrentStreakToOne();
+                        log.debugFmt("Reset streak for player %s to 1", player.getName());
                     }
                     ok.value().setLastEarnedDate(today);
+                    log.debug(
+                            String.format(
+                                    "Set last earned date for player %s to %s",
+                                    player.getName(), today));
                 } catch (DateTimeParseException dtpe) {
                     log.err(
                             String.format(
