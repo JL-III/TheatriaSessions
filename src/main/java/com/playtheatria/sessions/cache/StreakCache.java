@@ -46,6 +46,10 @@ public class StreakCache {
         mappedStreaks.put(playerUUID, new Streak(playerUUID, playerName));
     }
 
+    public void setStreak(@NotNull Streak streak) {
+        mappedStreaks.put(streak.getPlayerUUID(), streak);
+    }
+
     public void addStreak(@NotNull Streak streak) {
         mappedStreaks.put(streak.getPlayerUUID(), streak);
     }

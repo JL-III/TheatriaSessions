@@ -31,20 +31,7 @@ public class StreakCommand implements CommandExecutor, TabCompleter {
                 }
                 case 1 -> {
                     switch (args[0].toLowerCase()) {
-                        case "show-all" -> {
-                            for (Streak streak : streakService.getStreaks()) {
-                                sender.sendMessage(
-                                        "Player: "
-                                                + streak.getPlayerName()
-                                                + " | Current Streak: "
-                                                + streak.getCurrentStreak()
-                                                + " | Longest Streak: "
-                                                + streak.getLongestStreak()
-                                                + " | Last Earned: "
-                                                + streak.getLastEarnedDate());
-                            }
-                            return true;
-                        }
+                            // TODO create a reset command for testing
                         case "force-streak" -> {
                             if (sender instanceof Player player) {
                                 switch (streakService.getStreak(player.getUniqueId())) {
@@ -76,6 +63,31 @@ public class StreakCommand implements CommandExecutor, TabCompleter {
                                         "Only players can use the force-streak command.");
                                 return true;
                             }
+                        }
+                        case "reset" -> {
+                            if (sender instanceof Player player) {
+                                Streak streak = new Streak(player.getUniqueId(), player.getName());
+                                streakService.setStreak(streak);
+                                sender.sendMessage("Reset streak %s ".formatted(streak));
+                                return true;
+                            } else {
+                                sender.sendMessage("Only players can use the reset command.");
+                                return true;
+                            }
+                        }
+                        case "show-all" -> {
+                            for (Streak streak : streakService.getStreaks()) {
+                                sender.sendMessage(
+                                        "Player: "
+                                                + streak.getPlayerName()
+                                                + " | Current Streak: "
+                                                + streak.getCurrentStreak()
+                                                + " | Longest Streak: "
+                                                + streak.getLongestStreak()
+                                                + " | Last Earned: "
+                                                + streak.getLastEarnedDate());
+                            }
+                            return true;
                         }
                     }
                 }

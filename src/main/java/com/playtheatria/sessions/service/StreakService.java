@@ -25,6 +25,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class StreakService {
     private final StreakCache cache;
@@ -53,6 +54,10 @@ public class StreakService {
 
     public Collection<Streak> getStreaks() {
         return cache.getStreaks().values();
+    }
+
+    public void setStreak(@NotNull Streak streak) {
+        cache.setStreak(streak);
     }
 
     /**
