@@ -1,11 +1,15 @@
 package com.playtheatria.sessions.config;
 
+import java.util.ArrayList;
+
 import com.playtheatria.sessions.TheatriaSessions;
+
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.bukkit.configuration.ConfigurationSection;
 
 public final class ConfigManager {
@@ -16,6 +20,7 @@ public final class ConfigManager {
 
     private List<String> rewards;
     private final NavigableMap<Integer, List<String>> streakRewards = new TreeMap<>();
+    private final List<String> oracleLines = new ArrayList<>();
     private boolean communityRewardsEnabled;
     private String rewardMessage;
     public boolean debug;
@@ -35,6 +40,7 @@ public final class ConfigManager {
         this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
         this.rewardMessage = plugin.getConfig().getString("reward-message");
         loadStreakRewards();
+        loadStreakRewardMessages();
     }
 
     public void reloadConfig() {
@@ -70,6 +76,10 @@ public final class ConfigManager {
         return streakRewards;
     }
 
+    public List<String> getOracleLines() {
+        return oracleLines;
+    }
+
     private void loadStreakRewards() {
         streakRewards.clear();
 
@@ -96,5 +106,16 @@ public final class ConfigManager {
             }
         }
         log.log(Level.INFO, "Loaded {0} streak rewards", streakRewards.size());
+    }
+
+    private void loadStreakRewardMessages() {
+        oracleLines.clear();
+        List<String> lines = plugin.getConfig().getStringList("streak-reward-messages");
+        if (lines.isEmpty()) {
+            log.log(Level.WARNING, "No 'streak-reward-messages' configured in config.yml");
+            return;
+        }
+        oracleLines.addAll(lines);
+        log.log(Level.INFO, "Loaded {0} streak reward messages", oracleLines.size());
     }
 }

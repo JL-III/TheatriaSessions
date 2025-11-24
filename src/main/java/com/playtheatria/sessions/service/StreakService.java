@@ -180,7 +180,7 @@ public class StreakService {
         // start rewards at streaks 2 and above
         if (value < 2) {
             player.sendMessage(
-                    Component.text("Your first streak reward is at 2 days (1 more day).")
+                    Component.text("Earn your /daily-reward tomorrow for a streak reward!")
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
             return;
@@ -197,7 +197,7 @@ public class StreakService {
             return;
         }
 
-        String line = ORACLE_LINES.get(ThreadLocalRandom.current().nextInt(ORACLE_LINES.size()));
+        String line = cm.getOracleLines().get(ThreadLocalRandom.current().nextInt(cm.getOracleLines().size()));
         player.sendMessage(
                 Component.text(String.format(line, floorKey))
                         .color(NamedTextColor.YELLOW)
@@ -210,7 +210,7 @@ public class StreakService {
             int remaining = nextKey - value;
             player.sendMessage(
                     Component.text(
-                                    "Next streak reward at "
+                                    "Next reward tier at "
                                             + nextKey
                                             + " days ("
                                             + remaining
@@ -245,23 +245,4 @@ public class StreakService {
             log.info("Sent streak reward of: " + parsedCommand + " to " + player.getName());
         }
     }
-
-    private static final List<String> ORACLE_LINES =
-            List.of(
-                    "The Oracle observes your return. %d days sustained. A reward forms in your"
-                            + " hands.",
-                    "Your pattern persists. %d days aligned with Theatria. The Oracle grants you"
-                            + " this boon.",
-                    "The currents shift around you. %d days endured. The Oracle releases a reward.",
-                    "Constancy is rare. You carry it. %d-day streak confirmed. The Oracle"
-                            + " responds.",
-                    "You walk the same path again. %d days straight. The Oracle honors your"
-                            + " persistence.",
-                    "Your presence stabilizes the old mechanisms. %d days. The Oracle answers.",
-                    "Another day returned. %d days in sequence. The Oracle rewards your devotion.",
-                    "Theatria bends around your rhythm. %d days secured. The Oracle grants its"
-                            + " gift.",
-                    "Your name echoes in the Oracle’s chamber. %d days. A reward is manifested.",
-                    "You resonate with the world again. %d days in alignment. The Oracle"
-                            + " acknowledges you.");
 }
