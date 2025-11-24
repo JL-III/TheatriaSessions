@@ -76,7 +76,7 @@ public class RewardPlayer implements Listener {
                     if (lastDate == null) {
                         ok.value().incrementCurrentStreak();
                         ok.value().setLastEarnedDate(today);
-                        log.debugFmt("Set initial streak for player %s to 1", player.getName());
+                        log.debugFmt("Set initial streak %s", ok.value());
                         return;
                     }
                     if (lastDate.isEqual(today)) {
