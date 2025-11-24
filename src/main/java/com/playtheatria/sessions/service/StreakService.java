@@ -190,13 +190,6 @@ public class StreakService {
                         .color(NamedTextColor.YELLOW)
                         .decorate(TextDecoration.ITALIC));
 
-        // give the reward for the floor tier
-        for (String rewardCommand : commands) {
-            String parsedCommand = Util.parseCommand(player, rewardCommand);
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
-            log.info("Sent streak reward of: " + parsedCommand + " to " + player.getName());
-        }
-
         // compute next tier above current streak
         Integer nextKey = rewards.higherKey(value);
 
@@ -215,17 +208,29 @@ public class StreakService {
             player.sendMessage(
                     Component.text(
                                     String.format(
-                                            "You have reached the Oracle’s highest tier at %d days."
-                                                    + " There is nothing above this, only the"
-                                                    + " discipline to remain.",
+                                            "You have reached the Oracle’s highest tier at %d"
+                                                    + " days.",
                                             floorKey))
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
         }
         player.sendMessage(
-                Component.text("Your streak is now " + value + " days.")
-                        .color(NamedTextColor.YELLOW)
-                        .decorate(TextDecoration.ITALIC));
+                Component.text("Your streak is now ", NamedTextColor.YELLOW, TextDecoration.ITALIC)
+                        .append(
+                                Component.text(
+                                        String.valueOf(value),
+                                        NamedTextColor.LIGHT_PURPLE,
+                                        TextDecoration.ITALIC))
+                        .append(
+                                Component.text(
+                                        " days.", NamedTextColor.YELLOW, TextDecoration.ITALIC)));
+
+        // give the reward for the floor tier
+        for (String rewardCommand : commands) {
+            String parsedCommand = Util.parseCommand(player, rewardCommand);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
+            log.info("Sent streak reward of: " + parsedCommand + " to " + player.getName());
+        }
     }
 
     private static final List<String> ORACLE_LINES =
