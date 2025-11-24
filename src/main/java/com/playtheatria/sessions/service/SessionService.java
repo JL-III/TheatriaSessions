@@ -12,17 +12,13 @@ import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.events.IncrementRewardCountEvent;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
-
 import java.util.Collection;
 import java.util.UUID;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-
-import net.kyori.adventure.text.format.TextDecoration;
 
 public class SessionService {
     private final SessionCache cache;
@@ -102,7 +98,9 @@ public class SessionService {
             case Ok<Session, Exception> ok -> {
                 ok.value().setRewarded();
                 player.sendMessage(
-                        Component.text(cm.getRewardMessage()).color(NamedTextColor.YELLOW).decorate(TextDecoration.ITALIC));
+                        Component.text(cm.getRewardMessage())
+                                .color(NamedTextColor.YELLOW)
+                                .decorate(TextDecoration.ITALIC));
                 for (String rewardString : cm.getRewards()) {
                     String parsedCommand = Util.parseCommand(player, rewardString);
 

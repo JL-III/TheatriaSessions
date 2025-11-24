@@ -197,7 +197,9 @@ public class StreakService {
             return;
         }
 
-        String line = cm.getOracleLines().get(ThreadLocalRandom.current().nextInt(cm.getOracleLines().size()));
+        String line =
+                cm.getOracleLines()
+                        .get(ThreadLocalRandom.current().nextInt(cm.getOracleLines().size()));
         player.sendMessage(
                 Component.text(String.format(line, floorKey))
                         .color(NamedTextColor.YELLOW)

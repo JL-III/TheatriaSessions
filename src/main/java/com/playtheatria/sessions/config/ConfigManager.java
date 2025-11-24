@@ -1,15 +1,12 @@
 package com.playtheatria.sessions.config;
 
-import java.util.ArrayList;
-
 import com.playtheatria.sessions.TheatriaSessions;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.bukkit.configuration.ConfigurationSection;
 
 public final class ConfigManager {
