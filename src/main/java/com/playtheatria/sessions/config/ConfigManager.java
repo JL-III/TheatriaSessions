@@ -1,14 +1,21 @@
 package com.playtheatria.sessions.config;
 
 import com.playtheatria.sessions.TheatriaSessions;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.bukkit.configuration.ConfigurationSection;
 
 public final class ConfigManager {
     private final TheatriaSessions plugin;
+    private static final Logger log = Logger.getLogger("TheatriaSessions Config");
     private final long backupDuration;
     private final long initialBackupDuration;
 
     private List<String> rewards;
+    private final Map<Integer, List<String>> streakRewards = new HashMap<>();
     private boolean communityRewardsEnabled;
     private String rewardMessage;
     public boolean debug;
@@ -27,6 +34,7 @@ public final class ConfigManager {
         this.rewards = plugin.getConfig().getStringList("rewards");
         this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
         this.rewardMessage = plugin.getConfig().getString("reward-message");
+        loadStreakRewards();
     }
 
     public void reloadConfig() {
@@ -56,5 +64,39 @@ public final class ConfigManager {
 
     public boolean isDebug() {
         return debug;
+    }
+
+    public Map<Integer, List<String>> getStreakRewards() {
+        return streakRewards;
+    }
+
+    private void loadStreakRewards() {
+        streakRewards.clear();
+
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("streak-rewards");
+
+        if (section == null) {
+            log.log(Level.WARNING, "No 'streak-rewards' section in config.yml");
+            return;
+        }
+
+        for (String key : section.getKeys(false)) {
+            try {
+                int streakValue = Integer.parseInt(key);
+                List<String> commands = section.getStringList(key);
+
+                if (commands.isEmpty()) {
+                    log.log(Level.WARNING, "No commands configured for streak-rewards.{0}", key);
+                    continue;
+                }
+
+                streakRewards.put(streakValue, commands);
+            } catch (NumberFormatException e) {
+                log.log(
+                        Level.WARNING,
+                        "Invalid streak-rewards key '" + key + "', expected integer",
+                        e);
+            }
+        }
     }
 }

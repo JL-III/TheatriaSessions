@@ -14,3 +14,11 @@ rewards:
 community-rewards-enabled: false
 
 reward-message: "Great work! You hit today’s daily-reward goal! Thanks for making Theatria awesome!"
+
+# Placeholders are {player}, {player_uuid}, {world}, {streak}
+# no rewards for streaks of 2 or less
+reward-streaks:
+  3: "cc give p dailyrewardcrate 2 {player}"
+  7: "cc give p dailyrewardcrate 3 {player}"
+  14: "cc give p dailyrewardcrate 5 {player}"
+  30: "cc give p dailyrewardcrate 10 {player}"

@@ -6,6 +6,7 @@ import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.data.Streak;
+import com.playtheatria.sessions.enums.StreakOutcome;
 import com.playtheatria.sessions.events.IncrementRewardCountEvent;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.service.SessionService;
@@ -13,6 +14,8 @@ import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.utils.PLog;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -46,7 +49,12 @@ public class RewardPlayer implements Listener {
             return;
         }
 
-        switch (sessionService.getSession(event.getPlayerUUID())) {
+        handleSession(event.getPlayerUUID(), player);
+        handleStreak(event.getPlayerUUID(), player);
+    }
+
+    private void handleSession(UUID playerUUID, Player player) {
+        switch (sessionService.getSession(playerUUID)) {
             case Ok<Session, Exception> ok -> {
                 ok.value().setRewarded();
                 player.sendMessage(
@@ -67,45 +75,33 @@ public class RewardPlayer implements Listener {
                                 player.getName(), err.error().getMessage()));
             }
         }
+    }
 
-        switch (streakService.getStreak(event.getPlayerUUID())) {
+    private void handleStreak(UUID playerUUID, Player player) {
+        switch (streakService.getStreak(playerUUID)) {
             case Ok<Streak, Exception> ok -> {
                 LocalDate today = LocalDate.now(TimeUtils.timeZone);
                 try {
                     LocalDate lastDate = ok.value().getLastEarnedDate();
-                    if (lastDate == null) {
-                        ok.value().incrementCurrentStreak();
-                        ok.value().setLastEarnedDate(today);
-                        log.debugFmt("Set initial streak %s", ok.value());
-                        return;
+                    StreakOutcome outcome = determineOutcome(lastDate, today);
+
+                    switch (outcome) {
+                        case NO_PREVIOUS, CONSECUTIVE -> handleStreakIncrement(
+                                ok.value(), player, today);
+                        case SAME_DAY -> log.debugFmt(
+                                "Player %s already rewarded today", player.getName());
+                        case BROKEN -> {
+                            // if the last date is before yesterday, reset the streak to 1
+                            handleBrokenStreak(ok.value(), player, today);
+                        }
                     }
-                    if (lastDate.isEqual(today)) {
-                        log.debugFmt(
-                                "Player %s has already earned a reward today, not incrementing"
-                                        + " streak.",
-                                player.getName());
-                        return;
-                    }
-                    if (lastDate.plusDays(1).isEqual(today)) {
-                        ok.value().incrementCurrentStreak();
-                        log.debugFmt("Incremented streak %s", ok.value());
-                    } else {
-                        ok.value().setCurrentStreakToOne();
-                        log.debugFmt("Reset streak for player %s to 1", player.getName());
-                    }
-                    ok.value().setLastEarnedDate(today);
-                    log.debug(
-                            String.format(
-                                    "Set last earned date for player %s to %s",
-                                    player.getName(), today));
                 } catch (DateTimeParseException dtpe) {
                     log.err(
                             String.format(
                                     "Failed to parse last earned date for player %s: %s setting"
                                             + " current streak to 1.",
                                     player.getName(), dtpe.getMessage()));
-                    ok.value().setCurrentStreakToOne();
-                    ok.value().setLastEarnedDate(today);
+                    handleBrokenStreak(ok.value(), player, today);
                 }
             }
             case Err<Streak, Exception> err -> log.err(
@@ -115,10 +111,49 @@ public class RewardPlayer implements Listener {
         }
     }
 
+    private void handleBrokenStreak(Streak streak, Player player, LocalDate today) {
+        streak.setCurrentStreakToOne();
+        streak.setLastEarnedDate(today);
+        log.debugFmt("Streak broken. Resetting streak for %s", player.getName());
+    }
+
     private static String parseCommand(Player player, String rewardString) {
         return rewardString
                 .replace("{player}", player.getName())
                 .replace("{player_uuid}", player.getUniqueId().toString())
                 .replace("{world}", player.getWorld().getName());
+    }
+
+    private StreakOutcome determineOutcome(LocalDate last, LocalDate today) {
+        if (last == null) return StreakOutcome.NO_PREVIOUS;
+        if (last.isEqual(today)) return StreakOutcome.SAME_DAY;
+        if (last.plusDays(1).isEqual(today)) return StreakOutcome.CONSECUTIVE;
+        return StreakOutcome.BROKEN;
+    }
+
+    private void handleStreakIncrement(Streak streak, Player player, LocalDate today) {
+        streak.incrementCurrentStreak();
+        streak.setLastEarnedDate(today);
+        log.debugFmt("Incremented streak %s", streak);
+        rewardStreak(streak, player);
+    }
+
+    private void rewardStreak(Streak streak, Player player) {
+        int value = streak.getCurrentStreak();
+        // No rewards for streaks of 2 or less
+        if (value <= 2) {
+            return;
+        }
+        List<String> commands = cm.getStreakRewards().get(value);
+
+        if (commands == null || commands.isEmpty()) {
+            return;
+        }
+
+        for (String rewardCommand : commands) {
+            String parsedCommand = parseCommand(player, rewardCommand);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
+            log.info("Sent streak reward of: " + parsedCommand + " to " + player.getName());
+        }
     }
 }
