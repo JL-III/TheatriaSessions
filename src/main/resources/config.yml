@@ -18,6 +18,8 @@ reward-message: "Great work! You hit today’s daily-reward goal! Thanks for mak
 # Placeholders are {player}, {player_uuid}, {world}, {streak}
 # no rewards for streaks of 2 or less
 streak-rewards:
+  2:
+  - "cc give p dailyrewardcrate 1 {player}"
   3:
   - "cc give p dailyrewardcrate 2 {player}"
   7:

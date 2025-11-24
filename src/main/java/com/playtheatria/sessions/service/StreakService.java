@@ -179,8 +179,15 @@ public class StreakService {
 
         // highest configured tier <= current streak
         Integer floorKey = rewards.floorKey(value);
-        if (floorKey == null || floorKey < 3) {
-            // no eligible streak tier
+        if (floorKey == null) {
+            return;
+        }
+        // start rewards at streaks 2 and above
+        if (floorKey < 2) {
+            player.sendMessage(
+                    Component.text("Your first streak reward is at 2 days (1 more day).")
+                            .color(NamedTextColor.YELLOW)
+                            .decorate(TextDecoration.ITALIC));
             return;
         }
 
