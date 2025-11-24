@@ -9,6 +9,7 @@ import com.playtheatria.sessions.database.data.Streak;
 import com.playtheatria.sessions.errors.NotFoundException;
 import com.playtheatria.sessions.errors.PersistenceException;
 import com.playtheatria.sessions.errors.RepositoryException;
+import com.playtheatria.sessions.utils.PLog;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -16,16 +17,18 @@ import org.jetbrains.annotations.NotNull;
 
 public final class StreakRepo {
     private final Dao<Streak, UUID> dao;
+    private final PLog logger;
 
-    public StreakRepo(@NotNull TheatriaSessionsDB sessionsDB) throws SQLException {
+    public StreakRepo(@NotNull TheatriaSessionsDB sessionsDB, PLog logger) throws SQLException {
         this.dao = sessionsDB.getDao(Streak.class);
+        this.logger = logger;
     }
 
     /**
      * Load all streaks from the database
      * @return returns a Result containing the list of streaks if successful, or a PersistenceException if something failed.
      */
-    public Result<List<Streak>, PersistenceException> loadStreaks() {
+    public Result<List<Streak>, PersistenceException> load() {
         try {
             return new Ok<>(dao.queryForAll());
         } catch (SQLException exception) {
@@ -59,13 +62,17 @@ public final class StreakRepo {
     /**
      * Creates or updates a streak
      * @param streak the streak we are going to persist in the database.
-     * @return returns a Result containing the streak if creation or update was successful, or an Exception if something failed.
+     * @return returns a Result containing the CreateOrUpdateStatus if successful, or a RepositoryException if something failed.
      */
-    public Result<Streak, RepositoryException> createOrUpdate(@NotNull Streak streak) {
+    public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
+            @NotNull Streak streak) {
+        logger.debugFmt("Persisting Streak {0}", streak);
+        logger.debugFmt(
+                "[createOrUpdate] Running on thread: {0}", Thread.currentThread().getName());
         try {
-            dao.createOrUpdate(streak);
-            return new Ok<>(streak);
+            return new Ok<>(dao.createOrUpdate(streak));
         } catch (SQLException exception) {
+            logger.errFmt("CreateOrUpdate failed {0}", streak);
             return new Err<>(
                     new PersistenceException(
                             "Error on createOrUpdate Streak: " + streak.getPlayerUUID(),

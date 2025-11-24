@@ -109,7 +109,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     case "force-reward" -> {
                         for (Session session : sessionService.getSessions()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
-                                Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
+                                Bukkit.getPluginManager()
+                                        .callEvent(new RewardPlayerEvent(session.getPlayerUUID()));
                                 return true;
                             }
                         }

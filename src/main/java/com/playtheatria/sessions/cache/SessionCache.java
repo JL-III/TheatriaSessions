@@ -35,11 +35,11 @@ public class SessionCache {
             return new Err<>(
                     new Exception(
                             String.format(
-                                    "Failed to return a session from the SessionManager"
+                                    "Failed to return a session from SessionCache"
                                             + " mappedSessions for UUID: %s",
                                     playerUUID)));
         }
-        return new Ok<>(mappedSessions.get(playerUUID));
+        return new Ok<>(session);
     }
 
     public ConcurrentHashMap<UUID, Session> getSessions() {

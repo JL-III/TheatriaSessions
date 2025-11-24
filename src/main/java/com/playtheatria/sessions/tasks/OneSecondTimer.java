@@ -47,7 +47,7 @@ public class OneSecondTimer extends BukkitRunnable {
                     new Object[] {session.getPlayerName(), session.incrementSessionTime()});
 
             if (!session.hasEarnedReward() || session.isRewarded()) continue;
-            Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
+            Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(player.getUniqueId()));
         }
         dailyStatsService.setPlayersJoined(sessionService.getSessionsCount());
     }

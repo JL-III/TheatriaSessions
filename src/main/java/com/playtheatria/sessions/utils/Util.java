@@ -14,6 +14,8 @@ public class Util {
     public static final String COLOR_THREE = "#fff8bd";
     public static final String PERMISSION_ALLOW = "theatria.sessions.allow";
     public static final String PERMISSION_ADMIN = "theatria.sessions.admin";
+    public static final String PERMISSION_STREAKS_COMMAND = "theatria.streaks.allow";
+    public static final String PERMISSION_STREAKS_ADMIN = "theatria.streaks.admin";
     public static final String PERMISSION_ACTIVITY_COMMAND = "theatria.sessions.activity.command";
     public static final String PERMISSION_COMMUNITY_COMMAND = "theatria.sessions.community.command";
 

@@ -45,7 +45,7 @@ public class SessionRepo {
         try {
             return new Ok<>(dao.createOrUpdate(session));
         } catch (SQLException exception) {
-            log.errFmt("CreateOrUpdate failed{0}", session);
+            log.errFmt("CreateOrUpdate failed {0}", session);
             return new Err<>(
                     new PersistenceException("Failed to create or update Session", exception));
         }
