@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class Util {
@@ -88,5 +89,12 @@ public class Util {
 
     public static String summary(@NotNull String prefix, @NotNull Session session) {
         return "[%s] %s".formatted(prefix, session);
+    }
+
+    public static String parseCommand(Player player, String rewardString) {
+        return rewardString
+                .replace("{player}", player.getName())
+                .replace("{player_uuid}", player.getUniqueId().toString())
+                .replace("{world}", player.getWorld().getName());
     }
 }

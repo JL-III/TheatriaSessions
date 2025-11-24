@@ -75,8 +75,8 @@ public final class TheatriaSessions extends JavaPlugin {
         if (!ok(dailyStatsRepo.load(), v -> dailyStats = v)) return;
         if (!ok(streakRepo.load(), v -> streakCache = new StreakCache(v, log))) return;
 
-        sessionService = new SessionService(sessionCache, sessionRepo, log);
-        streakService = new StreakService(streakCache, streakRepo, log);
+        sessionService = new SessionService(sessionCache, sessionRepo, cm, log);
+        streakService = new StreakService(streakCache, streakRepo, cm, log);
         dailyStatsCache = new DailyStatsCache(dailyStats);
         dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
 
@@ -134,7 +134,7 @@ public final class TheatriaSessions extends JavaPlugin {
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new DayChange(dss, ss, log), this);
         pm.registerEvents(new PlayerJoin(ss, sts, log), this);
-        pm.registerEvents(new RewardPlayer(cm, ss, sts, log), this);
+        pm.registerEvents(new RewardPlayer(ss, sts, log), this);
         pm.registerEvents(new DailyStatsRewardCount(dss, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
     }

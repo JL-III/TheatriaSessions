@@ -98,5 +98,6 @@ public final class ConfigManager {
                         e);
             }
         }
+        log.log(Level.INFO, "Loaded {0} streak rewards", streakRewards.size());
     }
 }
