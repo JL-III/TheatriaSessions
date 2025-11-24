@@ -75,6 +75,7 @@ public class RewardPlayer implements Listener {
                     LocalDate lastDate = ok.value().getLastEarnedDate();
                     if (lastDate == null) {
                         ok.value().incrementCurrentStreak();
+                        ok.value().setLastEarnedDate(today);
                         return;
                     }
                     if (lastDate.isEqual(today)) {
