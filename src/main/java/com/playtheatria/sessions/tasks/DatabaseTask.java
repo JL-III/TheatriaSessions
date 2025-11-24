@@ -2,11 +2,9 @@ package com.playtheatria.sessions.tasks;
 
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
-import com.playtheatria.sessions.utils.PLog;
-
-import org.bukkit.scheduler.BukkitRunnable;
-
 import com.playtheatria.sessions.service.StreakService;
+import com.playtheatria.sessions.utils.PLog;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class DatabaseTask extends BukkitRunnable {
     private final SessionService sessionService;
@@ -15,7 +13,10 @@ public class DatabaseTask extends BukkitRunnable {
     private final PLog log;
 
     public DatabaseTask(
-            DailyStatsService dailyStatsService, SessionService sessionService, StreakService streakService, PLog log) {
+            DailyStatsService dailyStatsService,
+            SessionService sessionService,
+            StreakService streakService,
+            PLog log) {
         this.dailyStatsService = dailyStatsService;
         this.sessionService = sessionService;
         this.streakService = streakService;
