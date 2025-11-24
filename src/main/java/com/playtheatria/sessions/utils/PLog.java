@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 public final class PLog {
     private final ConfigManager configManager;
     private static final Logger logger =
-            Logger.getLogger("TheatriaSessions" + PLog.class.getSimpleName());
+            Logger.getLogger("TheatriaSessions " + PLog.class.getSimpleName());
 
     public PLog(ConfigManager configManager) {
         this.configManager = configManager;

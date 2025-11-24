@@ -19,8 +19,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -182,6 +184,12 @@ public class StreakService {
             return;
         }
 
+        String line = ORACLE_LINES.get(ThreadLocalRandom.current().nextInt(ORACLE_LINES.size()));
+        player.sendMessage(
+                Component.text(String.format(line, floorKey))
+                        .color(NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.ITALIC));
+
         // give the reward for the floor tier
         for (String rewardCommand : commands) {
             String parsedCommand = Util.parseCommand(player, rewardCommand);
@@ -201,13 +209,41 @@ public class StreakService {
                                             + " days ("
                                             + remaining
                                             + " more).")
-                            .color(NamedTextColor.GOLD));
+                            .color(NamedTextColor.YELLOW)
+                            .decorate(TextDecoration.ITALIC));
         } else {
             player.sendMessage(
                     Component.text(
-                                    "You are at the maximum streak reward tier. Keep your streak to"
-                                            + " stay maxed out.")
-                            .color(NamedTextColor.GOLD));
+                                    String.format(
+                                            "You have reached the Oracle’s highest tier at %d days."
+                                                    + " There is nothing above this, only the"
+                                                    + " discipline to remain.",
+                                            floorKey))
+                            .color(NamedTextColor.YELLOW)
+                            .decorate(TextDecoration.ITALIC));
         }
+        player.sendMessage(
+                Component.text("Your streak is now " + value + " days.")
+                        .color(NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.ITALIC));
     }
+
+    private static final List<String> ORACLE_LINES =
+            List.of(
+                    "The Oracle observes your return. %d days sustained. A reward forms in your"
+                            + " hands.",
+                    "Your pattern persists. %d days aligned with Theatria. The Oracle grants you"
+                            + " this boon.",
+                    "The currents shift around you. %d days endured. The Oracle releases a reward.",
+                    "Constancy is rare. You carry it. %d-day streak confirmed. The Oracle"
+                            + " responds.",
+                    "You walk the same path again. %d days straight. The Oracle honors your"
+                            + " persistence.",
+                    "Your presence stabilizes the old mechanisms. %d days. The Oracle answers.",
+                    "Another day returned. %d days in sequence. The Oracle rewards your devotion.",
+                    "Theatria bends around your rhythm. %d days secured. The Oracle grants its"
+                            + " gift.",
+                    "Your name echoes in the Oracle’s chamber. %d days. A reward is manifested.",
+                    "You resonate with the world again. %d days in alignment. The Oracle"
+                            + " acknowledges you.");
 }
