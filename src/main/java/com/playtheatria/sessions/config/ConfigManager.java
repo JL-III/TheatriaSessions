@@ -1,9 +1,9 @@
 package com.playtheatria.sessions.config;
 
 import com.playtheatria.sessions.TheatriaSessions;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.configuration.ConfigurationSection;
@@ -15,7 +15,7 @@ public final class ConfigManager {
     private final long initialBackupDuration;
 
     private List<String> rewards;
-    private final Map<Integer, List<String>> streakRewards = new HashMap<>();
+    private final NavigableMap<Integer, List<String>> streakRewards = new TreeMap<>();
     private boolean communityRewardsEnabled;
     private String rewardMessage;
     public boolean debug;
@@ -66,7 +66,7 @@ public final class ConfigManager {
         return debug;
     }
 
-    public Map<Integer, List<String>> getStreakRewards() {
+    public NavigableMap<Integer, List<String>> getStreakRewards() {
         return streakRewards;
     }
 
@@ -74,7 +74,6 @@ public final class ConfigManager {
         streakRewards.clear();
 
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("streak-rewards");
-
         if (section == null) {
             log.log(Level.WARNING, "No 'streak-rewards' section in config.yml");
             return;
@@ -84,12 +83,10 @@ public final class ConfigManager {
             try {
                 int streakValue = Integer.parseInt(key);
                 List<String> commands = section.getStringList(key);
-
                 if (commands.isEmpty()) {
                     log.log(Level.WARNING, "No commands configured for streak-rewards.{0}", key);
                     continue;
                 }
-
                 streakRewards.put(streakValue, commands);
             } catch (NumberFormatException e) {
                 log.log(

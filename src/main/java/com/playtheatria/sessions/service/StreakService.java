@@ -17,7 +17,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -165,20 +168,46 @@ public class StreakService {
      */
     private void rewardStreak(Streak streak, Player player) {
         int value = streak.getCurrentStreak();
-        // No rewards for streaks of 2 or less
-        if (value <= 2) {
+        NavigableMap<Integer, List<String>> rewards = cm.getStreakRewards();
+
+        // highest configured tier <= current streak
+        Integer floorKey = rewards.floorKey(value);
+        if (floorKey == null || floorKey < 3) {
+            // no eligible streak tier
             return;
         }
-        List<String> commands = cm.getStreakRewards().get(value);
 
+        List<String> commands = rewards.get(floorKey);
         if (commands == null || commands.isEmpty()) {
             return;
         }
 
+        // give the reward for the floor tier
         for (String rewardCommand : commands) {
             String parsedCommand = Util.parseCommand(player, rewardCommand);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), parsedCommand);
             log.info("Sent streak reward of: " + parsedCommand + " to " + player.getName());
+        }
+
+        // compute next tier above current streak
+        Integer nextKey = rewards.higherKey(value);
+
+        if (nextKey != null) {
+            int remaining = nextKey - value;
+            player.sendMessage(
+                    Component.text(
+                                    "Next streak reward at "
+                                            + nextKey
+                                            + " days ("
+                                            + remaining
+                                            + " more).")
+                            .color(NamedTextColor.GOLD));
+        } else {
+            player.sendMessage(
+                    Component.text(
+                                    "You are at the maximum streak reward tier. Keep your streak to"
+                                            + " stay maxed out.")
+                            .color(NamedTextColor.GOLD));
         }
     }
 }
