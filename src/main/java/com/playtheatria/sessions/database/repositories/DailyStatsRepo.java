@@ -43,7 +43,7 @@ public class DailyStatsRepo {
             return new Ok<>(dailyStats);
         } catch (SQLException exception) {
             log.debugFmt(
-                    "Failed to load DailyStats from the database: {0}", exception.getMessage());
+                    "Failed to load DailyStats from the database: %s", exception.getMessage());
             return new Err<>(
                     new IllegalStateException("SQLException while managing DailyStats", exception));
         }
@@ -56,7 +56,7 @@ public class DailyStatsRepo {
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
             DailyStats dailyStats) {
-        log.debugFmt("[createOrUpdate] Running on thread: {0}", Thread.currentThread().getName());
+        log.debugFmt("[createOrUpdate] Running on thread: %s", Thread.currentThread().getName());
         log.debug("createOrUpdate called on a dailyStats");
         log.debugFmt("Date %s", dailyStats.getDate().toString());
         log.debugFmt("PlayersJoined: %s", dailyStats.getPlayersJoined());

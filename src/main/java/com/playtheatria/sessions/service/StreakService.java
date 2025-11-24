@@ -40,7 +40,7 @@ public class StreakService {
     }
 
     public void persist(boolean verbose) {
-        log.debugFmt("[persist] Running on thread: {0}", Thread.currentThread().getName());
+        log.debugFmt("[persist] Running on thread: %s", Thread.currentThread().getName());
         for (Streak streak : getStreaks()) {
             switch (repo.createOrUpdate(streak)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {

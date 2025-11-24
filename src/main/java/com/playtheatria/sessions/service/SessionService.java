@@ -58,7 +58,7 @@ public class SessionService {
     }
 
     public void persist(boolean verbose) {
-        log.debugFmt("[persist] Running on thread: {0}", Thread.currentThread().getName());
+        log.debugFmt("[persist] Running on thread: %s", Thread.currentThread().getName());
         for (Session session : getSessions()) {
             switch (repo.createOrUpdate(session)) {
                 case Ok<Dao.CreateOrUpdateStatus, PersistenceException> ok -> {

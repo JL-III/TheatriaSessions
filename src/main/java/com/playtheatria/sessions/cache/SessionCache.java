@@ -79,6 +79,6 @@ public class SessionCache {
         }
 
         mappedSessions = updatedSessions;
-        logger.debugFmt("Reset mapped sessions size: {0}", mappedSessions.size());
+        logger.debugFmt("Reset mapped sessions size: %s", mappedSessions.size());
     }
 }

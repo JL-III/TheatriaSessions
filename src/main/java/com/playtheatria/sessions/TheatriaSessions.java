@@ -85,7 +85,7 @@ public final class TheatriaSessions extends JavaPlugin {
 
         log.debug(
                 String.format(
-                        "[onEnable] Running on thread: {0}", Thread.currentThread().getName()));
+                        "[onEnable] Running on thread: %s", Thread.currentThread().getName()));
         oneSecondTimer.runTaskTimer(this, 20, 20);
         databaseTask.runTaskTimerAsynchronously(
                 this, 20 * cm.getInitDelay(), 20 * cm.getBackupDuration());
