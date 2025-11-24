@@ -101,7 +101,7 @@ public class StreakCommand implements CommandExecutor, TabCompleter {
             CommandSender sender, Command command, String label, String[] args) {
         if (sender.hasPermission(Util.PERMISSION_STREAKS_ADMIN)) {
             if (args.length == 1) {
-                return List.of("show-all", "force-streak");
+                return List.of("force-streak", "reset", "show-all");
             }
         }
         return List.of();
