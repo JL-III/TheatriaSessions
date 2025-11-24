@@ -80,7 +80,7 @@ public final class ConfigManager {
             return;
         }
 
-        for (String key : section.getKeys(false)) {
+        for (String key : section.getKeys(true)) {
             try {
                 int streakValue = Integer.parseInt(key);
                 List<String> commands = section.getStringList(key);
