@@ -80,7 +80,7 @@ public final class TheatriaSessions extends JavaPlugin {
         dailyStatsCache = new DailyStatsCache(dailyStats);
         dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
 
-        databaseTask = new DatabaseTask(dailyStatsService, sessionService, log);
+        databaseTask = new DatabaseTask(dailyStatsService, sessionService, streakService, log);
         oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, log);
 
         log.debug(
@@ -109,6 +109,7 @@ public final class TheatriaSessions extends JavaPlugin {
         if (oneSecondTimer != null) oneSecondTimer.cancel();
         sessionService.persist(true);
         dailyStatsService.persist(true);
+        streakService.persist(true);
     }
 
     private void registerCommands(List<CommandRecord> records) {
