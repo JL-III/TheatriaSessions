@@ -76,4 +76,22 @@ public class Streak {
     public void setLastEarnedDate(LocalDate date) {
         this.lastEarnedDate = date.toString();
     }
+
+    @Override
+    public String toString() {
+        return "Streak{"
+                + "playerUUID="
+                + playerUUID
+                + ", playerName='"
+                + playerName
+                + '\''
+                + ", currentStreak="
+                + currentStreak
+                + ", longestStreak="
+                + longestStreak
+                + ", lastEarnedDate='"
+                + lastEarnedDate
+                + '\''
+                + '}';
+    }
 }
