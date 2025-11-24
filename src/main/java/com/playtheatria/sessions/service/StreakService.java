@@ -177,17 +177,18 @@ public class StreakService {
         int value = streak.getCurrentStreak();
         NavigableMap<Integer, List<String>> rewards = cm.getStreakRewards();
 
-        // highest configured tier <= current streak
-        Integer floorKey = rewards.floorKey(value);
-        if (floorKey == null) {
-            return;
-        }
         // start rewards at streaks 2 and above
-        if (floorKey < 2) {
+        if (value < 2) {
             player.sendMessage(
                     Component.text("Your first streak reward is at 2 days (1 more day).")
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
+            return;
+        }
+
+        // highest configured tier <= current streak
+        Integer floorKey = rewards.floorKey(value);
+        if (floorKey == null) {
             return;
         }
 
