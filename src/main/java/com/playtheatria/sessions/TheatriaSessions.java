@@ -6,14 +6,17 @@ import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.sessions.cache.DailyStatsCache;
 import com.playtheatria.sessions.cache.SessionCache;
+import com.playtheatria.sessions.cache.StreakCache;
 import com.playtheatria.sessions.commands.ActivityCommand;
 import com.playtheatria.sessions.commands.CommunityCommand;
 import com.playtheatria.sessions.commands.SessionCommand;
+import com.playtheatria.sessions.commands.StreakCommand;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.TheatriaSessionsDB;
 import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
 import com.playtheatria.sessions.database.repositories.SessionRepo;
+import com.playtheatria.sessions.database.repositories.StreakRepo;
 import com.playtheatria.sessions.listeners.DailyStatsRewardCount;
 import com.playtheatria.sessions.listeners.DayChange;
 import com.playtheatria.sessions.listeners.PlayerJoin;
@@ -22,8 +25,9 @@ import com.playtheatria.sessions.listeners.RewardPlayer;
 import com.playtheatria.sessions.records.CommandRecord;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
+import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.tasks.DatabaseTask;
-import com.playtheatria.sessions.tasks.OneSecondTimerTask;
+import com.playtheatria.sessions.tasks.OneSecondTimer;
 import com.playtheatria.sessions.utils.PLog;
 import java.io.File;
 import java.io.IOException;
@@ -44,8 +48,12 @@ public final class TheatriaSessions extends JavaPlugin {
     private SessionRepo sessionRepo;
     private SessionService sessionService;
 
+    private StreakCache streakCache;
+    private StreakRepo streakRepo;
+    private StreakService streakService;
+
     private DatabaseTask databaseTask;
-    private OneSecondTimerTask oneSecondTimerTask;
+    private OneSecondTimer oneSecondTimer;
     private Essentials essentials;
     private TheatriaSessionsDB sessionsDB;
     private DailyStats dailyStats;
@@ -55,7 +63,6 @@ public final class TheatriaSessions extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         ConfigManager cm = new ConfigManager(this);
-
         log = new PLog(cm);
 
         if (!ok(essentials(), v -> essentials = v)) return;
@@ -63,22 +70,27 @@ public final class TheatriaSessions extends JavaPlugin {
         if (!ok(sessionsDB(), v -> sessionsDB = v)) return;
         if (!ok(sessionRepo(), v -> sessionRepo = v)) return;
         if (!ok(dailyStatsRepo(), v -> dailyStatsRepo = v)) return;
+        if (!ok(streakRepo(), v -> streakRepo = v)) return;
         if (!ok(sessionRepo.load(), v -> sessionCache = new SessionCache(v, log))) return;
         if (!ok(dailyStatsRepo.load(), v -> dailyStats = v)) return;
+        if (!ok(streakRepo.load(), v -> streakCache = new StreakCache(v, log))) return;
 
-        sessionService = new SessionService(sessionCache, sessionRepo, log);
+        sessionService = new SessionService(sessionCache, sessionRepo, cm, log);
+        streakService = new StreakService(streakCache, streakRepo, cm, log);
         dailyStatsCache = new DailyStatsCache(dailyStats);
         dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
 
-        databaseTask = new DatabaseTask(dailyStatsService, sessionService, log);
-        oneSecondTimerTask =
-                new OneSecondTimerTask(dailyStatsService, sessionService, essentials, log);
+        databaseTask = new DatabaseTask(dailyStatsService, sessionService, streakService, log);
+        oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, log);
 
-        oneSecondTimerTask.runTaskTimer(this, 20, 20);
+        log.debug(
+                String.format(
+                        "[onEnable] Running on thread: %s", Thread.currentThread().getName()));
+        oneSecondTimer.runTaskTimer(this, 20, 20);
         databaseTask.runTaskTimerAsynchronously(
                 this, 20 * cm.getInitDelay(), 20 * cm.getBackupDuration());
 
-        registerEvents(cm, dailyStatsService, sessionService, log);
+        registerEvents(cm, dailyStatsService, sessionService, streakService, log);
 
         registerCommands(
                 List.of(
@@ -86,16 +98,18 @@ public final class TheatriaSessions extends JavaPlugin {
                                 "session",
                                 new SessionCommand(dailyStatsService, sessionService, cm)),
                         new CommandRecord("community", new CommunityCommand(cm, dailyStatsService)),
-                        new CommandRecord("activity", new ActivityCommand(sessionService))));
+                        new CommandRecord("activity", new ActivityCommand(sessionService)),
+                        new CommandRecord("streaks", new StreakCommand(streakService))));
         log.info("Loaded plugin.");
     }
 
     @Override
     public void onDisable() {
         if (databaseTask != null) databaseTask.cancel();
-        if (oneSecondTimerTask != null) oneSecondTimerTask.cancel();
+        if (oneSecondTimer != null) oneSecondTimer.cancel();
         sessionService.persist(true);
         dailyStatsService.persist(true);
+        streakService.persist(true);
     }
 
     private void registerCommands(List<CommandRecord> records) {
@@ -112,11 +126,15 @@ public final class TheatriaSessions extends JavaPlugin {
     }
 
     private void registerEvents(
-            ConfigManager cm, DailyStatsService dss, SessionService ss, PLog log) {
+            ConfigManager cm,
+            DailyStatsService dss,
+            SessionService ss,
+            StreakService sts,
+            PLog log) {
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new DayChange(dss, ss, log), this);
-        pm.registerEvents(new PlayerJoin(ss, log), this);
-        pm.registerEvents(new RewardPlayer(cm, log), this);
+        pm.registerEvents(new PlayerJoin(ss, sts, log), this);
+        pm.registerEvents(new RewardPlayer(ss, sts, log), this);
         pm.registerEvents(new DailyStatsRewardCount(dss, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
     }
@@ -179,6 +197,14 @@ public final class TheatriaSessions extends JavaPlugin {
             return new Ok<>(new DailyStatsRepo(sessionsDB, log));
         } catch (SQLException e) {
             return new Err<>(new SQLException("Failed to create CurrentDayStatsRepo", e));
+        }
+    }
+
+    private Result<StreakRepo, Exception> streakRepo() {
+        try {
+            return new Ok<>(new StreakRepo(sessionsDB, log));
+        } catch (SQLException e) {
+            return new Err<>(new SQLException("Failed to create StreakRepo", e));
         }
     }
 

@@ -1,17 +1,28 @@
 package com.playtheatria.sessions.config;
 
 import com.playtheatria.sessions.TheatriaSessions;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.bukkit.configuration.ConfigurationSection;
 
 public final class ConfigManager {
     private final TheatriaSessions plugin;
+    private static final Logger log = Logger.getLogger("TheatriaSessions Config");
     private final long backupDuration;
     private final long initialBackupDuration;
 
     private List<String> rewards;
+    private final NavigableMap<Integer, List<String>> streakRewards = new TreeMap<>();
+    private final List<String> oracleLines = new ArrayList<>();
+    private String encouragementMessage;
     private boolean communityRewardsEnabled;
     private String rewardMessage;
     public boolean debug;
+    private ConfigurationSection streaksSection;
 
     public ConfigManager(TheatriaSessions plugin) {
         this.plugin = plugin;
@@ -23,10 +34,14 @@ public final class ConfigManager {
     }
 
     public void loadConfig() {
+        this.streaksSection = plugin.getConfig().getConfigurationSection("streaks");
         this.debug = plugin.getConfig().getBoolean("debug");
         this.rewards = plugin.getConfig().getStringList("rewards");
         this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
         this.rewardMessage = plugin.getConfig().getString("reward-message");
+        loadEncouragementMessage();
+        loadStreakRewards();
+        loadStreakRewardMessages();
     }
 
     public void reloadConfig() {
@@ -56,5 +71,82 @@ public final class ConfigManager {
 
     public boolean isDebug() {
         return debug;
+    }
+
+    public NavigableMap<Integer, List<String>> getStreakRewards() {
+        return streakRewards;
+    }
+
+    public List<String> getOracleLines() {
+        return oracleLines;
+    }
+
+    public String getEncouragementMessage() {
+        return encouragementMessage;
+    }
+
+    private void loadStreakRewards() {
+        streakRewards.clear();
+
+        if (streaksSection == null) {
+            log.log(Level.WARNING, "No 'streaks' section in config.yml");
+            return;
+        }
+
+        ConfigurationSection rewardsSection = streaksSection.getConfigurationSection("rewards");
+        if (rewardsSection == null) {
+            log.log(Level.WARNING, "No 'streaks.rewards' section in config.yml");
+            return;
+        }
+
+        for (String key : rewardsSection.getKeys(false)) {
+            try {
+                int streakValue = Integer.parseInt(key);
+                List<String> commands = rewardsSection.getStringList(key);
+                if (commands.isEmpty()) {
+                    log.log(Level.WARNING, "No commands configured for streak-rewards.{0}", key);
+                    continue;
+                }
+                streakRewards.put(streakValue, commands);
+            } catch (NumberFormatException e) {
+                log.log(
+                        Level.WARNING,
+                        "Invalid streak-rewards key '" + key + "', expected integer",
+                        e);
+            }
+        }
+        log.log(Level.INFO, "Loaded {0} streak rewards", streakRewards.size());
+    }
+
+    private void loadStreakRewardMessages() {
+        oracleLines.clear();
+
+        if (streaksSection == null) {
+            log.log(Level.WARNING, "No 'streaks' section in config.yml");
+            return;
+        }
+
+        List<String> lines = streaksSection.getStringList("reward-messages");
+        if (lines.isEmpty()) {
+            log.log(Level.WARNING, "No 'streaks.reward-messages' configured in config.yml");
+            return;
+        }
+        oracleLines.addAll(lines);
+        log.log(Level.INFO, "Loaded {0} streak reward messages", oracleLines.size());
+    }
+
+    private void loadEncouragementMessage() {
+        if (streaksSection == null) {
+            log.log(Level.WARNING, "No 'streaks' section in config.yml");
+            return;
+        }
+
+        String message = streaksSection.getString("encouragement-message");
+        if (message == null || message.isEmpty()) {
+            log.log(Level.WARNING, "No 'streaks.encouragement-message' configured in config.yml");
+            return;
+        }
+        this.encouragementMessage = message;
+        log.log(Level.INFO, "Loaded encouragement message for streaks");
     }
 }

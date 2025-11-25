@@ -1,6 +1,6 @@
 name: Deploy via Pterodactyl API
 on:
-  pull_request:
+  push:
     branches:
       - stage
     

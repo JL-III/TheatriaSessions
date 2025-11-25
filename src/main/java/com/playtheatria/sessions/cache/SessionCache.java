@@ -16,13 +16,13 @@ import org.jetbrains.annotations.NotNull;
 
 public class SessionCache {
     private ConcurrentHashMap<UUID, Session> mappedSessions = new ConcurrentHashMap<>();
-    private final PLog log;
+    private final PLog logger;
 
-    public SessionCache(List<Session> sessions, PLog log) {
+    public SessionCache(List<Session> sessions, PLog logger) {
         for (Session session : sessions) {
             mappedSessions.put(session.getPlayerUUID(), session);
         }
-        this.log = log;
+        this.logger = logger;
     }
 
     public boolean hasSession(@NotNull UUID playerUUID) {
@@ -35,11 +35,11 @@ public class SessionCache {
             return new Err<>(
                     new Exception(
                             String.format(
-                                    "Failed to return a session from the SessionManager"
+                                    "Failed to return a session from SessionCache"
                                             + " mappedSessions for UUID: %s",
                                     playerUUID)));
         }
-        return new Ok<>(mappedSessions.get(playerUUID));
+        return new Ok<>(session);
     }
 
     public ConcurrentHashMap<UUID, Session> getSessions() {
@@ -47,7 +47,7 @@ public class SessionCache {
     }
 
     public void createNewSession(@NotNull UUID playerUUID, @NotNull String playerName) {
-        log.info(String.format("Creating session for %s", playerName));
+        logger.debugFmt("Creating session for %s", playerName);
         mappedSessions.put(playerUUID, new Session(playerUUID, playerName));
     }
 
@@ -56,7 +56,7 @@ public class SessionCache {
     }
 
     public void resetSessions() {
-        log.debug("Purging sessions.");
+        logger.debug("Purging sessions.");
         Set<UUID> onlinePlayers =
                 Bukkit.getOnlinePlayers().stream()
                         .map(Player::getUniqueId)
@@ -79,6 +79,6 @@ public class SessionCache {
         }
 
         mappedSessions = updatedSessions;
-        log.debug("Reset mapped sessions size: " + mappedSessions.size());
+        logger.debugFmt("Reset mapped sessions size: %s", mappedSessions.size());
     }
 }
