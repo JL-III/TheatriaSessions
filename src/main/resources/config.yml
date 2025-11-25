@@ -16,9 +16,9 @@ community-rewards-enabled: false
 reward-message: "The Oracle marks your presence. Your /daily-reward is delivered."
 
 # Placeholders are {player}, {player_uuid}, {world}, {streak}
-# no rewards for streaks less than 2
 streaks:
   encouragement-message: "Earn your /daily-reward again tomorrow for a streak reward!"
+  # no rewards for streaks less than 2
   rewards:
     2:
     - "cc give p dailyrewardcrate 1 {player}"

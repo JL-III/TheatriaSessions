@@ -212,11 +212,11 @@ public class StreakService {
             int remaining = nextKey - value;
             player.sendMessage(
                     Component.text(
-                                    "Next reward tier at "
+                                    "Next streak reward tier at "
                                             + nextKey
                                             + " days ("
                                             + remaining
-                                            + " more).")
+                                            + (remaining > 1 ? " more days)." : " more day)."))
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
         } else {
@@ -230,15 +230,16 @@ public class StreakService {
                             .decorate(TextDecoration.ITALIC));
         }
         player.sendMessage(
-                Component.text("Your streak is now ", NamedTextColor.YELLOW, TextDecoration.ITALIC)
+                Component.text(
+                                "Your /daily-reward streak is now ",
+                                NamedTextColor.YELLOW,
+                                TextDecoration.ITALIC)
                         .append(
                                 Component.text(
                                         String.valueOf(value),
                                         NamedTextColor.LIGHT_PURPLE,
                                         TextDecoration.ITALIC))
-                        .append(
-                                Component.text(
-                                        " days.", NamedTextColor.YELLOW, TextDecoration.ITALIC)));
+                        .append(Component.text(".", NamedTextColor.YELLOW, TextDecoration.ITALIC)));
 
         // give the reward for the floor tier
         for (String rewardCommand : commands) {
