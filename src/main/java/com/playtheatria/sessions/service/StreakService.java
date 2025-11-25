@@ -212,11 +212,11 @@ public class StreakService {
             int remaining = nextKey - value;
             player.sendMessage(
                     Component.text(
-                                    "Next streak reward tier at "
+                                    "A greater boon awakens at "
                                             + nextKey
                                             + " days ("
                                             + remaining
-                                            + (remaining > 1 ? " more days)." : " more day)."))
+                                            + (remaining > 1 ? " days away)." : " day away)."))
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
         } else {
