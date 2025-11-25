@@ -15,29 +15,31 @@ community-rewards-enabled: false
 
 reward-message: "The Oracle marks your presence. Your /daily-reward is delivered."
 
-# Placeholder is %d for streak count
-streak-reward-messages:
-- "The Oracle observes your return. %d days sustained. A reward forms in your hands."
-- "Your pattern persists. %d days aligned with Theatria. The Oracle grants you this boon."
-- "The currents shift around you. %d days endured. The Oracle releases a reward."
-- "Constancy is rare. You carry it. %d-day streak confirmed. The Oracle responds."
-- "You walk the same path again. %d days straight. The Oracle honors your persistence."
-- "Your presence stabilizes the old mechanisms. %d days. The Oracle answers."
-- "Another day returned. %d days in sequence. The Oracle rewards your devotion."
-- "Theatria bends around your rhythm. %d days secured. The Oracle grants its gift."
-- "Your name echoes in the Oracle’s chamber. %d days. A reward is manifested."
-- "You resonate with the world again. %d days in alignment. The Oracle acknowledges you."
-
 # Placeholders are {player}, {player_uuid}, {world}, {streak}
 # no rewards for streaks less than 2
-streak-rewards:
-  2:
-  - "cc give p dailyrewardcrate 1 {player}"
-  3:
-  - "cc give p dailyrewardcrate 2 {player}"
-  7:
-  - "cc give p dailyrewardcrate 3 {player}"
-  14:
-  - "cc give p dailyrewardcrate 5 {player}"
-  30:
-  - "cc give p dailyrewardcrate 10 {player}"
+streaks:
+  encouragement-message: "Earn your /daily-reward again tomorrow for a streak reward!"
+  rewards:
+    2:
+    - "cc give p dailyrewardcrate 1 {player}"
+    3:
+    - "cc give p dailyrewardcrate 2 {player}"
+    7:
+    - "cc give p dailyrewardcrate 3 {player}"
+    14:
+    - "cc give p dailyrewardcrate 5 {player}"
+    30:
+    - "cc give p dailyrewardcrate 10 {player}"
+
+  # Placeholder is %d for streak count
+  reward-messages:
+  - "The Oracle observes your return. %d days sustained. A reward forms in your hands."
+  - "Your pattern persists. %d days aligned with Theatria. The Oracle grants you this boon."
+  - "The currents shift around you. %d days endured. The Oracle releases a reward."
+  - "Constancy is rare. You carry it. %d-day streak confirmed. The Oracle responds."
+  - "You walk the same path again. %d days straight. The Oracle honors your persistence."
+  - "Your presence stabilizes the old mechanisms. %d days. The Oracle answers."
+  - "Another day returned. %d days in sequence. The Oracle rewards your devotion."
+  - "Theatria bends around your rhythm. %d days secured. The Oracle grants its gift."
+  - "Your name echoes in the Oracle’s chamber. %d days. A reward is manifested."
+  - "You resonate with the world again. %d days in alignment. The Oracle acknowledges you."

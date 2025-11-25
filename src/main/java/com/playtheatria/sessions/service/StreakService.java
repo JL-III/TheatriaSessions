@@ -180,7 +180,7 @@ public class StreakService {
         // start rewards at streaks 2 and above
         if (value < 2) {
             player.sendMessage(
-                    Component.text("Earn your /daily-reward tomorrow for a streak reward!")
+                    Component.text(cm.getEncouragementMessage())
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
             return;
