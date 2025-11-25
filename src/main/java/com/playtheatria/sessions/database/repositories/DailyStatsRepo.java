@@ -33,15 +33,16 @@ public class DailyStatsRepo {
         try {
             DailyStats dailyStats = dao.queryForId("0");
             if (dailyStats == null) {
-                log.info("No DailyStats found in database with the id of 0. Creating a new entry.");
+                log.debug(
+                        "No DailyStats found in database with the id of 0. Creating a new entry.");
                 dailyStats = new DailyStats(LocalDate.now(TimeUtils.timeZone));
                 dao.create(dailyStats);
             } else {
-                log.info("Loaded DailyStats from the database.");
+                log.debug("Loaded DailyStats from the database.");
             }
             return new Ok<>(dailyStats);
         } catch (SQLException exception) {
-            log.info("Failed to load DailyStats from the database: " + exception.getMessage());
+            log.debugFmt("Failed to load DailyStats from the database: %s", exception.getMessage());
             return new Err<>(
                     new IllegalStateException("SQLException while managing DailyStats", exception));
         }
@@ -54,10 +55,11 @@ public class DailyStatsRepo {
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(
             DailyStats dailyStats) {
+        log.debugFmt("[createOrUpdate] Running on thread: %s", Thread.currentThread().getName());
         log.debug("createOrUpdate called on a dailyStats");
-        log.debug(String.format("Date %s", dailyStats.getDate()));
-        log.debug(String.format("PlayersJoined: %s", dailyStats.getPlayersJoined()));
-        log.debug(String.format("RewardsEarned: %s", dailyStats.getRewardsEarned()));
+        log.debugFmt("Date %s", dailyStats.getDate().toString());
+        log.debugFmt("PlayersJoined: %s", dailyStats.getPlayersJoined());
+        log.debugFmt("RewardsEarned: %s", dailyStats.getRewardsEarned());
         try {
             return new Ok<>(dao.createOrUpdate(dailyStats));
         } catch (SQLException exception) {

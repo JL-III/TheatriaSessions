@@ -12,3 +12,5 @@ commands:
     usage: /<command>
   activity:
     usage: /<command>
+  streaks:
+    usage: /<command>

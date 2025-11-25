@@ -12,13 +12,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class OneSecondTimerTask extends BukkitRunnable {
+public class OneSecondTimer extends BukkitRunnable {
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
     private final Essentials essentials;
     private final PLog log;
 
-    public OneSecondTimerTask(
+    public OneSecondTimer(
             DailyStatsService dailyStatsService,
             SessionService sessionService,
             Essentials essentials,
@@ -42,13 +42,12 @@ public class OneSecondTimerTask extends BukkitRunnable {
                 continue;
             }
 
-            log.debug(
-                    String.format(
-                            "session for %s time: %s",
-                            session.getPlayerName(), session.incrementSessionTime()));
+            log.debugFmt(
+                    "session for %s time: %s",
+                    new Object[] {session.getPlayerName(), session.incrementSessionTime()});
 
             if (!session.hasEarnedReward() || session.isRewarded()) continue;
-            Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(session));
+            Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(player.getUniqueId()));
         }
         dailyStatsService.setPlayersJoined(sessionService.getSessionsCount());
     }

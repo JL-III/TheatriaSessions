@@ -26,7 +26,7 @@ public class SessionRepo {
     public Result<List<Session>, RepositoryException> load() {
         try {
             List<Session> items = dao.queryForAll();
-            log.debug("Loaded " + items.size() + " sessions from the database.");
+            log.debugFmt("Loaded %s sessions from the database.", items.size());
             return new Ok<>(items);
         } catch (SQLException e) {
             return new Err<>(
@@ -40,11 +40,12 @@ public class SessionRepo {
      * @return Result containing the CreateOrUpdateStatus if successful, or a PersistenceException if something failed.
      */
     public Result<Dao.CreateOrUpdateStatus, PersistenceException> createOrUpdate(Session session) {
-        log.debug("Persisting Session" + session);
+        log.debugFmt("Persisting Session %s", session);
+        log.debugFmt("[createOrUpdate] Running on thread: %s", Thread.currentThread().getName());
         try {
             return new Ok<>(dao.createOrUpdate(session));
         } catch (SQLException exception) {
-            log.info("CreateOrUpdate failed" + session);
+            log.errFmt("CreateOrUpdate failed %s", session);
             return new Err<>(
                     new PersistenceException("Failed to create or update Session", exception));
         }
