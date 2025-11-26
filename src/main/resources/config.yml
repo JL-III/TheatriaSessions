@@ -13,6 +13,7 @@ session:
   rewards:
   - "cc give p dailyrewardcrate 5 {player}"
   reward-message: "The Oracle marks your presence. Your /daily-reward is delivered."
+  notify-message: "Half the span has passed. Daily reward in %d minutes."
 
 community-rewards-enabled: false
 
