@@ -7,6 +7,9 @@ backup-duration: 600
 # How many seconds until the first backup after a reboot
 initial-backup-duration: 600
 
+# How many seconds a player must be online to earn a reward
+reward-threshold: 1800
+
 # Placeholders are {player}, {player_uuid}, {world}
 rewards:
   - "cc give p dailyrewardcrate 5 {player}"
@@ -17,6 +20,7 @@ reward-message: "The Oracle marks your presence. Your /daily-reward is delivered
 
 # Placeholders are {player}, {player_uuid}, {world}, {streak}
 streaks:
+  enabled: false
   encouragement-message: "Earn your /daily-reward again tomorrow for a streak reward!"
   # no rewards for streaks less than 2
   rewards:
