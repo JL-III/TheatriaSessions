@@ -1,22 +1,20 @@
 debug: false
 
 # Changing these values requires a restart
-
 # How many seconds between backups
 backup-duration: 600
 # How many seconds until the first backup after a reboot
 initial-backup-duration: 600
 
-# How many seconds a player must be online to earn a reward
-reward-threshold: 1800
-
-# Placeholders are {player}, {player_uuid}, {world}
-rewards:
+session:
+  # How many seconds a player must be online to earn a reward
+  threshold: 1800
+  # Placeholders are {player}, {player_uuid}, {world}
+  rewards:
   - "cc give p dailyrewardcrate 5 {player}"
+  reward-message: "The Oracle marks your presence. Your /daily-reward is delivered."
 
 community-rewards-enabled: false
-
-reward-message: "The Oracle marks your presence. Your /daily-reward is delivered."
 
 # Placeholders are {player}, {player_uuid}, {world}, {streak}
 streaks:
