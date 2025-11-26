@@ -74,7 +74,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 Util.formatMessage(
                                         "Number of Sessions", sessionService.getSessionsCount()));
                         for (Session session : sessionService.getSessions()) {
-                            sender.sendMessage(Util.formatAdminMessage(session));
+                            sender.sendMessage(Util.formatAdminMessage(session, configManager));
                         }
                         return true;
                     }
@@ -99,7 +99,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             sender.sendMessage(
                                     Util.formatMessage(
                                             "Progress",
-                                            session.getSessionTime() + "/" + session.THRESHOLD));
+                                            session.getSessionTime()
+                                                    + "/"
+                                                    + configManager.getRewardThreshold()));
                             sender.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
                             sender.sendMessage(
                                     Util.formatMessage("EarnedReward", session.isRewarded()));
@@ -272,7 +274,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Component.text(
                                         String.format(
                                                 "  • Progress: %s/%s",
-                                                session.getSessionTime(), session.THRESHOLD))
+                                                session.getSessionTime(),
+                                                configManager.getRewardThreshold()))
                                 .color(textColorThree),
                         Component.text("  • Earned Reward: ")
                                 .color(textColorThree)

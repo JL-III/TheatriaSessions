@@ -1,5 +1,6 @@
 package com.playtheatria.sessions.utils;
 
+import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -52,20 +53,20 @@ public class Util {
                 .append(Component.text("] ").color(TextColor.fromHexString(Util.COLOR_ONE)));
     }
 
-    public static Component formatPlayerMessage(Session session) {
+    public static Component formatPlayerMessage(Session session, ConfigManager configManager) {
         double sessionMinutes =
                 Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
-        double thresholdMinutes = session.THRESHOLD / 60.0;
+        double thresholdMinutes = configManager.getRewardThreshold() / 60.0;
         return Util.formatIndicator(session)
                 .append(
                         Util.formatProgress(sessionMinutes, thresholdMinutes)
                                 .color(TextColor.fromHexString(COLOR_THREE)));
     }
 
-    public static Component formatAdminMessage(Session session) {
+    public static Component formatAdminMessage(Session session, ConfigManager configManager) {
         double sessionMinutes =
                 Math.floor(session.getSessionTime() / 6.0) / 10.0; // Truncate to 1 decimal place
-        double thresholdMinutes = session.THRESHOLD / 60.0;
+        double thresholdMinutes = configManager.getRewardThreshold() / 60.0;
         return Util.formatIndicator(session)
                 .append(
                         Component.text(Util.formatToLengthWithEllipsis(session.getPlayerName(), 12))
