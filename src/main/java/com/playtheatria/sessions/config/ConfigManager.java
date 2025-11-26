@@ -20,6 +20,7 @@ public final class ConfigManager {
     private int threshold;
     private List<String> rewards;
     private String rewardMessage;
+    private String notifyMessage;
 
     private boolean communityRewardsEnabled;
 
@@ -45,6 +46,7 @@ public final class ConfigManager {
         loadThreshold();
         loadRewards();
         loadRewardMessage();
+        loadNotifyMessage();
         this.streaksSection = plugin.getConfig().getConfigurationSection("streaks");
         loadSteaksEnabled();
         loadEncouragementMessage();
@@ -101,6 +103,10 @@ public final class ConfigManager {
         return this.streaksEnabled;
     }
 
+    public String getNotifyMessage() {
+        return this.notifyMessage;
+    }
+
     private void loadThreshold() {
         if (sessionSection == null) {
             log.log(Level.WARNING, "No 'session' section in config.yml");
@@ -130,7 +136,17 @@ public final class ConfigManager {
         }
         this.rewardMessage = sessionSection.getString("reward-message");
     }
- 
+
+    private void loadNotifyMessage() {
+        if (sessionSection == null) {
+            log.log(Level.WARNING, "No 'session' section in config.yml");
+            // default to empty array.
+            this.rewardMessage = "";
+            return;
+        }
+        this.rewardMessage = sessionSection.getString("notify-message");
+    }
+
     private void loadSteaksEnabled() {
         if (streaksSection == null) {
             log.log(Level.WARNING, "No 'streaks' section in config.yml");

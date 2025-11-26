@@ -56,11 +56,7 @@ public class OneSecondTimer extends BukkitRunnable {
                 int remaining = threshold - incrementValue;
                 int minutes = remaining / 60;
                 player.sendMessage(
-                        Component.text(
-                                        String.format(
-                                                "Half the span has passed. Daily reward in %d"
-                                                        + " minutes.",
-                                                (minutes)))
+                        Component.text(String.format(cm.getNotifyMessage(), (minutes)))
                                 .color(NamedTextColor.YELLOW)
                                 .decorate(TextDecoration.ITALIC));
             }
