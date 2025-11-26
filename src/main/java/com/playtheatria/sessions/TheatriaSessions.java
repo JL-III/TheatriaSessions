@@ -81,7 +81,7 @@ public final class TheatriaSessions extends JavaPlugin {
         dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
 
         databaseTask = new DatabaseTask(dailyStatsService, sessionService, streakService, log);
-        oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, log);
+        oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, cm, log);
 
         log.debug(
                 String.format(
