@@ -15,12 +15,15 @@ public final class ConfigManager {
     private final long backupDuration;
     private final long initialBackupDuration;
 
+    private Integer threshold;
+
     private List<String> rewards;
     private final NavigableMap<Integer, List<String>> streakRewards = new TreeMap<>();
     private final List<String> oracleLines = new ArrayList<>();
     private String encouragementMessage;
     private boolean communityRewardsEnabled;
     private String rewardMessage;
+    private boolean streaksEnabled;
     public boolean debug;
     private ConfigurationSection streaksSection;
 
@@ -39,6 +42,8 @@ public final class ConfigManager {
         this.rewards = plugin.getConfig().getStringList("rewards");
         this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
         this.rewardMessage = plugin.getConfig().getString("reward-message");
+        this.threshold = plugin.getConfig().getInt("reward-threshold");
+        loadSteaksEnabled();
         loadEncouragementMessage();
         loadStreakRewards();
         loadStreakRewardMessages();
@@ -83,6 +88,22 @@ public final class ConfigManager {
 
     public String getEncouragementMessage() {
         return encouragementMessage;
+    }
+
+    public Integer getRewardThreshold() {
+        return threshold;
+    }
+
+    public boolean isStreaksEnabled() {
+        return this.streaksEnabled;
+    }
+
+    private void loadSteaksEnabled() {
+        if (streaksSection == null) {
+            log.log(Level.WARNING, "No 'streaks' section in config.yml");
+            return;
+        }
+        this.streaksEnabled = streaksSection.getBoolean("enabled");
     }
 
     private void loadStreakRewards() {
