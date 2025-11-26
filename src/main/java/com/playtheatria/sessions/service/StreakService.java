@@ -214,9 +214,9 @@ public class StreakService {
                     Component.text(
                                     "A greater boon awakens at "
                                             + nextKey
-                                            + " days ("
+                                            + " days. "
                                             + remaining
-                                            + (remaining > 1 ? " days away)." : " day away)."))
+                                            + (remaining > 1 ? " days remain." : " day remains."))
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
         } else {
