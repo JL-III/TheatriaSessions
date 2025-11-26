@@ -141,10 +141,10 @@ public final class ConfigManager {
         if (sessionSection == null) {
             log.log(Level.WARNING, "No 'session' section in config.yml");
             // default to empty array.
-            this.rewardMessage = "";
+            this.notifyMessage = "";
             return;
         }
-        this.rewardMessage = sessionSection.getString("notify-message");
+        this.notifyMessage = sessionSection.getString("notify-message");
     }
 
     private void loadSteaksEnabled() {
