@@ -1,25 +1,21 @@
 package com.playtheatria.sessions.menus;
 
+import com.playtheatria.sessions.utils.Util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import com.playtheatria.sessions.utils.Util;
 
 public class Menu {
     private final Component title;
@@ -65,7 +61,7 @@ public class Menu {
         }
         for (Map.Entry<String, List<Entry>> entry : entries.entrySet()) {
             builder.append(Component.newline())
-                    .append(Component.text(entry.getKey()).color(NamedTextColor.WHITE));
+                    .append(Component.text(entry.getKey()).color(secondaryColor));
 
             final AtomicInteger entriesCount = new AtomicInteger();
             entry.getValue().stream()
@@ -243,7 +239,7 @@ public class Menu {
         private final String name;
         @Nullable private String description;
         @Nullable private String url;
-        private TextColor color = TextColor.color(0xAAAAAA);
+        private TextColor color = TextColor.fromHexString(Util.COLOR_THREE);
 
         private Entry(@NotNull String name) {
             this.name = name;
