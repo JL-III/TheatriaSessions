@@ -212,6 +212,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     public void sendSessionMessage(Player player, Session session) {
         final Menu menu =
                 Menu.builder()
+                        .themeColor(TextColor.fromHexString(Util.COLOR_TWO))
+                        .secondaryColor(TextColor.fromHexString(Util.COLOR_THREE))
                         .title(
                                 Component.text(
                                         String.format(
@@ -257,8 +259,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                         .text("streaks")
                                         .icon("⭐")
                                         .color(TextColor.color(0x6773f5)))
-                        .themeColor(TextColor.fromHexString(Util.COLOR_TWO))
-                        .secondaryColor(TextColor.fromHexString(Util.COLOR_THREE))
                         .build();
         player.sendMessage(menu.toComponent());
     }
