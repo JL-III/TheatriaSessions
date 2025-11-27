@@ -55,7 +55,11 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
         final Menu menu =
                 Menu.builder()
-                        .title(Component.text("Example"))
+                        .title(
+                                Component.text(
+                                        String.format(
+                                                "Daily-Reward - %s",
+                                                dailyStatsService.getDate().toString())))
                         .description(Component.text("An example plugin"))
                         .entries(
                                 "Entry 1",
@@ -66,8 +70,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 "Example",
                                 Menu.Entry.of("Contributor 1").description("Code, refactoring"))
                         .buttons(
-                                Menu.Cmd.of("activity").text("activity text").icon("⛏"),
-                                Menu.Cmd.of("streaks show-all")
+                                Menu.Cmd.of("/activity").text("activity text").icon("⛏"),
+                                Menu.Cmd.of("/streaks show-all")
                                         .text("streaks")
                                         .icon("⭐")
                                         .color(TextColor.color(0x6773f5)))
