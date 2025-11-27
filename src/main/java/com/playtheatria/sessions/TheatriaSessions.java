@@ -95,7 +95,8 @@ public final class TheatriaSessions extends JavaPlugin {
                 List.of(
                         new CommandRecord(
                                 "session",
-                                new SessionCommand(dailyStatsService, sessionService, cm)),
+                                new SessionCommand(
+                                        dailyStatsService, sessionService, streakService, cm)),
                         new CommandRecord("activity", new ActivityCommand(sessionService)),
                         new CommandRecord("streaks", new StreakCommand(streakService))));
         log.info("Loaded plugin.");

@@ -5,10 +5,12 @@ import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
+import com.playtheatria.sessions.database.data.Streak;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.menus.Menu;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
+import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.utils.Util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -28,17 +30,19 @@ import org.jetbrains.annotations.Nullable;
 
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private final DailyStatsService dailyStatsService;
-
     private final SessionService sessionService;
+    private final StreakService streakService;
     private final ConfigManager configManager;
 
     public SessionCommand(
             DailyStatsService dailyStatsService,
             SessionService sessionService,
+            StreakService streakService,
             ConfigManager configManager) {
         this.dailyStatsService = dailyStatsService;
 
         this.sessionService = sessionService;
+        this.streakService = streakService;
         this.configManager = configManager;
     }
 
@@ -54,7 +58,14 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 if (sender instanceof Player player) {
                     switch (sessionService.getSession(player.getUniqueId())) {
                         case Ok<Session, Exception> ok -> {
-                            sendSessionMessage(player, ok.value());
+                            switch (streakService.getStreak(player.getUniqueId())) {
+                                case Ok<Streak, Exception> ok_streak -> {
+                                    sendSessionMessage(player, ok.value(), ok_streak.value());
+                                }
+                                case Err<Streak, Exception> err_streak -> {
+                                    player.sendMessage(err_streak.error().getMessage());
+                                }
+                            }
                         }
                         case Err<Session, Exception> err -> {
                             player.sendMessage(err.error().getMessage());
@@ -209,7 +220,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    public void sendSessionMessage(Player player, Session session) {
+    public void sendSessionMessage(Player player, Session session, Streak streak) {
         TextColor fromHexString = TextColor.fromHexString(Util.COLOR_TWO);
         TextColor fromHexString2 = TextColor.fromHexString(Util.COLOR_THREE);
         final Menu menu =
@@ -256,12 +267,27 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                         .description(
                                                 "Indicates whether you have earned your daily"
                                                         + " reward for today."))
-                        .buttons(
-                                Menu.Cmd.of("/activity").text("activity text").icon("⛏"),
-                                Menu.Cmd.of("/streaks show-all")
-                                        .text("streaks")
-                                        .icon("⭐")
-                                        .color(TextColor.color(0x6773f5)))
+                        .entries(
+                                "   Current Streak: ",
+                                Menu.Entry.of(String.format(" %d days", streak.getCurrentStreak()))
+                                        .description(
+                                                "The number of consecutive days you have earned"
+                                                        + " your daily reward."))
+                        .entries(
+                                "   Longest Streak: ",
+                                Menu.Entry.of(String.format(" %d days", streak.getLongestStreak()))
+                                        .description(
+                                                "Your longest streak of consecutive days earning"
+                                                        + " your daily reward."))
+                        .entries(
+                                "   Last Earned: ",
+                                Menu.Entry.of(
+                                                String.format(
+                                                        " %s",
+                                                        streak.getLastEarnedDate() == null
+                                                                ? "N/A"
+                                                                : streak.getLastEarnedDate()))
+                                        .description("The last date you earned your daily reward."))
                         .build();
         player.sendMessage(menu.toComponent());
     }
