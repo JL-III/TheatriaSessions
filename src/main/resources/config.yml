@@ -3,7 +3,6 @@ debug: false
 # Changing these values requires a restart
 # How many seconds between backups
 backup-duration: 600
-# How many seconds until the first backup after a reboot
 initial-backup-duration: 600
 
 session:
@@ -16,6 +15,9 @@ session:
   notify-message: "Half the span has passed. Daily reward in %d minutes."
 
 community-rewards-enabled: false
+
+# How many seconds between sending daily-reward message and streak message
+streak-delay: 3
 
 # Placeholders are {player}, {player_uuid}, {world}, {streak}
 streaks:

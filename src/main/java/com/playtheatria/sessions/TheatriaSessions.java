@@ -134,7 +134,7 @@ public final class TheatriaSessions extends JavaPlugin {
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new DayChange(dss, ss, log), this);
         pm.registerEvents(new PlayerJoin(ss, sts, log), this);
-        pm.registerEvents(new RewardPlayer(ss, sts, cm, log), this);
+        pm.registerEvents(new RewardPlayer(this, ss, sts, cm, log), this);
         pm.registerEvents(new DailyStatsRewardCount(dss, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
     }

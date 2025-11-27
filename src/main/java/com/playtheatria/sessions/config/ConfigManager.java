@@ -23,6 +23,7 @@ public final class ConfigManager {
     private String notifyMessage;
 
     private boolean communityRewardsEnabled;
+    private int streakDelay;
 
     private ConfigurationSection streaksSection;
     private boolean streaksEnabled;
@@ -42,6 +43,7 @@ public final class ConfigManager {
         this.debug = plugin.getConfig().getBoolean("debug");
         this.rewardMessage = plugin.getConfig().getString("reward-message");
         this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
+        this.streakDelay = plugin.getConfig().getInt("streak-delay");
         this.sessionSection = plugin.getConfig().getConfigurationSection("session");
         loadThreshold();
         loadRewards();
@@ -105,6 +107,10 @@ public final class ConfigManager {
 
     public String getNotifyMessage() {
         return this.notifyMessage;
+    }
+
+    public int getStreakDelay() {
+        return this.streakDelay;
     }
 
     private void loadThreshold() {
