@@ -219,7 +219,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                 dailyStatsService.getDate().toString())))
                         .entries("⭐ Community Stats")
                         .entries(
-                                "- Players Joined:",
+                                "  Players Joined:",
                                 Menu.Entry.of(
                                                 String.format(
                                                         " %s",
@@ -230,13 +230,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                         + " above can use /activity to see who"
                                                         + " has joined today."))
                         .entries(
-                                "- Players Earned:",
+                                "  Players Earned:",
                                 Menu.Entry.of(
                                         String.format(" %s", dailyStatsService.getRewardsEarned())))
-                        .entries("")
+                        .entries("", Menu.Entry.of(" "))
                         .entries("⭐ Personal Stats")
                         .entries(
-                                "- Progress:",
+                                "  Progress:",
                                 Menu.Entry.of(
                                                 String.format(
                                                         " %s/%s",
@@ -246,7 +246,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                 "Your current progress towards"
                                                         + " earning your daily reward."))
                         .entries(
-                                "- Earned Reward: ",
+                                "  Earned Reward: ",
                                 Menu.Entry.of(session.isRewarded() ? " ✅" : " ❌")
                                         .description(
                                                 "Indicates whether you have earned your daily"
@@ -257,52 +257,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                         .text("streaks")
                                         .icon("⭐")
                                         .color(TextColor.color(0x6773f5)))
+                        .themeColor(TextColor.fromHexString(Util.COLOR_TWO))
+                        .secondaryColor(TextColor.fromHexString(Util.COLOR_THREE))
                         .build();
         player.sendMessage(menu.toComponent());
     }
-
-    // public void sendSessionMessage(CommandSender sender, Session session) {
-    //     TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
-    //     TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
-
-    //     List.of(
-    //                     Component.text(
-    //                                     String.format(
-    //                                             "Daily-Reward - %s",
-    //                                             dailyStatsService.getDate().toString()))
-    //                             .decorate(TextDecoration.UNDERLINED)
-    //                             .color(textColorTwo),
-    //                     Component.text("⭐ Community Stats").color(textColorTwo),
-    //                     Component.text(
-    //                                     String.format(
-    //                                             "  • Players Joined %s",
-    //                                             dailyStatsService.getPlayersJoined()))
-    //                             .color(textColorThree)
-    //                             .hoverEvent(
-    //                                     HoverEvent.showText(
-    //                                             Component.text(
-    //                                                     ))),
-    //                     Component.text(
-    //                                     String.format(
-    //                                             "  • Players Earned %s",
-    //                                             dailyStatsService.getRewardsEarned()))
-    //                             .color(textColorThree)
-    //                             .hoverEvent(
-    //                                     HoverEvent.showText(
-    //                                             Component.text(
-    //                                                     "The number of players that have earned
-    // a"
-    //                                                             + " /daily-reward today."))),
-    //                     Component.text("⭐ Personal Stats").color(textColorTwo),
-    //                     Component.text(
-    //                                     String.format(
-    //                                             "  • Progress: %s/%s",
-    //                                             session.getSessionTime(),
-    //                                             configManager.getRewardThreshold()))
-    //                             .color(textColorThree),
-    //                     Component.text("  • Earned Reward: ")
-    //                             .color(textColorThree)
-    //                             .append(Util.formatIndicator(session)))
-    //             .forEach(sender::sendMessage);
-    // }
 }

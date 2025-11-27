@@ -61,9 +61,7 @@ public class Menu {
         }
         for (Map.Entry<String, List<Entry>> entry : entries.entrySet()) {
             builder.append(Component.newline())
-                    .append(
-                            Component.text(entry.getKey())
-                                    .color(NamedTextColor.WHITE));
+                    .append(Component.text(entry.getKey()).color(NamedTextColor.WHITE));
 
             final AtomicInteger entriesCount = new AtomicInteger();
             entry.getValue().stream()
@@ -136,7 +134,10 @@ public class Menu {
          * @param themeColor The resource theme color
          * @return The {@link Builder}
          */
-        @NotNull public Builder themeColor(@NotNull TextColor themeColor) {
+        @NotNull public Builder themeColor(TextColor themeColor) {
+            if (themeColor == null) {
+                throw new IllegalArgumentException("Theme color cannot be null");
+            }
             this.themeColor = themeColor;
             return this;
         }
@@ -147,7 +148,10 @@ public class Menu {
          * @param secondaryColor The resource secondary color
          * @return The {@link Builder}
          */
-        @NotNull public Builder secondaryColor(@NotNull TextColor secondaryColor) {
+        @NotNull public Builder secondaryColor(TextColor secondaryColor) {
+            if (secondaryColor == null) {
+                throw new IllegalArgumentException("Secondary color cannot be null");
+            }
             this.secondaryColor = secondaryColor;
             return this;
         }

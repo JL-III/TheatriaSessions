@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 
 public class Util {
     public static final String COLOR_ONE = "#f5428a";
-    public static final String COLOR_TWO = "#42f598";
-    public static final String COLOR_THREE = "#fff8bd";
+    public static final @NotNull String COLOR_TWO = "#42f598";
+    public static final @NotNull String COLOR_THREE = "#fff8bd";
     public static final String PERMISSION_ALLOW = "theatria.sessions.allow";
     public static final String PERMISSION_ADMIN = "theatria.sessions.admin";
     public static final String PERMISSION_STREAKS_COMMAND = "theatria.streaks.allow";
