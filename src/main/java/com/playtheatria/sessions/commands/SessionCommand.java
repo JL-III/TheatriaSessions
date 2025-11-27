@@ -2,11 +2,9 @@ package com.playtheatria.sessions.commands;
 
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
-import com.playtheatria.jliii.generalutils.result.Result;
 import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
-import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.menus.Menu;
 import com.playtheatria.sessions.service.DailyStatsService;
@@ -17,9 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -53,33 +49,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull String label,
             @NotNull String[] args) {
         if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
-        final Menu menu =
-                Menu.builder()
-                        .title(
-                                Component.text(
-                                        String.format(
-                                                "Daily-Reward - %s",
-                                                dailyStatsService.getDate().toString())))
-                        .description(Component.text("An example plugin"))
-                        .entries(
-                                "Entry 1",
-                                Menu.Entry.of("NessXXIII")
-                                        .description("Click to visit our website")
-                                        .url("https://docs.playtheatria.com"))
-                        .entries(
-                                "Example",
-                                Menu.Entry.of("Contributor 1").description("Code, refactoring"))
-                        .buttons(
-                                Menu.Cmd.of("/activity").text("activity text").icon("⛏"),
-                                Menu.Cmd.of("/streaks show-all")
-                                        .text("streaks")
-                                        .icon("⭐")
-                                        .color(TextColor.color(0x6773f5)))
-                        .build();
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
-                    player.sendMessage(menu.toComponent());
                     switch (sessionService.getSession(player.getUniqueId())) {
                         case Ok<Session, Exception> ok -> {
                             sendSessionMessage(player, ok.value());
@@ -237,74 +209,99 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    public void sendSessionMessage(CommandSender sender, Session session) {
-        Result<RewardTier, Exception> rewardTier =
-                RewardTier.getNearestTier(dailyStatsService.getRewardsEarned());
-        @SuppressWarnings("unused")
-        String rewardTierName =
-                rewardTier instanceof Ok<RewardTier, Exception> ok ? ok.value().name() : "0";
-        @SuppressWarnings("unused")
-        String rewardBonus =
-                rewardTier instanceof Ok<RewardTier, Exception> ok
-                        ? ok.value().getPercentage()
-                        : "0%";
-        TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
-        TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
-
-        List.of(
-                        Component.text(
+    public void sendSessionMessage(Player player, Session session) {
+        final Menu menu =
+                Menu.builder()
+                        .title(
+                                Component.text(
                                         String.format(
                                                 "Daily-Reward - %s",
-                                                dailyStatsService.getDate().toString()))
-                                .decorate(TextDecoration.UNDERLINED)
-                                .color(textColorTwo),
-                        Component.text("⭐ Community Stats").color(textColorTwo),
-                        Component.text(
-                                        String.format(
-                                                "  • Players Joined %s",
-                                                dailyStatsService.getPlayersJoined()))
-                                .color(textColorThree)
-                                .hoverEvent(
-                                        HoverEvent.showText(
-                                                Component.text(
-                                                        "The number of players that have joined the"
-                                                            + " server today. Supporter Rank and"
-                                                            + " above can use /activity to see who"
-                                                            + " has joined today."))),
-                        Component.text(
-                                        String.format(
-                                                "  • Players Earned %s",
-                                                dailyStatsService.getRewardsEarned()))
-                                .color(textColorThree)
-                                .hoverEvent(
-                                        HoverEvent.showText(
-                                                Component.text(
-                                                        "The number of players that have earned a"
-                                                                + " /daily-reward today."))),
-                        //                Component.text(String.format("  • Community Reward Tier:
-                        // %s", rewardTierName))
-                        //                        .color(textColorThree)
-                        //
-                        // .hoverEvent(HoverEvent.showText(Component.text("The current reward tier
-                        // for the community. More players earning their /daily-reward will increase
-                        // this. The highest tier is 5."))),
-                        //                Component.text(String.format("      • Community Sell Hand
-                        // Bonus: %s", rewardBonus))
-                        //                        .color(textColorThree)
-                        //
-                        // .hoverEvent(HoverEvent.showText(Component.text("The bonus players receive
-                        // from the community reward tier when using /sell hand. This resets
-                        // daily."))),
-                        Component.text("⭐ Personal Stats").color(textColorTwo),
-                        Component.text(
-                                        String.format(
-                                                "  • Progress: %s/%s",
-                                                session.getSessionTime(),
-                                                configManager.getRewardThreshold()))
-                                .color(textColorThree),
-                        Component.text("  • Earned Reward: ")
-                                .color(textColorThree)
-                                .append(Util.formatIndicator(session)))
-                .forEach(sender::sendMessage);
+                                                dailyStatsService.getDate().toString())))
+                        .entries("⭐ Community Stats")
+                        .entries(
+                                "Players Joined",
+                                Menu.Entry.of(
+                                                String.format(
+                                                        " %s",
+                                                        dailyStatsService.getPlayersJoined()))
+                                        .description(
+                                                "The number of players that have joined the"
+                                                        + " server today. Supporter Rank and"
+                                                        + " above can use /activity to see who"
+                                                        + " has joined today."))
+                        .entries(
+                                "Players Earned",
+                                Menu.Entry.of(
+                                        String.format(" %s", dailyStatsService.getRewardsEarned())))
+                        .entries("⭐ Personal Stats")
+                        .entries(
+                                "Progress",
+                                Menu.Entry.of(
+                                                String.format(
+                                                        " %s/%s",
+                                                        session.getSessionTime(),
+                                                        configManager.getRewardThreshold()))
+                                        .description(
+                                                "Your current progress towards"
+                                                        + " earning your daily reward."))
+                        .entries(
+                                "Earned Reward",
+                                Menu.Entry.of(session.isRewarded() ? " ✅" : " ❌")
+                                        .description(
+                                                "Indicates whether you have earned your daily"
+                                                        + " reward for today."))
+                        .buttons(
+                                Menu.Cmd.of("/activity").text("activity text").icon("⛏"),
+                                Menu.Cmd.of("/streaks show-all")
+                                        .text("streaks")
+                                        .icon("⭐")
+                                        .color(TextColor.color(0x6773f5)))
+                        .build();
+        player.sendMessage(menu.toComponent());
     }
+
+    // public void sendSessionMessage(CommandSender sender, Session session) {
+    //     TextColor textColorTwo = TextColor.fromHexString(Util.COLOR_TWO);
+    //     TextColor textColorThree = TextColor.fromHexString(Util.COLOR_THREE);
+
+    //     List.of(
+    //                     Component.text(
+    //                                     String.format(
+    //                                             "Daily-Reward - %s",
+    //                                             dailyStatsService.getDate().toString()))
+    //                             .decorate(TextDecoration.UNDERLINED)
+    //                             .color(textColorTwo),
+    //                     Component.text("⭐ Community Stats").color(textColorTwo),
+    //                     Component.text(
+    //                                     String.format(
+    //                                             "  • Players Joined %s",
+    //                                             dailyStatsService.getPlayersJoined()))
+    //                             .color(textColorThree)
+    //                             .hoverEvent(
+    //                                     HoverEvent.showText(
+    //                                             Component.text(
+    //                                                     ))),
+    //                     Component.text(
+    //                                     String.format(
+    //                                             "  • Players Earned %s",
+    //                                             dailyStatsService.getRewardsEarned()))
+    //                             .color(textColorThree)
+    //                             .hoverEvent(
+    //                                     HoverEvent.showText(
+    //                                             Component.text(
+    //                                                     "The number of players that have earned
+    // a"
+    //                                                             + " /daily-reward today."))),
+    //                     Component.text("⭐ Personal Stats").color(textColorTwo),
+    //                     Component.text(
+    //                                     String.format(
+    //                                             "  • Progress: %s/%s",
+    //                                             session.getSessionTime(),
+    //                                             configManager.getRewardThreshold()))
+    //                             .color(textColorThree),
+    //                     Component.text("  • Earned Reward: ")
+    //                             .color(textColorThree)
+    //                             .append(Util.formatIndicator(session)))
+    //             .forEach(sender::sendMessage);
+    // }
 }
