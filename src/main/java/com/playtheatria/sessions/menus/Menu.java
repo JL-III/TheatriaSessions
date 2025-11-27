@@ -61,7 +61,9 @@ public class Menu {
         }
         for (Map.Entry<String, List<Entry>> entry : entries.entrySet()) {
             builder.append(Component.newline())
-                    .append(Component.text(entry.getKey()).color(secondaryColor));
+                    .append(
+                            Component.text(entry.getKey())
+                                    .color(TextColor.fromHexString(Util.COLOR_THREE)));
 
             final AtomicInteger entriesCount = new AtomicInteger();
             entry.getValue().stream()
