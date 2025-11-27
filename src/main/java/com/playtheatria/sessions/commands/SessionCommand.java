@@ -249,7 +249,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 "   Players Earned:",
                                 Menu.Entry.of(
                                         String.format(" %s", dailyStatsService.getRewardsEarned())))
-                        .entries("", Menu.Entry.of(" "))
                         .entries("⭐ Personal Stats")
                         .entries(
                                 "   Progress:",
@@ -267,7 +266,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                         .description(
                                                 "Indicates whether you have earned your daily"
                                                         + " reward for today."))
-                        .entries("", Menu.Entry.of(" "))
                         .entries("⭐ Streaks")
                         .entries(
                                 "   Current Streak: ",

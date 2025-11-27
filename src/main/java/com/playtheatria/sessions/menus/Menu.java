@@ -63,7 +63,7 @@ public class Menu {
             builder.append(Component.newline())
                     .append(
                             Component.text(entry.getKey())
-                                    .color(TextColor.fromHexString(Util.COLOR_ONE)));
+                                    .color(TextColor.fromHexString(Util.COLOR_THREE)));
 
             final AtomicInteger entriesCount = new AtomicInteger();
             entry.getValue().stream()
@@ -101,8 +101,8 @@ public class Menu {
     public static class Builder {
         private Component title;
         private Component description;
-        private TextColor themeColor = TextColor.fromHexString(Util.COLOR_TWO);
-        private TextColor secondaryColor = TextColor.fromHexString(Util.COLOR_THREE);
+        private TextColor themeColor = TextColor.fromHexString(Util.COLOR_ONE);
+        private TextColor secondaryColor = TextColor.fromHexString(Util.COLOR_TWO);
         private final Map<String, List<Entry>> attributions = new LinkedHashMap<>();
         private final List<Cmd> buttons = new ArrayList<>();
 
