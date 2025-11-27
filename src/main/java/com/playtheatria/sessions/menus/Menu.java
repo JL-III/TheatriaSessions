@@ -62,7 +62,7 @@ public class Menu {
         for (Map.Entry<String, List<Entry>> entry : entries.entrySet()) {
             builder.append(Component.newline())
                     .append(
-                            Component.text("• " + entry.getKey() + ": ")
+                            Component.text(entry.getKey())
                                     .color(NamedTextColor.WHITE));
 
             final AtomicInteger entriesCount = new AtomicInteger();

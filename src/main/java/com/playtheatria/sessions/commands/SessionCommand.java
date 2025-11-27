@@ -219,7 +219,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                 dailyStatsService.getDate().toString())))
                         .entries("⭐ Community Stats")
                         .entries(
-                                "Players Joined",
+                                "- Players Joined:",
                                 Menu.Entry.of(
                                                 String.format(
                                                         " %s",
@@ -230,12 +230,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                         + " above can use /activity to see who"
                                                         + " has joined today."))
                         .entries(
-                                "Players Earned",
+                                "- Players Earned:",
                                 Menu.Entry.of(
                                         String.format(" %s", dailyStatsService.getRewardsEarned())))
+                        .entries("")
                         .entries("⭐ Personal Stats")
                         .entries(
-                                "Progress",
+                                "- Progress:",
                                 Menu.Entry.of(
                                                 String.format(
                                                         " %s/%s",
@@ -245,7 +246,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                 "Your current progress towards"
                                                         + " earning your daily reward."))
                         .entries(
-                                "Earned Reward",
+                                "- Earned Reward: ",
                                 Menu.Entry.of(session.isRewarded() ? " ✅" : " ❌")
                                         .description(
                                                 "Indicates whether you have earned your daily"
