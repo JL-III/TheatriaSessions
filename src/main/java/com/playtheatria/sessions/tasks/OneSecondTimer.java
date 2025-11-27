@@ -21,7 +21,6 @@ public class OneSecondTimer extends BukkitRunnable {
     private final SessionService sessionService;
     private final Essentials essentials;
     private final ConfigManager cm;
-    private final PLog log;
 
     public OneSecondTimer(
             DailyStatsService dailyStatsService,
@@ -33,7 +32,6 @@ public class OneSecondTimer extends BukkitRunnable {
         this.sessionService = sessionService;
         this.essentials = essentials;
         this.cm = cm;
-        this.log = log;
     }
 
     @Override
@@ -60,9 +58,6 @@ public class OneSecondTimer extends BukkitRunnable {
                                 .color(NamedTextColor.YELLOW)
                                 .decorate(TextDecoration.ITALIC));
             }
-            log.debug(
-                    String.format(
-                            "session for %s time: %s", session.getPlayerName(), incrementValue));
 
             if (!session.hasEarnedReward(cm.getRewardThreshold()) || session.isRewarded()) continue;
             Bukkit.getPluginManager().callEvent(new RewardPlayerEvent(player.getUniqueId()));
