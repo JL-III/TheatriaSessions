@@ -8,8 +8,6 @@ depend: [Essentials, TheatriaTime]
 commands:
   session:
     usage: /<command>
-  community:
-    usage: /<command>
   activity:
     usage: /<command>
   streaks:

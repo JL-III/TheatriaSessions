@@ -8,7 +8,6 @@ import com.playtheatria.sessions.cache.DailyStatsCache;
 import com.playtheatria.sessions.cache.SessionCache;
 import com.playtheatria.sessions.cache.StreakCache;
 import com.playtheatria.sessions.commands.ActivityCommand;
-import com.playtheatria.sessions.commands.CommunityCommand;
 import com.playtheatria.sessions.commands.SessionCommand;
 import com.playtheatria.sessions.commands.StreakCommand;
 import com.playtheatria.sessions.config.ConfigManager;
@@ -97,7 +96,6 @@ public final class TheatriaSessions extends JavaPlugin {
                         new CommandRecord(
                                 "session",
                                 new SessionCommand(dailyStatsService, sessionService, cm)),
-                        new CommandRecord("community", new CommunityCommand(cm, dailyStatsService)),
                         new CommandRecord("activity", new ActivityCommand(sessionService)),
                         new CommandRecord("streaks", new StreakCommand(streakService))));
         log.info("Loaded plugin.");

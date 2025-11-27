@@ -8,6 +8,7 @@ import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
+import com.playtheatria.sessions.menus.Menu;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.utils.Util;
@@ -52,9 +53,29 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull String label,
             @NotNull String[] args) {
         if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
+        final Menu menu =
+                Menu.builder()
+                        .title(Component.text("Example"))
+                        .description(Component.text("An example plugin"))
+                        .entries(
+                                "Entry 1",
+                                Menu.Entry.of("NessXXIII")
+                                        .description("Click to visit our website")
+                                        .url("https://docs.playtheatria.com"))
+                        .entries(
+                                "Example",
+                                Menu.Entry.of("Contributor 1").description("Code, refactoring"))
+                        .buttons(
+                                Menu.Cmd.of("activity").text("activity text").icon("⛏"),
+                                Menu.Cmd.of("streaks show-all")
+                                        .text("streaks")
+                                        .icon("⭐")
+                                        .color(TextColor.color(0x6773f5)))
+                        .build();
         switch (args.length) {
             case 0 -> {
                 if (sender instanceof Player player) {
+                    player.sendMessage(menu.toComponent());
                     switch (sessionService.getSession(player.getUniqueId())) {
                         case Ok<Session, Exception> ok -> {
                             sendSessionMessage(player, ok.value());
