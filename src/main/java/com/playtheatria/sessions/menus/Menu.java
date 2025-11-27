@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
@@ -14,8 +15,11 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import com.playtheatria.sessions.utils.Util;
 
 public class Menu {
     private final Component title;
@@ -99,8 +103,8 @@ public class Menu {
     public static class Builder {
         private Component title;
         private Component description;
-        private TextColor themeColor = TextColor.color(0x00FB9A);
-        private TextColor secondaryColor = TextColor.color(0xAAAAAA);
+        private TextColor themeColor = TextColor.fromHexString(Util.COLOR_TWO);
+        private TextColor secondaryColor = TextColor.fromHexString(Util.COLOR_THREE);
         private final Map<String, List<Entry>> attributions = new LinkedHashMap<>();
         private final List<Cmd> buttons = new ArrayList<>();
 
