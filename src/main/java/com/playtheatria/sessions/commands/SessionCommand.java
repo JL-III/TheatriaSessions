@@ -210,18 +210,21 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     public void sendSessionMessage(Player player, Session session) {
+        TextColor fromHexString = TextColor.fromHexString(Util.COLOR_TWO);
+        TextColor fromHexString2 = TextColor.fromHexString(Util.COLOR_THREE);
         final Menu menu =
                 Menu.builder()
-                        .themeColor(TextColor.fromHexString(Util.COLOR_TWO))
-                        .secondaryColor(TextColor.fromHexString(Util.COLOR_THREE))
+                        .themeColor(fromHexString)
+                        .secondaryColor(fromHexString2)
                         .title(
                                 Component.text(
                                         String.format(
                                                 "Daily-Reward - %s",
                                                 dailyStatsService.getDate().toString())))
+                        .description(Component.text("Stats for server and personal progress"))
                         .entries("⭐ Community Stats")
                         .entries(
-                                "  Players Joined:",
+                                "   Players Joined:",
                                 Menu.Entry.of(
                                                 String.format(
                                                         " %s",
@@ -232,13 +235,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                         + " above can use /activity to see who"
                                                         + " has joined today."))
                         .entries(
-                                "  Players Earned:",
+                                "   Players Earned:",
                                 Menu.Entry.of(
                                         String.format(" %s", dailyStatsService.getRewardsEarned())))
                         .entries("", Menu.Entry.of(" "))
                         .entries("⭐ Personal Stats")
                         .entries(
-                                "  Progress:",
+                                "   Progress:",
                                 Menu.Entry.of(
                                                 String.format(
                                                         " %s/%s",
@@ -248,7 +251,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                 "Your current progress towards"
                                                         + " earning your daily reward."))
                         .entries(
-                                "  Earned Reward: ",
+                                "   Earned Reward: ",
                                 Menu.Entry.of(session.isRewarded() ? " ✅" : " ❌")
                                         .description(
                                                 "Indicates whether you have earned your daily"
