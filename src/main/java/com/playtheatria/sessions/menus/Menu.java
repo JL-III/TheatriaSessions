@@ -63,7 +63,7 @@ public class Menu {
             builder.append(Component.newline())
                     .append(
                             Component.text(entry.getKey())
-                                    .color(TextColor.fromHexString(Util.COLOR_THREE)));
+                                    .color(TextColor.fromHexString(Util.COLOR_ONE)));
 
             final AtomicInteger entriesCount = new AtomicInteger();
             entry.getValue().stream()

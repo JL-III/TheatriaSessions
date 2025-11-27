@@ -267,6 +267,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                         .description(
                                                 "Indicates whether you have earned your daily"
                                                         + " reward for today."))
+                        .entries("", Menu.Entry.of(" "))
                         .entries("⭐ Streaks")
                         .entries(
                                 "   Current Streak: ",
