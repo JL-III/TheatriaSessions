@@ -267,6 +267,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                 "Indicates whether you have earned your daily"
                                                         + " reward for today."))
                         .entries("⭐ Streaks")
+                        // Current streak needs to be updated when the player logs in and or when
+                        // they get their daily reward.
                         .entries(
                                 "   Current Streak: ",
                                 Menu.Entry.of(String.format(" %d days", streak.getCurrentStreak()))

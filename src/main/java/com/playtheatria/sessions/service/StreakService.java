@@ -61,6 +61,19 @@ public class StreakService {
     }
 
     /**
+     * Resets the current streak for a given player UUID.
+     * Then saves it in the cache.
+     * @param streak the Streak object whose current streak is to be reset.
+     */
+    public void resetCurrentStreak(Streak streak) {
+        if (streak != null) {
+            log.debugFmt("Reset streak for %s to 1", streak.getPlayerName());
+            streak.setCurrentStreak(0);
+            cache.setStreak(streak);
+        }
+    }
+
+    /**
      * Persist all streaks in the cache to the database.
      * @param verbose whether to log each persisted streak verbosely.
      */

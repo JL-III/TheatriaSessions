@@ -77,6 +77,10 @@ public class Streak {
         this.lastEarnedDate = date.toString();
     }
 
+    public void setCurrentStreak(Integer currentStreak) {
+        this.currentStreak = currentStreak;
+    }
+
     @Override
     public String toString() {
         return "Streak{"

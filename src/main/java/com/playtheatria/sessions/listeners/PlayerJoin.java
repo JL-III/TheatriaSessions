@@ -1,9 +1,15 @@
 package com.playtheatria.sessions.listeners;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
+import com.playtheatria.sessions.database.data.Streak;
 import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -39,6 +45,29 @@ public class PlayerJoin implements Listener {
         if (!streakService.hasStreak(playerUUID)) {
             log.debug("No streak found for " + playerName);
             streakService.createNewStreak(playerUUID, playerName);
+        } else {
+            switch (streakService.getStreak(playerUUID)) {
+                case Ok<Streak, Exception> okStreak -> {
+                    Streak streak = okStreak.value();
+                    LocalDate lastEarnedDate = streak.getLastEarnedDate();
+                    LocalDate today = LocalDate.now(TimeUtils.timeZone);
+                    long daysBetween = ChronoUnit.DAYS.between(lastEarnedDate, today);
+                    if (daysBetween > 1) {
+                        log.debug(
+                                String.format(
+                                        "Resetting streak for %s. Days since last earned: %d",
+                                        playerName, daysBetween));
+                        // Reset streak
+                        streakService.resetCurrentStreak(streak);
+                    }
+                }
+                case Err<Streak, Exception> err -> {
+                    log.err(
+                            String.format(
+                                    "Failed to retrieve streak for %s on login: %s",
+                                    playerName, err.error()));
+                }
+            }
         }
     }
 }
