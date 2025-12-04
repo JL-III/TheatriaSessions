@@ -12,33 +12,45 @@ import org.bukkit.configuration.ConfigurationSection;
 public final class ConfigManager {
     private final TheatriaSessions plugin;
     private static final Logger log = Logger.getLogger("TheatriaSessions Config");
+    public boolean debug;
     private final long backupDuration;
     private final long initialBackupDuration;
 
+    private ConfigurationSection sessionSection;
+    private int threshold;
     private List<String> rewards;
+    private String rewardMessage;
+    private String notifyMessage;
+
+    private boolean communityRewardsEnabled;
+    private int streakDelay;
+
+    private ConfigurationSection streaksSection;
+    private boolean streaksEnabled;
     private final NavigableMap<Integer, List<String>> streakRewards = new TreeMap<>();
     private final List<String> oracleLines = new ArrayList<>();
     private String encouragementMessage;
-    private boolean communityRewardsEnabled;
-    private String rewardMessage;
-    public boolean debug;
-    private ConfigurationSection streaksSection;
 
     public ConfigManager(TheatriaSessions plugin) {
         this.plugin = plugin;
+        this.debug = plugin.getConfig().getBoolean("debug");
         this.backupDuration = plugin.getConfig().getLong("backup-duration");
         this.initialBackupDuration = plugin.getConfig().getLong("initial-backup-duration");
-        this.rewardMessage = plugin.getConfig().getString("reward-message");
-        this.debug = plugin.getConfig().getBoolean("debug");
         loadConfig();
     }
 
     public void loadConfig() {
-        this.streaksSection = plugin.getConfig().getConfigurationSection("streaks");
         this.debug = plugin.getConfig().getBoolean("debug");
-        this.rewards = plugin.getConfig().getStringList("rewards");
-        this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
         this.rewardMessage = plugin.getConfig().getString("reward-message");
+        this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
+        this.streakDelay = plugin.getConfig().getInt("streak-delay");
+        this.sessionSection = plugin.getConfig().getConfigurationSection("session");
+        loadThreshold();
+        loadRewards();
+        loadRewardMessage();
+        loadNotifyMessage();
+        this.streaksSection = plugin.getConfig().getConfigurationSection("streaks");
+        loadSteaksEnabled();
         loadEncouragementMessage();
         loadStreakRewards();
         loadStreakRewardMessages();
@@ -62,7 +74,7 @@ public final class ConfigManager {
     }
 
     public boolean isCommunityRewardsEnabled() {
-        return communityRewardsEnabled;
+        return this.communityRewardsEnabled;
     }
 
     public String getRewardMessage() {
@@ -70,19 +82,83 @@ public final class ConfigManager {
     }
 
     public boolean isDebug() {
-        return debug;
+        return this.debug;
     }
 
     public NavigableMap<Integer, List<String>> getStreakRewards() {
-        return streakRewards;
+        return this.streakRewards;
     }
 
     public List<String> getOracleLines() {
-        return oracleLines;
+        return this.oracleLines;
     }
 
     public String getEncouragementMessage() {
-        return encouragementMessage;
+        return this.encouragementMessage;
+    }
+
+    public Integer getRewardThreshold() {
+        return this.threshold;
+    }
+
+    public boolean isStreaksEnabled() {
+        return this.streaksEnabled;
+    }
+
+    public String getNotifyMessage() {
+        return this.notifyMessage;
+    }
+
+    public int getStreakDelay() {
+        return this.streakDelay;
+    }
+
+    private void loadThreshold() {
+        if (sessionSection == null) {
+            log.log(Level.WARNING, "No 'session' section in config.yml");
+            // default to 30 minutes if no config found, otherwise would default to 0.
+            this.threshold = 1800;
+            return;
+        }
+        this.threshold = sessionSection.getInt("threshold");
+    }
+
+    public void loadRewards() {
+        if (sessionSection == null) {
+            log.log(Level.WARNING, "No 'session' section in config.yml");
+            // default to empty array.
+            this.rewards = new ArrayList<>();
+            return;
+        }
+        this.rewards = sessionSection.getStringList("rewards");
+    }
+
+    private void loadRewardMessage() {
+        if (sessionSection == null) {
+            log.log(Level.WARNING, "No 'session' section in config.yml");
+            // default to empty array.
+            this.rewardMessage = "";
+            return;
+        }
+        this.rewardMessage = sessionSection.getString("reward-message");
+    }
+
+    private void loadNotifyMessage() {
+        if (sessionSection == null) {
+            log.log(Level.WARNING, "No 'session' section in config.yml");
+            // default to empty array.
+            this.notifyMessage = "";
+            return;
+        }
+        this.notifyMessage = sessionSection.getString("notify-message");
+    }
+
+    private void loadSteaksEnabled() {
+        if (streaksSection == null) {
+            log.log(Level.WARNING, "No 'streaks' section in config.yml");
+            return;
+        }
+        this.streaksEnabled = streaksSection.getBoolean("enabled");
     }
 
     private void loadStreakRewards() {

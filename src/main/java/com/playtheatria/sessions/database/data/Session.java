@@ -4,7 +4,7 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import java.util.UUID;
 
-@DatabaseTable(tableName = "sessions")
+@DatabaseTable(tableName = "sessions_v2")
 public class Session {
     @DatabaseField(id = true, index = true)
     private UUID playerUUID;
@@ -14,8 +14,6 @@ public class Session {
     @DatabaseField private Integer sessionTime = 0;
 
     @DatabaseField private Integer afkTime = 0;
-
-    @DatabaseField public final Integer THRESHOLD = 3600;
 
     @DatabaseField private boolean rewarded = false;
 
@@ -34,8 +32,8 @@ public class Session {
      * If the session time has exceeded the threshold, the player is ready to receive their reward.
      * @return whether the session has exceeded the threshold
      */
-    public boolean hasEarnedReward() {
-        return sessionTime >= THRESHOLD;
+    public boolean hasEarnedReward(int threshold) {
+        return sessionTime >= threshold;
     }
 
     public Integer getSessionTime() {

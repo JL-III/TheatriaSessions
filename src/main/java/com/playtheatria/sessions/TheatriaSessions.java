@@ -8,7 +8,6 @@ import com.playtheatria.sessions.cache.DailyStatsCache;
 import com.playtheatria.sessions.cache.SessionCache;
 import com.playtheatria.sessions.cache.StreakCache;
 import com.playtheatria.sessions.commands.ActivityCommand;
-import com.playtheatria.sessions.commands.CommunityCommand;
 import com.playtheatria.sessions.commands.SessionCommand;
 import com.playtheatria.sessions.commands.StreakCommand;
 import com.playtheatria.sessions.config.ConfigManager;
@@ -81,7 +80,7 @@ public final class TheatriaSessions extends JavaPlugin {
         dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
 
         databaseTask = new DatabaseTask(dailyStatsService, sessionService, streakService, log);
-        oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, log);
+        oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, cm, log);
 
         log.debug(
                 String.format(
@@ -96,8 +95,8 @@ public final class TheatriaSessions extends JavaPlugin {
                 List.of(
                         new CommandRecord(
                                 "session",
-                                new SessionCommand(dailyStatsService, sessionService, cm)),
-                        new CommandRecord("community", new CommunityCommand(cm, dailyStatsService)),
+                                new SessionCommand(
+                                        dailyStatsService, sessionService, streakService, cm)),
                         new CommandRecord("activity", new ActivityCommand(sessionService)),
                         new CommandRecord("streaks", new StreakCommand(streakService))));
         log.info("Loaded plugin.");
@@ -134,7 +133,7 @@ public final class TheatriaSessions extends JavaPlugin {
         PluginManager pm = Bukkit.getPluginManager();
         pm.registerEvents(new DayChange(dss, ss, log), this);
         pm.registerEvents(new PlayerJoin(ss, sts, log), this);
-        pm.registerEvents(new RewardPlayer(ss, sts, log), this);
+        pm.registerEvents(new RewardPlayer(this, ss, sts, cm, log), this);
         pm.registerEvents(new DailyStatsRewardCount(dss, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
     }

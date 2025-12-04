@@ -61,6 +61,19 @@ public class StreakService {
     }
 
     /**
+     * Resets the current streak for a given player UUID.
+     * Then saves it in the cache.
+     * @param streak the Streak object whose current streak is to be reset.
+     */
+    public void resetCurrentStreak(Streak streak) {
+        if (streak != null) {
+            log.debugFmt("Reset streak for %s to 1", streak.getPlayerName());
+            streak.setCurrentStreak(0);
+            cache.setStreak(streak);
+        }
+    }
+
+    /**
      * Persist all streaks in the cache to the database.
      * @param verbose whether to log each persisted streak verbosely.
      */
@@ -214,9 +227,9 @@ public class StreakService {
                     Component.text(
                                     "A greater boon awakens at "
                                             + nextKey
-                                            + " days ("
+                                            + " days. "
                                             + remaining
-                                            + (remaining > 1 ? " days away)." : " day away)."))
+                                            + (remaining > 1 ? " days remain." : " day remains."))
                             .color(NamedTextColor.YELLOW)
                             .decorate(TextDecoration.ITALIC));
         } else {
