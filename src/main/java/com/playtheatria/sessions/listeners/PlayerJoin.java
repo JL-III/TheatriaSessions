@@ -50,6 +50,13 @@ public class PlayerJoin implements Listener {
                 case Ok<Streak, Exception> okStreak -> {
                     Streak streak = okStreak.value();
                     LocalDate lastEarnedDate = streak.getLastEarnedDate();
+                    if (lastEarnedDate == null) {
+                        log.debug(
+                                String.format(
+                                        "No last earned date for %s, skipping streak check.",
+                                        playerName));
+                        return;
+                    }
                     LocalDate today = LocalDate.now(TimeUtils.timeZone);
                     long daysBetween = ChronoUnit.DAYS.between(lastEarnedDate, today);
                     if (daysBetween > 1) {
