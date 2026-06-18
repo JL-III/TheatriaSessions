@@ -23,6 +23,8 @@ public final class ConfigManager {
     private String notifyMessage;
 
     private boolean communityRewardsEnabled;
+    private String communityBonusGroup;
+    private String communityBonusDuration;
     private int streakDelay;
 
     private ConfigurationSection streaksSection;
@@ -43,6 +45,7 @@ public final class ConfigManager {
         this.debug = plugin.getConfig().getBoolean("debug");
         this.rewardMessage = plugin.getConfig().getString("reward-message");
         this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
+        loadCommunityBonus();
         this.streakDelay = plugin.getConfig().getInt("streak-delay");
         this.sessionSection = plugin.getConfig().getConfigurationSection("session");
         loadThreshold();
@@ -75,6 +78,14 @@ public final class ConfigManager {
 
     public boolean isCommunityRewardsEnabled() {
         return this.communityRewardsEnabled;
+    }
+
+    public String getCommunityBonusGroup() {
+        return this.communityBonusGroup;
+    }
+
+    public String getCommunityBonusDuration() {
+        return this.communityBonusDuration;
     }
 
     public String getRewardMessage() {
@@ -151,6 +162,22 @@ public final class ConfigManager {
             return;
         }
         this.notifyMessage = sessionSection.getString("notify-message");
+    }
+
+    private void loadCommunityBonus() {
+        // Defaults guarantee the bonus still works (and the duration stays >24h) when
+        // the section is missing; see the config.yml comments for why duration matters.
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("community-bonus");
+        if (section == null) {
+            log.log(Level.WARNING, "No 'community-bonus' section in config.yml; using defaults");
+            this.communityBonusGroup = "default";
+            this.communityBonusDuration = "2d";
+            return;
+        }
+        String group = section.getString("group");
+        this.communityBonusGroup = (group == null || group.isEmpty()) ? "default" : group;
+        String duration = section.getString("duration");
+        this.communityBonusDuration = (duration == null || duration.isEmpty()) ? "2d" : duration;
     }
 
     private void loadSteaksEnabled() {

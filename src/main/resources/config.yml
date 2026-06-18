@@ -16,6 +16,18 @@ session:
 
 community-rewards-enabled: false
 
+# Community sell-multiplier bonus, granted via LuckPerms when the server hits a
+# playtime goal so every online player benefits.
+community-bonus:
+  # LuckPerms group the bonus permission is granted to.
+  group: "default"
+  # Safety-net duration only. The authoritative terminator is the daily reset
+  # (DayChange), which revokes the bonus on the day change. This duration only
+  # guarantees a granted bonus never expires BEFORE the next reset, which always
+  # arrives within 24h. Keep it comfortably longer than a day (e.g. 2d) -- do NOT
+  # shorten it below 24h or a bonus could lapse mid-day.
+  duration: "2d"
+
 # How many seconds between sending daily-reward message and streak message
 streak-delay: 3
 

@@ -127,7 +127,7 @@ public final class TheatriaSessions extends JavaPlugin {
             StreakService sts,
             PLog log) {
         PluginManager pm = Bukkit.getPluginManager();
-        pm.registerEvents(new DayChange(dss, ss, log), this);
+        pm.registerEvents(new DayChange(dss, ss, cm, log), this);
         pm.registerEvents(new PlayerJoin(ss, sts, log), this);
         pm.registerEvents(new RewardPlayer(this, ss, sts, cm, log), this);
         pm.registerEvents(new DailyStatsRewardCount(dss, log), this);

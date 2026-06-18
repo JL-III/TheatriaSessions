@@ -42,7 +42,10 @@ public class RewardCommunity implements Listener {
             boolean granted =
                     Bukkit.dispatchCommand(
                             Bukkit.getConsoleSender(),
-                            Util.grantCommunityPermCommand(tier.getPermission()));
+                            Util.grantCommunityPermCommand(
+                                    tier.getPermission(),
+                                    configManager.getCommunityBonusGroup(),
+                                    configManager.getCommunityBonusDuration()));
             if (!granted) {
                 log.warn(
                         "Failed to grant community permission '"

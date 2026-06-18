@@ -1,5 +1,6 @@
 package com.playtheatria.sessions.listeners;
 
+import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
@@ -13,11 +14,17 @@ import org.bukkit.event.Listener;
 public class DayChange implements Listener {
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
+    private final ConfigManager configManager;
     private final PLog log;
 
-    public DayChange(DailyStatsService dailyStatsService, SessionService sessionService, PLog log) {
+    public DayChange(
+            DailyStatsService dailyStatsService,
+            SessionService sessionService,
+            ConfigManager configManager,
+            PLog log) {
         this.dailyStatsService = dailyStatsService;
         this.sessionService = sessionService;
+        this.configManager = configManager;
         this.log = log;
     }
 
@@ -54,7 +61,8 @@ public class DayChange implements Listener {
         for (RewardTier tier : RewardTier.values()) {
             if (!Bukkit.dispatchCommand(
                     Bukkit.getConsoleSender(),
-                    Util.revokeCommunityPermCommand(tier.getPermission()))) {
+                    Util.revokeCommunityPermCommand(
+                            tier.getPermission(), configManager.getCommunityBonusGroup()))) {
                 allRevoked = false;
             }
         }
