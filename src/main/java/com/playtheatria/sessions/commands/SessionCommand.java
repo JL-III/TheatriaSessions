@@ -329,7 +329,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     private void addJoined(Menu.Builder builder, Player viewer) {
-        builder.entries("⭐ Joined Today:", roster(viewer));
+        // Standalone header + an indented names row, matching the other tabs'
+        // layout (and giving the leading space the names were missing).
+        builder.entries("⭐ Joined Today").entries("   ", roster(viewer));
     }
 
     private Menu.Cmd[] navButtons(String active, boolean canSeeRoster) {
@@ -348,13 +350,18 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         return button;
     }
 
-    /** Distinct accent color per tab so paging between them is visually obvious. */
+    /**
+     * Distinct accent color per tab so paging between them is visually obvious.
+     * All four share one saturation/lightness (HSL ~S75 L66) so they read as a
+     * cohesive family; only the hue moves, spread around the wheel to keep each
+     * tab unmistakable.
+     */
     private static TextColor tabColor(String tab) {
         return switch (tab) {
-            case "streaks" -> TextColor.fromHexString("#ffd166"); // gold
-            case "community" -> TextColor.fromHexString("#4aa3ff"); // sky blue
-            case "joined" -> TextColor.fromHexString("#f5428a"); // magenta
-            default -> TextColor.fromHexString("#42f598"); // personal -> green
+            case "streaks" -> TextColor.fromHexString("#E9C967"); // amber  (hue ~45)
+            case "community" -> TextColor.fromHexString("#67A8E9"); // azure  (hue ~210)
+            case "joined" -> TextColor.fromHexString("#D467E9"); // orchid (hue ~290)
+            default -> TextColor.fromHexString("#67E9A8"); // personal -> mint (hue ~150)
         };
     }
 
