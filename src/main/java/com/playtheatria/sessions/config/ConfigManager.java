@@ -167,7 +167,8 @@ public final class ConfigManager {
     private void loadCommunityBonus() {
         // Defaults guarantee the bonus still works (and the duration stays >24h) when
         // the section is missing; see the config.yml comments for why duration matters.
-        ConfigurationSection section = plugin.getConfig().getConfigurationSection("community-bonus");
+        ConfigurationSection section =
+                plugin.getConfig().getConfigurationSection("community-bonus");
         if (section == null) {
             log.log(Level.WARNING, "No 'community-bonus' section in config.yml; using defaults");
             this.communityBonusGroup = "default";

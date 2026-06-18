@@ -2,18 +2,16 @@ package com.playtheatria.sessions.commands;
 
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
-import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.data.Streak;
+import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.menus.Menu;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.utils.Util;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -34,20 +32,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Single entry point for the plugin. With no args it shows the player's stats;
- * otherwise the first arg selects a {@link SubCommand} (activity, community,
- * streaks) or one of the admin verbs handled here.
+ * Single entry point for the plugin. With no args it shows the player a unified
+ * screen -- personal progress, streaks, community bonus tiers, and (for staff)
+ * the roster of players who joined today with per-name detail on hover. The
+ * first arg otherwise selects a {@link SubCommand} (streaks) or an admin verb.
  */
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private static final List<String> ADMIN_VERBS =
-            List.of(
-                    "check",
-                    "create",
-                    "force-reward",
-                    "reload-config",
-                    "reset-progress",
-                    "set-progress",
-                    "show-all");
+            List.of("create", "force-reward", "reload-config", "reset-progress", "set-progress");
 
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
@@ -65,8 +57,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         this.streakService = streakService;
         this.configManager = configManager;
 
-        register(new ActivitySubCommand(sessionService));
-        register(new CommunitySubCommand(dailyStatsService));
         register(new StreaksSubCommand(streakService));
     }
 
@@ -125,45 +115,14 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
         switch (args.length) {
             case 1 -> {
-                switch (args[0].toLowerCase()) {
-                    case "show-all" -> {
-                        sender.sendMessage(
-                                Util.formatMessage(
-                                        "Number of Sessions", sessionService.getSessionsCount()));
-                        for (Session session : sessionService.getSessions()) {
-                            sender.sendMessage(Util.formatAdminMessage(session, configManager));
-                        }
-                        return true;
-                    }
-                    case "reload-config" -> {
-                        sender.sendMessage(Util.formatMessage("sessions", "Reloading config"));
-                        configManager.reloadConfig();
-                        return true;
-                    }
+                if (args[0].equalsIgnoreCase("reload-config")) {
+                    sender.sendMessage(Util.formatMessage("sessions", "Reloading config"));
+                    configManager.reloadConfig();
+                    return true;
                 }
             }
             case 2 -> {
                 switch (args[0].toLowerCase()) {
-                    case "check" -> {
-                        DateTimeFormatter formatter =
-                                DateTimeFormatter.ofPattern("dd MMM yyyy hh:mm:ss");
-                        String formattedDate =
-                                LocalDateTime.now(TimeUtils.timeZone).format(formatter);
-                        for (Session session : sessionService.getSessions()) {
-                            if (!session.getPlayerName().equalsIgnoreCase(args[1])) continue;
-                            sender.sendMessage(Util.formatMessage("Date", formattedDate + " EST"));
-                            sender.sendMessage(
-                                    Util.formatMessage(
-                                            "Progress",
-                                            session.getSessionTime()
-                                                    + "/"
-                                                    + configManager.getRewardThreshold()));
-                            sender.sendMessage(Util.formatMessage("AfkTime", session.getAfkTime()));
-                            sender.sendMessage(
-                                    Util.formatMessage("EarnedReward", session.isRewarded()));
-                            return true;
-                        }
-                    }
                     case "force-reward" -> {
                         for (Session session : sessionService.getSessions()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
@@ -236,13 +195,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return List.of();
         switch (args.length) {
             case 2 -> {
-                if (args[0].equalsIgnoreCase("show-all")) return List.of();
+                if (args[0].equalsIgnoreCase("reload-config")) return List.of();
                 return sessionService.getSessions().stream()
                         .map(Session::getPlayerName)
                         .collect(Collectors.toList());
             }
             case 3 -> {
-                if (args[1].equalsIgnoreCase("set-progress") || args[1].equalsIgnoreCase("create"))
+                if (args[0].equalsIgnoreCase("set-progress") || args[0].equalsIgnoreCase("create"))
                     return List.of("<amount>");
                 return List.of();
             }
@@ -267,34 +226,25 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     public void sendSessionMessage(Player player, Session session, Streak streak) {
-        TextColor fromHexString = TextColor.fromHexString(Util.COLOR_TWO);
-        TextColor fromHexString2 = TextColor.fromHexString(Util.COLOR_THREE);
-        final Menu menu =
+        TextColor theme = TextColor.fromHexString(Util.COLOR_TWO);
+        TextColor secondary = TextColor.fromHexString(Util.COLOR_THREE);
+
+        int rewardCount = dailyStatsService.getRewardsEarned();
+        String activeBonus = communityActiveBonus(rewardCount);
+        String nextBonus = communityNextBonus(rewardCount);
+
+        Menu.Builder builder =
                 Menu.builder()
-                        .themeColor(fromHexString)
-                        .secondaryColor(fromHexString2)
+                        .themeColor(theme)
+                        .secondaryColor(secondary)
                         .title(
                                 Component.text(
                                         String.format(
-                                                "Daily-Reward - %s",
-                                                dailyStatsService.getDate().toString())))
-                        .description(Component.text("Stats for server and personal progress"))
-                        .entries("⭐ Community Stats")
-                        .entries(
-                                "   Players Joined:",
-                                Menu.Entry.of(
-                                                String.format(
-                                                        " %s",
-                                                        dailyStatsService.getPlayersJoined()))
-                                        .description(
-                                                "The number of players that have joined the"
-                                                        + " server today. Supporter Rank and"
-                                                        + " above can use /session activity to"
-                                                        + " see who has joined today."))
-                        .entries(
-                                "   Players Earned:",
-                                Menu.Entry.of(
-                                        String.format(" %s", dailyStatsService.getRewardsEarned())))
+                                                "Daily-Reward - %s", dailyStatsService.getDate())))
+                        .description(
+                                Component.text(
+                                        "Your progress, streaks, and today's community activity."
+                                                + " Hover any value for details."))
                         .entries("⭐ Personal Stats")
                         .entries(
                                 "   Progress:",
@@ -304,39 +254,120 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                         session.getSessionTime(),
                                                         configManager.getRewardThreshold()))
                                         .description(
-                                                "Your current progress towards"
-                                                        + " earning your daily reward."))
+                                                "Your current progress towards earning your daily"
+                                                        + " reward."))
                         .entries(
-                                "   Earned Reward: ",
+                                "   Earned Reward:",
                                 Menu.Entry.of(session.isRewarded() ? " ✅" : " ❌")
                                         .description(
-                                                "Indicates whether you have earned your daily"
-                                                        + " reward for today."))
+                                                "Whether you have earned your daily reward today."))
                         .entries("⭐ Streaks")
-                        // Current streak needs to be updated when the player logs in and or when
-                        // they get their daily reward.
                         .entries(
-                                "   Current Streak: ",
+                                "   Current Streak:",
                                 Menu.Entry.of(String.format(" %d days", streak.getCurrentStreak()))
                                         .description(
-                                                "The number of consecutive days you have earned"
-                                                        + " your daily reward."))
+                                                "Consecutive days you have earned your daily"
+                                                        + " reward."))
                         .entries(
-                                "   Longest Streak: ",
+                                "   Longest Streak:",
                                 Menu.Entry.of(String.format(" %d days", streak.getLongestStreak()))
-                                        .description(
-                                                "Your longest streak of consecutive days earning"
-                                                        + " your daily reward."))
+                                        .description("Your longest run of consecutive days."))
                         .entries(
-                                "   Last Earned: ",
+                                "   Last Earned:",
                                 Menu.Entry.of(
                                                 String.format(
                                                         " %s",
                                                         streak.getLastEarnedDate() == null
                                                                 ? "N/A"
                                                                 : streak.getLastEarnedDate()))
-                                        .description("The last date you earned your daily reward."))
-                        .build();
-        player.sendMessage(menu.toComponent());
+                                        .description("The last day you earned your daily reward."))
+                        .entries("⭐ Community")
+                        .entries(
+                                "   Players Joined:",
+                                Menu.Entry.of(
+                                                String.format(
+                                                        " %s",
+                                                        dailyStatsService.getPlayersJoined()))
+                                        .description("Players who have joined the server today."))
+                        .entries(
+                                "   Players Earned:",
+                                Menu.Entry.of(String.format(" %s", rewardCount))
+                                        .description("Players who hit today's playtime goal."))
+                        .entries(
+                                "   Active Bonus:",
+                                Menu.Entry.of(" " + activeBonus)
+                                        .description(
+                                                "The community sell-hand bonus active for everyone"
+                                                        + " right now."))
+                        .entries(
+                                "   Next Bonus:",
+                                Menu.Entry.of(" " + nextBonus)
+                                        .description(
+                                                "Progress towards unlocking the next community"
+                                                        + " bonus tier."));
+
+        // Staff-only roster: who joined today, with each player's detail on hover.
+        // This folds the old activity/show-all/check views into one place.
+        if (player.hasPermission(Util.PERMISSION_ACTIVITY_COMMAND)
+                || player.hasPermission(Util.PERMISSION_ADMIN)) {
+            builder.entries("⭐ Joined Today:", roster());
+        }
+
+        player.sendMessage(builder.build().toComponent());
+    }
+
+    private Menu.Entry[] roster() {
+        List<Session> sessions = sessionService.getSessions();
+        if (sessions.isEmpty()) {
+            return new Menu.Entry[] {Menu.Entry.of("none yet")};
+        }
+        return sessions.stream()
+                .map(session -> Menu.Entry.of(session.getPlayerName()).description(detail(session)))
+                .toArray(Menu.Entry[]::new);
+    }
+
+    /** Per-player hover detail shown on each name in the roster (the old "check" view). */
+    private String detail(Session session) {
+        double sessionMinutes = Math.floor(session.getSessionTime() / 6.0) / 10.0;
+        double thresholdMinutes = configManager.getRewardThreshold() / 60.0;
+        return "Progress: "
+                + sessionMinutes
+                + "/"
+                + thresholdMinutes
+                + " min\nAFK: "
+                + session.getAfkTime()
+                + "\nEarned reward: "
+                + (session.isRewarded() ? "yes" : "no");
+    }
+
+    private String communityActiveBonus(int rewardCount) {
+        String active = "none unlocked yet today";
+        switch (RewardTier.getNearestTier(rewardCount)) {
+            case Ok<RewardTier, Exception> ok -> {
+                RewardTier tier = ok.value();
+                active = tier.getDisplayName() + " (+" + tier.getPercentage() + " sell hand)";
+            }
+            case Err<RewardTier, Exception> ignored -> {}
+        }
+        return active;
+    }
+
+    private String communityNextBonus(int rewardCount) {
+        String next = "top tier reached!";
+        switch (RewardTier.getNextTier(rewardCount)) {
+            case Ok<RewardTier, Exception> ok -> {
+                RewardTier tier = ok.value();
+                int needed = tier.getThreshold() - rewardCount;
+                next =
+                        needed
+                                + " more at the goal to unlock "
+                                + tier.getDisplayName()
+                                + " (+"
+                                + tier.getPercentage()
+                                + ")";
+            }
+            case Err<RewardTier, Exception> ignored -> {}
+        }
+        return next;
     }
 }
