@@ -14,7 +14,12 @@ import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.utils.Util;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -28,11 +33,27 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Single entry point for the plugin. With no args it shows the player's stats;
+ * otherwise the first arg selects a {@link SubCommand} (activity, community,
+ * streaks) or one of the admin verbs handled here.
+ */
 public class SessionCommand implements CommandExecutor, TabCompleter {
+    private static final List<String> ADMIN_VERBS =
+            List.of(
+                    "check",
+                    "create",
+                    "force-reward",
+                    "reload-config",
+                    "reset-progress",
+                    "set-progress",
+                    "show-all");
+
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
     private final StreakService streakService;
     private final ConfigManager configManager;
+    private final Map<String, SubCommand> subCommands = new LinkedHashMap<>();
 
     public SessionCommand(
             DailyStatsService dailyStatsService,
@@ -40,10 +61,17 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             StreakService streakService,
             ConfigManager configManager) {
         this.dailyStatsService = dailyStatsService;
-
         this.sessionService = sessionService;
         this.streakService = streakService;
         this.configManager = configManager;
+
+        register(new ActivitySubCommand(sessionService));
+        register(new CommunitySubCommand(dailyStatsService));
+        register(new StreaksSubCommand(streakService));
+    }
+
+    private void register(SubCommand sub) {
+        subCommands.put(sub.name(), sub);
     }
 
     @Override
@@ -52,30 +80,51 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull Command command,
             @NotNull String label,
             @NotNull String[] args) {
-        if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
-        switch (args.length) {
-            case 0 -> {
-                if (sender instanceof Player player) {
-                    switch (sessionService.getSession(player.getUniqueId())) {
-                        case Ok<Session, Exception> ok -> {
-                            switch (streakService.getStreak(player.getUniqueId())) {
-                                case Ok<Streak, Exception> ok_streak -> {
-                                    sendSessionMessage(player, ok.value(), ok_streak.value());
-                                }
-                                case Err<Streak, Exception> err_streak -> {
-                                    player.sendMessage(err_streak.error().getMessage());
-                                }
-                            }
-                        }
-                        case Err<Session, Exception> err -> {
-                            player.sendMessage(err.error().getMessage());
-                        }
-                    }
-                    return true;
-                }
+        if (args.length == 0) {
+            if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
+            if (sender instanceof Player player) {
+                showStats(player);
             }
+            return true;
+        }
+
+        SubCommand sub = subCommands.get(args[0].toLowerCase(Locale.ROOT));
+        if (sub != null) {
+            if (!sender.hasPermission(sub.permission())) return true;
+            return sub.execute(sender, Arrays.copyOfRange(args, 1, args.length));
+        }
+
+        return handleAdmin(sender, args);
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(
+            @NotNull CommandSender sender,
+            @NotNull Command command,
+            @NotNull String label,
+            @NotNull String[] args) {
+        if (args.length == 1) {
+            List<String> out = new ArrayList<>();
+            for (SubCommand sub : subCommands.values()) {
+                if (sender.hasPermission(sub.permission())) out.add(sub.name());
+            }
+            if (sender.hasPermission(Util.PERMISSION_ADMIN)) out.addAll(ADMIN_VERBS);
+            return out;
+        }
+
+        SubCommand sub = subCommands.get(args[0].toLowerCase(Locale.ROOT));
+        if (sub != null) {
+            if (!sender.hasPermission(sub.permission())) return List.of();
+            return sub.tabComplete(sender, Arrays.copyOfRange(args, 1, args.length));
+        }
+
+        return adminTabComplete(sender, args);
+    }
+
+    private boolean handleAdmin(CommandSender sender, String[] args) {
+        if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
+        switch (args.length) {
             case 1 -> {
-                if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
                 switch (args[0].toLowerCase()) {
                     case "show-all" -> {
                         sender.sendMessage(
@@ -94,7 +143,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case 2 -> {
-                if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
                 switch (args[0].toLowerCase()) {
                     case "check" -> {
                         DateTimeFormatter formatter =
@@ -136,7 +184,6 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 }
             }
             case 3 -> {
-                if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
                 switch (args[0].toLowerCase()) {
                     case "create" -> {
                         try {
@@ -185,24 +232,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         return false;
     }
 
-    @Override
-    public @Nullable List<String> onTabComplete(
-            @NotNull CommandSender sender,
-            @NotNull Command command,
-            @NotNull String label,
-            @NotNull String[] args) {
+    private List<String> adminTabComplete(CommandSender sender, String[] args) {
         if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return List.of();
         switch (args.length) {
-            case 1 -> {
-                return List.of(
-                        "check",
-                        "create",
-                        "force-reward",
-                        "reload-config",
-                        "reset-progress",
-                        "set-progress",
-                        "show-all");
-            }
             case 2 -> {
                 if (args[0].equalsIgnoreCase("show-all")) return List.of();
                 return sessionService.getSessions().stream()
@@ -217,6 +249,20 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             default -> {
                 return List.of();
             }
+        }
+    }
+
+    private void showStats(Player player) {
+        switch (sessionService.getSession(player.getUniqueId())) {
+            case Ok<Session, Exception> ok -> {
+                switch (streakService.getStreak(player.getUniqueId())) {
+                    case Ok<Streak, Exception> okStreak -> sendSessionMessage(
+                            player, ok.value(), okStreak.value());
+                    case Err<Streak, Exception> errStreak -> player.sendMessage(
+                            errStreak.error().getMessage());
+                }
+            }
+            case Err<Session, Exception> err -> player.sendMessage(err.error().getMessage());
         }
     }
 
@@ -243,8 +289,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                         .description(
                                                 "The number of players that have joined the"
                                                         + " server today. Supporter Rank and"
-                                                        + " above can use /activity to see who"
-                                                        + " has joined today."))
+                                                        + " above can use /session activity to"
+                                                        + " see who has joined today."))
                         .entries(
                                 "   Players Earned:",
                                 Menu.Entry.of(

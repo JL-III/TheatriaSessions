@@ -7,30 +7,29 @@ import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.utils.Util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.jetbrains.annotations.NotNull;
 
-public class CommunityCommand implements CommandExecutor {
+/** {@code /session community} -- shows the community bonus tier and progress. */
+public class CommunitySubCommand implements SubCommand {
 
     private final DailyStatsService dailyStatsService;
 
-    public CommunityCommand(DailyStatsService dailyStatsService) {
+    public CommunitySubCommand(DailyStatsService dailyStatsService) {
         this.dailyStatsService = dailyStatsService;
     }
 
     @Override
-    public boolean onCommand(
-            @NotNull CommandSender sender,
-            @NotNull Command command,
-            @NotNull String label,
-            @NotNull String[] args) {
-        if (!sender.hasPermission(Util.PERMISSION_COMMUNITY_COMMAND)) {
-            sender.sendMessage("You do not have permission to use this command.");
-            return true;
-        }
+    public String name() {
+        return "community";
+    }
 
+    @Override
+    public String permission() {
+        return Util.PERMISSION_COMMUNITY_COMMAND;
+    }
+
+    @Override
+    public boolean execute(CommandSender sender, String[] args) {
         int rewardCount = dailyStatsService.getRewardsEarned();
 
         sender.sendMessage(Util.formatMessage("Community", "Activity Goals"));

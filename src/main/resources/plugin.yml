@@ -9,9 +9,3 @@ softdepend: [LuckPerms]
 commands:
   session:
     usage: /<command>
-  activity:
-    usage: /<command>
-  streaks:
-    usage: /<command>
-  community:
-    usage: /<command>
