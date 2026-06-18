@@ -12,3 +12,5 @@ commands:
     usage: /<command>
   streaks:
     usage: /<command>
+  community:
+    usage: /<command>
