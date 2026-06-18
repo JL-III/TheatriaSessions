@@ -33,14 +33,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Single entry point for the plugin. With no args it shows the player a unified
- * screen -- personal progress, streaks, community bonus tiers, and (for staff)
- * the roster of players who joined today with per-name detail on hover. The
- * first arg otherwise selects a {@link SubCommand} (streaks) or an admin verb.
+ * Single entry point for the plugin. With no args it shows the player a compact,
+ * tabbed screen -- Personal, Streaks, Community, and (for staff) the Joined Today
+ * roster -- with clickable buttons that swap tabs via {@code /session view <tab>}.
+ * The first arg otherwise selects a {@link SubCommand} (streaks) or an admin verb.
  */
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private static final List<String> ADMIN_VERBS =
             List.of("create", "force-reward", "reload-config", "reset-progress", "set-progress");
+    private static final List<String> TABS =
+            List.of("personal", "streaks", "community", "joined");
 
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
@@ -73,13 +75,20 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull String[] args) {
         if (args.length == 0) {
             if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
+            if (sender instanceof Player player) showView(player, "personal");
+            return true;
+        }
+
+        String first = args[0].toLowerCase(Locale.ROOT);
+        if (first.equals("view")) {
+            if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
             if (sender instanceof Player player) {
-                showStats(player);
+                showView(player, args.length >= 2 ? args[1] : "personal");
             }
             return true;
         }
 
-        SubCommand sub = subCommands.get(args[0].toLowerCase(Locale.ROOT));
+        SubCommand sub = subCommands.get(first);
         if (sub != null) {
             if (!sender.hasPermission(sub.permission())) return true;
             return sub.execute(sender, Arrays.copyOfRange(args, 1, args.length));
@@ -96,6 +105,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull String[] args) {
         if (args.length == 1) {
             List<String> out = new ArrayList<>();
+            if (sender.hasPermission(Util.PERMISSION_ALLOW)) out.add("view");
             for (SubCommand sub : subCommands.values()) {
                 if (sender.hasPermission(sub.permission())) out.add(sub.name());
             }
@@ -103,7 +113,15 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             return out;
         }
 
-        SubCommand sub = subCommands.get(args[0].toLowerCase(Locale.ROOT));
+        String first = args[0].toLowerCase(Locale.ROOT);
+        if (first.equals("view")) {
+            if (args.length != 2) return List.of();
+            List<String> tabs = new ArrayList<>(List.of("personal", "streaks", "community"));
+            if (canSeeRoster(sender)) tabs.add("joined");
+            return tabs;
+        }
+
+        SubCommand sub = subCommands.get(first);
         if (sub != null) {
             if (!sender.hasPermission(sub.permission())) return List.of();
             return sub.tabComplete(sender, Arrays.copyOfRange(args, 1, args.length));
@@ -212,12 +230,14 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private void showStats(Player player) {
+    // --- Tabbed player view -------------------------------------------------
+
+    private void showView(Player player, String tab) {
         switch (sessionService.getSession(player.getUniqueId())) {
             case Ok<Session, Exception> ok -> {
                 switch (streakService.getStreak(player.getUniqueId())) {
-                    case Ok<Streak, Exception> okStreak -> sendSessionMessage(
-                            player, ok.value(), okStreak.value());
+                    case Ok<Streak, Exception> okStreak -> player.sendMessage(
+                            buildView(player, tab, ok.value(), okStreak.value()).toComponent());
                     case Err<Streak, Exception> errStreak -> player.sendMessage(
                             errStreak.error().getMessage());
                 }
@@ -226,119 +246,159 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    public void sendSessionMessage(Player player, Session session, Streak streak) {
-        TextColor theme = TextColor.fromHexString(Util.COLOR_TWO);
-        TextColor secondary = TextColor.fromHexString(Util.COLOR_THREE);
-
-        int rewardCount = dailyStatsService.getRewardsEarned();
-        String activeBonus = communityActiveBonus(rewardCount);
-        String nextBonus = communityNextBonus(rewardCount);
+    private Menu buildView(Player player, String requestedTab, Session session, Streak streak) {
+        boolean canSeeRoster = canSeeRoster(player);
+        String tab = normalizeTab(requestedTab, canSeeRoster);
 
         Menu.Builder builder =
                 Menu.builder()
-                        .themeColor(theme)
-                        .secondaryColor(secondary)
+                        .themeColor(TextColor.fromHexString(Util.COLOR_TWO))
+                        .secondaryColor(TextColor.fromHexString(Util.COLOR_THREE))
                         .title(
                                 Component.text(
                                         String.format(
-                                                "Daily-Reward - %s", dailyStatsService.getDate())))
-                        .description(
-                                Component.text(
-                                        "Your progress, streaks, and today's community activity."
-                                                + " Hover any value for details."))
-                        .entries("⭐ Personal Stats")
-                        .entries(
-                                "   Progress:",
-                                Menu.Entry.of(
-                                                String.format(
-                                                        " %s/%s",
-                                                        session.getSessionTime(),
-                                                        configManager.getRewardThreshold()))
-                                        .description(
-                                                "Your current progress towards earning your daily"
-                                                        + " reward."))
-                        .entries(
-                                "   Earned Reward:",
-                                Menu.Entry.of(session.isRewarded() ? " ✅" : " ❌")
-                                        .description(
-                                                "Whether you have earned your daily reward today."))
-                        .entries("⭐ Streaks")
-                        .entries(
-                                "   Current Streak:",
-                                Menu.Entry.of(String.format(" %d days", streak.getCurrentStreak()))
-                                        .description(
-                                                "Consecutive days you have earned your daily"
-                                                        + " reward."))
-                        .entries(
-                                "   Longest Streak:",
-                                Menu.Entry.of(String.format(" %d days", streak.getLongestStreak()))
-                                        .description("Your longest run of consecutive days."))
-                        .entries(
-                                "   Last Earned:",
-                                Menu.Entry.of(
-                                                String.format(
-                                                        " %s",
-                                                        streak.getLastEarnedDate() == null
-                                                                ? "N/A"
-                                                                : streak.getLastEarnedDate()))
-                                        .description("The last day you earned your daily reward."))
-                        .entries("⭐ Community")
-                        .entries(
-                                "   Players Joined:",
-                                Menu.Entry.of(
-                                                String.format(
-                                                        " %s",
-                                                        dailyStatsService.getPlayersJoined()))
-                                        .description("Players who have joined the server today."))
-                        .entries(
-                                "   Players Earned:",
-                                Menu.Entry.of(String.format(" %s", rewardCount))
-                                        .description("Players who hit today's playtime goal."))
-                        .entries(
-                                "   Active Bonus:",
-                                Menu.Entry.of(" " + activeBonus)
-                                        .description(
-                                                "The community sell-hand bonus active for everyone"
-                                                        + " right now."))
-                        .entries(
-                                "   Next Bonus:",
-                                Menu.Entry.of(" " + nextBonus)
-                                        .description(
-                                                "Progress towards unlocking the next community"
-                                                        + " bonus tier."));
+                                                "Daily-Reward - %s  [%s]",
+                                                dailyStatsService.getDate(), titleFor(tab))));
 
-        // Staff-only roster: who joined today, with each player's detail on hover.
-        // This folds the old activity/show-all/check views into one place.
-        if (player.hasPermission(Util.PERMISSION_ACTIVITY_COMMAND)
-                || player.hasPermission(Util.PERMISSION_ADMIN)) {
-            builder.entries("⭐ Joined Today:", roster());
+        switch (tab) {
+            case "streaks" -> addStreaks(builder, streak);
+            case "community" -> addCommunity(builder);
+            case "joined" -> addJoined(builder, player);
+            default -> addPersonal(builder, session);
         }
 
-        player.sendMessage(builder.build().toComponent());
+        builder.buttons(navButtons(tab, canSeeRoster));
+        return builder.build();
     }
 
-    private Menu.Entry[] roster() {
+    private void addPersonal(Menu.Builder builder, Session session) {
+        builder.entries("⭐ Personal Stats")
+                .entries(
+                        "   Progress:",
+                        Menu.Entry.of(" " + progressMinutes(session))
+                                .description(
+                                        "Your current progress towards earning your daily reward."))
+                .entries(
+                        "   Earned Reward:",
+                        Menu.Entry.of(session.isRewarded() ? " ✅" : " ❌")
+                                .description("Whether you have earned your daily reward today."));
+    }
+
+    private void addStreaks(Menu.Builder builder, Streak streak) {
+        builder.entries("⭐ Streaks")
+                .entries(
+                        "   Current Streak:",
+                        Menu.Entry.of(String.format(" %d days", streak.getCurrentStreak()))
+                                .description("Consecutive days you have earned your daily reward."))
+                .entries(
+                        "   Longest Streak:",
+                        Menu.Entry.of(String.format(" %d days", streak.getLongestStreak()))
+                                .description("Your longest run of consecutive days."))
+                .entries(
+                        "   Last Earned:",
+                        Menu.Entry.of(
+                                        " "
+                                                + (streak.getLastEarnedDate() == null
+                                                        ? "N/A"
+                                                        : streak.getLastEarnedDate()))
+                                .description("The last day you earned your daily reward."));
+    }
+
+    private void addCommunity(Menu.Builder builder) {
+        int rewardCount = dailyStatsService.getRewardsEarned();
+        builder.entries("⭐ Community")
+                .entries(
+                        "   Players Joined:",
+                        Menu.Entry.of(String.format(" %s", dailyStatsService.getPlayersJoined()))
+                                .description("Players who have joined the server today."))
+                .entries(
+                        "   Players Earned:",
+                        Menu.Entry.of(String.format(" %s", rewardCount))
+                                .description("Players who hit today's playtime goal."))
+                .entries(
+                        "   Active Bonus:",
+                        Menu.Entry.of(" " + communityActiveBonus(rewardCount))
+                                .description(
+                                        "The community sell-hand bonus active for everyone now."))
+                .entries(
+                        "   Next Bonus:",
+                        Menu.Entry.of(" " + communityNextBonus(rewardCount))
+                                .description(
+                                        "Progress towards unlocking the next community bonus"
+                                                + " tier."));
+    }
+
+    private void addJoined(Menu.Builder builder, Player viewer) {
+        builder.entries("⭐ Joined Today:", roster(viewer));
+    }
+
+    private Menu.Cmd[] navButtons(String active, boolean canSeeRoster) {
+        List<Menu.Cmd> buttons = new ArrayList<>();
+        buttons.add(navButton("Personal", "personal", active));
+        buttons.add(navButton("Streaks", "streaks", active));
+        buttons.add(navButton("Community", "community", active));
+        if (canSeeRoster) buttons.add(navButton("Joined", "joined", active));
+        return buttons.toArray(new Menu.Cmd[0]);
+    }
+
+    private Menu.Cmd navButton(String label, String tab, String active) {
+        TextColor color =
+                tab.equals(active)
+                        ? TextColor.fromHexString(Util.COLOR_TWO)
+                        : TextColor.fromHexString(Util.COLOR_THREE);
+        return Menu.Cmd.of("/session view " + tab).text(label).color(color);
+    }
+
+    /** The roster of who joined today; each name carries that player's detail on hover. */
+    private Menu.Entry[] roster(Player viewer) {
         Collection<Session> sessions = sessionService.getSessions();
         if (sessions.isEmpty()) {
             return new Menu.Entry[] {Menu.Entry.of("none yet")};
         }
+        boolean includeAfk = viewer.hasPermission(Util.PERMISSION_ADMIN);
         return sessions.stream()
-                .map(session -> Menu.Entry.of(session.getPlayerName()).description(detail(session)))
+                .map(
+                        session ->
+                                Menu.Entry.of(session.getPlayerName())
+                                        .description(detail(session, includeAfk)))
                 .toArray(Menu.Entry[]::new);
     }
 
-    /** Per-player hover detail shown on each name in the roster (the old "check" view). */
-    private String detail(Session session) {
+    /** Per-player hover detail (the old "check" view). AFK is admin-gated. */
+    private String detail(Session session, boolean includeAfk) {
+        String text = "Progress: " + progressMinutes(session);
+        if (includeAfk) {
+            text += "\nAFK: " + session.getAfkTime();
+        }
+        return text + "\nEarned reward: " + (session.isRewarded() ? "yes" : "no");
+    }
+
+    /** Session progress and threshold as decimal minutes, e.g. {@code "5.9/30.0 min"}. */
+    private String progressMinutes(Session session) {
         double sessionMinutes = Math.floor(session.getSessionTime() / 6.0) / 10.0;
         double thresholdMinutes = configManager.getRewardThreshold() / 60.0;
-        return "Progress: "
-                + sessionMinutes
-                + "/"
-                + thresholdMinutes
-                + " min\nAFK: "
-                + session.getAfkTime()
-                + "\nEarned reward: "
-                + (session.isRewarded() ? "yes" : "no");
+        return sessionMinutes + "/" + thresholdMinutes + " min";
+    }
+
+    private boolean canSeeRoster(CommandSender sender) {
+        return sender.hasPermission(Util.PERMISSION_ACTIVITY_COMMAND)
+                || sender.hasPermission(Util.PERMISSION_ADMIN);
+    }
+
+    private String normalizeTab(String requestedTab, boolean canSeeRoster) {
+        String tab = requestedTab == null ? "personal" : requestedTab.toLowerCase(Locale.ROOT);
+        if (!TABS.contains(tab)) tab = "personal";
+        if (tab.equals("joined") && !canSeeRoster) tab = "personal";
+        return tab;
+    }
+
+    private static String titleFor(String tab) {
+        return switch (tab) {
+            case "streaks" -> "Streaks";
+            case "community" -> "Community";
+            case "joined" -> "Joined Today";
+            default -> "Personal";
+        };
     }
 
     private String communityActiveBonus(int rewardCount) {
