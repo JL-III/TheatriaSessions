@@ -252,7 +252,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
 
         Menu.Builder builder =
                 Menu.builder()
-                        .themeColor(TextColor.fromHexString(Util.COLOR_TWO))
+                        .themeColor(tabColor(tab))
                         .secondaryColor(TextColor.fromHexString(Util.COLOR_THREE))
                         .title(
                                 Component.text(
@@ -342,11 +342,20 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     private Menu.Cmd navButton(String label, String tab, String active) {
-        TextColor color =
-                tab.equals(active)
-                        ? TextColor.fromHexString(Util.COLOR_TWO)
-                        : TextColor.fromHexString(Util.COLOR_THREE);
-        return Menu.Cmd.of("/session view " + tab).text(label).color(color);
+        // Every button wears its tab's signature color; the active one gets a marker.
+        Menu.Cmd button = Menu.Cmd.of("/session view " + tab).text(label).color(tabColor(tab));
+        if (tab.equals(active)) button.icon(">");
+        return button;
+    }
+
+    /** Distinct accent color per tab so paging between them is visually obvious. */
+    private static TextColor tabColor(String tab) {
+        return switch (tab) {
+            case "streaks" -> TextColor.fromHexString("#ffd166"); // gold
+            case "community" -> TextColor.fromHexString("#4aa3ff"); // sky blue
+            case "joined" -> TextColor.fromHexString("#f5428a"); // magenta
+            default -> TextColor.fromHexString("#42f598"); // personal -> green
+        };
     }
 
     /** The roster of who joined today; each name carries that player's detail on hover. */
