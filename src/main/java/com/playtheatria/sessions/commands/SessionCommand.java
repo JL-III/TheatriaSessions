@@ -14,6 +14,7 @@ import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.utils.Util;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -317,7 +318,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     private Menu.Entry[] roster() {
-        List<Session> sessions = sessionService.getSessions();
+        Collection<Session> sessions = sessionService.getSessions();
         if (sessions.isEmpty()) {
             return new Menu.Entry[] {Menu.Entry.of("none yet")};
         }
