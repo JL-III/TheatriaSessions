@@ -128,3 +128,32 @@ spotless {
 		formatAnnotations()
 	}
 }
+
+// Launch a local Paper test server with this plugin installed:
+//
+//     ./gradlew runServer
+//
+// Gradle equivalent of a Maven `-Prun` profile. shadowJar builds the plugin jar,
+// then scripts/run-server.sh downloads Paper, installs the jar, accepts the EULA,
+// and starts the server. SKIP_BUILD=true because shadowJar already produced the
+// jar; PLUGIN_JAR points the script at Gradle's build/libs output (it otherwise
+// looks in Maven's target/). Override the Paper build with
+// -Ppaper.run.version=... / -Ppaper.run.build=... (the script defaults to 26.1.2).
+tasks.register('runServer', Exec) {
+	group = 'application'
+	description = 'Builds the plugin, then boots a local Paper server with it installed.'
+
+	dependsOn tasks.named('shadowJar')
+	workingDir projectDir
+	commandLine 'bash', file('scripts/run-server.sh').absolutePath
+
+	environment 'SKIP_BUILD', 'true'
+	environment 'PLUGIN_ARTIFACT', 'TheatriaSessions'
+	environment 'PLUGIN_JAR', layout.buildDirectory.file('libs/TheatriaSessions.jar').get().asFile.absolutePath
+	if (project.hasProperty('paper.run.version')) {
+		environment 'PAPER_VERSION', project.property('paper.run.version')
+	}
+	if (project.hasProperty('paper.run.build')) {
+		environment 'PAPER_BUILD', project.property('paper.run.build')
+	}
+}
