@@ -33,9 +33,7 @@ public class RewardCommunity implements Listener {
             }
             Bukkit.dispatchCommand(
                     Bukkit.getConsoleSender(),
-                    "lp group default permission settemp "
-                            + event.getRewardTier().getPermission()
-                            + " true 1day");
+                    Util.grantCommunityPermCommand(event.getRewardTier().getPermission()));
         } else {
             log.debug("Reward Community Event fired!");
         }

@@ -98,4 +98,31 @@ public class Util {
                 .replace("{player_uuid}", player.getUniqueId().toString())
                 .replace("{world}", player.getWorld().getName());
     }
+
+    // --- Community sell-multiplier bonus (LuckPerms integration) ---
+    // Bonuses are granted to this group so every online player benefits when the
+    // community hits a playtime goal.
+    public static final String COMMUNITY_BONUS_GROUP = "default";
+
+    // Safety-net duration only. The authoritative terminator is the daily reset
+    // (see DayChange), which revokes these perms on TheatriaTime's downtime-robust
+    // DayChangeEvent. This duration only guarantees a granted bonus never expires
+    // BEFORE the next reset, which always arrives within 24h.
+    public static final String COMMUNITY_BONUS_DURATION = "2d";
+
+    /** LuckPerms command that grants a community bonus permission to the group. */
+    public static String grantCommunityPermCommand(String permission) {
+        return "lp group "
+                + COMMUNITY_BONUS_GROUP
+                + " permission settemp "
+                + permission
+                + " true "
+                + COMMUNITY_BONUS_DURATION
+                + " replace";
+    }
+
+    /** LuckPerms command that revokes a community bonus permission from the group. */
+    public static String revokeCommunityPermCommand(String permission) {
+        return "lp group " + COMMUNITY_BONUS_GROUP + " permission unsettemp " + permission;
+    }
 }
