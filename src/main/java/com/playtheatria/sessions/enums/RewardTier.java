@@ -31,31 +31,25 @@ public enum RewardTier {
         return permission;
     }
 
-    public static RewardTier getByThreshold(int rewardCount) {
+    public static Result<RewardTier, Exception> getByThreshold(int rewardCount) {
         for (RewardTier tier : values()) {
             if (tier.getThreshold() == rewardCount) {
-                return tier;
+                return new Ok<>(tier);
             }
         }
-        return null; // No matching tier
+        return new Err<>(new Exception("No tier found for threshold " + rewardCount));
     }
 
     public static Result<RewardTier, Exception> getNearestTier(int rewardCount) {
-        RewardTier nearestTier = null;
-
+        // values() are in ascending threshold order, so the last tier whose
+        // threshold is met is the highest (nearest) one reached.
+        Result<RewardTier, Exception> nearest = new Err<>(new Exception("No nearest tier found"));
         for (RewardTier tier : values()) {
             if (tier.getThreshold() <= rewardCount) {
-                // Update nearest tier if the current one is closer
-                if (nearestTier == null || tier.getThreshold() > nearestTier.getThreshold()) {
-                    nearestTier = tier;
-                }
+                nearest = new Ok<>(tier);
             }
         }
-        if (nearestTier == null) {
-            return new Err<>(new Exception("No nearest tier found"));
-        } else {
-            return new Ok<>(nearestTier);
-        }
+        return nearest;
     }
 
     public String getPercentage() {
