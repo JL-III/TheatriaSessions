@@ -69,16 +69,6 @@ public enum RewardTier {
         return new Err<>(new Exception("No next tier found"));
     }
 
-    public static RewardTier getNextTier(RewardTier currentTier) {
-        RewardTier[] tiers = RewardTier.values();
-        int currentIndex = currentTier.ordinal();
-
-        if (currentIndex + 1 < tiers.length) {
-            return tiers[currentIndex + 1];
-        }
-        return null; // No next tier exists
-    }
-
     public String getDisplayName() {
         return displayName;
     }
