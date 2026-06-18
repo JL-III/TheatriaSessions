@@ -34,8 +34,7 @@ public class StreaksSubCommand implements SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         switch (args.length) {
             case 0 -> {
-                sender.sendMessage(
-                        "Usage: /session streaks <show-all|force-streak|reset>");
+                sender.sendMessage("Usage: /session streaks <show-all|force-streak|reset>");
                 return true;
             }
             case 1 -> {
