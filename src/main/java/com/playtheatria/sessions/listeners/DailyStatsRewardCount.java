@@ -1,5 +1,7 @@
 package com.playtheatria.sessions.listeners;
 
+import com.playtheatria.jliii.generalutils.result.Err;
+import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.IncrementRewardCountEvent;
 import com.playtheatria.sessions.events.RewardCommunityEvent;
@@ -21,17 +23,19 @@ public class DailyStatsRewardCount implements Listener {
     @EventHandler
     public void onIncrementRewardCount(IncrementRewardCountEvent event) {
         int rewardCount = dailyStatsService.incrementRewardsEarned();
-        RewardTier rewardTier = RewardTier.getByThreshold(rewardCount);
 
-        if (rewardTier == null) {
-            log.debug("No RewardTier found for rewardCount: " + rewardCount);
-            return;
+        switch (RewardTier.getByThreshold(rewardCount)) {
+            case Ok<RewardTier, Exception> ok -> {
+                RewardTier rewardTier = ok.value();
+                log.debug(
+                        String.format(
+                                "Threshold found for reward count of: %s. Calling"
+                                        + " RewardCommunityEvent with: %s",
+                                rewardCount, rewardTier));
+                Bukkit.getPluginManager().callEvent(new RewardCommunityEvent(rewardTier));
+            }
+            case Err<RewardTier, Exception> ignored -> log.debug(
+                    "No RewardTier found for rewardCount: " + rewardCount);
         }
-        log.debug(
-                String.format(
-                        "Threshold found for reward count of: %s. Calling RewardCommunityEvent"
-                                + " with: %s",
-                        rewardCount, rewardTier));
-        Bukkit.getPluginManager().callEvent(new RewardCommunityEvent(rewardTier));
     }
 }

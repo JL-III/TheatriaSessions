@@ -18,11 +18,11 @@ public final class PLog {
     }
 
     public void warn(String msg) {
-        logger.log(Level.WARNING, "[TheatriaSessions] %s", msg);
+        logger.log(Level.WARNING, "[TheatriaSessions] " + msg);
     }
 
     public void err(String msg) {
-        logger.log(Level.SEVERE, "[TheatriaSessions] %s", msg);
+        logger.log(Level.SEVERE, "[TheatriaSessions] " + msg);
     }
 
     public void errFmt(String template, Object arg) {

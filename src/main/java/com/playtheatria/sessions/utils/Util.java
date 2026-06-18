@@ -98,4 +98,25 @@ public class Util {
                 .replace("{player_uuid}", player.getUniqueId().toString())
                 .replace("{world}", player.getWorld().getName());
     }
+
+    // --- Community sell-multiplier bonus (LuckPerms integration) ---
+    // The group and duration are configuration (see config.yml: community-bonus);
+    // these helpers only format the LuckPerms commands from the supplied values.
+
+    /** LuckPerms command that grants a community bonus permission to the group. */
+    public static String grantCommunityPermCommand(
+            String permission, String group, String duration) {
+        return "lp group "
+                + group
+                + " permission settemp "
+                + permission
+                + " true "
+                + duration
+                + " replace";
+    }
+
+    /** LuckPerms command that revokes a community bonus permission from the group. */
+    public static String revokeCommunityPermCommand(String permission, String group) {
+        return "lp group " + group + " permission unsettemp " + permission;
+    }
 }

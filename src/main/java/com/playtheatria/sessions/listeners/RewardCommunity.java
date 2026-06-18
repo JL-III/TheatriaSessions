@@ -1,6 +1,7 @@
 package com.playtheatria.sessions.listeners;
 
 import com.playtheatria.sessions.config.ConfigManager;
+import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.RewardCommunityEvent;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
@@ -23,19 +24,34 @@ public class RewardCommunity implements Listener {
     @EventHandler
     public void onRewardCommunity(RewardCommunityEvent event) {
         if (configManager.isCommunityRewardsEnabled()) {
+            RewardTier tier = event.getRewardTier();
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player.hasPermission(event.getRewardTier().getPermission())) continue;
+                if (player.hasPermission(tier.getPermission())) continue;
                 player.sendMessage(
-                        Util.formatMessage("Alert!", "The community received a community reward!"));
+                        Util.formatMessage(
+                                "Community",
+                                "Unlocked "
+                                        + tier.getDisplayName()
+                                        + " (+"
+                                        + tier.getPercentage()
+                                        + " sell hand) until reset!"));
                 player.sendMessage(
-                        Component.text("Use /daily-reward for more info!")
+                        Component.text("Use /community for details.")
                                 .color(TextColor.fromHexString(Util.COLOR_THREE)));
             }
-            Bukkit.dispatchCommand(
-                    Bukkit.getConsoleSender(),
-                    "lp group default permission settemp "
-                            + event.getRewardTier().getPermission()
-                            + " true 1day");
+            boolean granted =
+                    Bukkit.dispatchCommand(
+                            Bukkit.getConsoleSender(),
+                            Util.grantCommunityPermCommand(
+                                    tier.getPermission(),
+                                    configManager.getCommunityBonusGroup(),
+                                    configManager.getCommunityBonusDuration()));
+            if (!granted) {
+                log.warn(
+                        "Failed to grant community permission '"
+                                + tier.getPermission()
+                                + "'. Is LuckPerms installed?");
+            }
         } else {
             log.debug("Reward Community Event fired!");
         }
