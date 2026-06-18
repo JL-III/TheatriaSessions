@@ -62,6 +62,19 @@ public enum RewardTier {
         return percentage;
     }
 
+    /**
+     * Returns the next tier to be unlocked for the given reward count -- the first
+     * tier whose threshold is not yet met. Err if every tier has been reached.
+     */
+    public static Result<RewardTier, Exception> getNextTier(int rewardCount) {
+        for (RewardTier tier : values()) {
+            if (tier.getThreshold() > rewardCount) {
+                return new Ok<>(tier);
+            }
+        }
+        return new Err<>(new Exception("No next tier found"));
+    }
+
     public static RewardTier getNextTier(RewardTier currentTier) {
         RewardTier[] tiers = RewardTier.values();
         int currentIndex = currentTier.ordinal();
