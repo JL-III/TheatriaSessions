@@ -39,8 +39,16 @@ public class RewardCommunity implements Listener {
                         Component.text("Use /community for details.")
                                 .color(TextColor.fromHexString(Util.COLOR_THREE)));
             }
-            Bukkit.dispatchCommand(
-                    Bukkit.getConsoleSender(), Util.grantCommunityPermCommand(tier.getPermission()));
+            boolean granted =
+                    Bukkit.dispatchCommand(
+                            Bukkit.getConsoleSender(),
+                            Util.grantCommunityPermCommand(tier.getPermission()));
+            if (!granted) {
+                log.warn(
+                        "Failed to grant community permission '"
+                                + tier.getPermission()
+                                + "'. Is LuckPerms installed?");
+            }
         } else {
             log.debug("Reward Community Event fired!");
         }

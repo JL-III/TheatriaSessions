@@ -50,10 +50,16 @@ public class DayChange implements Listener {
      */
     @EventHandler
     public void onDayChangeClearCommunityBonuses(DayChangeEvent event) {
+        boolean allRevoked = true;
         for (RewardTier tier : RewardTier.values()) {
-            Bukkit.dispatchCommand(
+            if (!Bukkit.dispatchCommand(
                     Bukkit.getConsoleSender(),
-                    Util.revokeCommunityPermCommand(tier.getPermission()));
+                    Util.revokeCommunityPermCommand(tier.getPermission()))) {
+                allRevoked = false;
+            }
+        }
+        if (!allRevoked) {
+            log.warn("Failed to revoke one or more community permissions. Is LuckPerms installed?");
         }
         log.debug("[DayChangeEvent] Cleared community sell-multiplier bonuses.");
     }

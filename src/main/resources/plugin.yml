@@ -5,6 +5,7 @@ api-version: '1.21'
 general-utils-version: ${generalUtilsVersion}
 theatria-time-version: ${theatriaTimeVersion}
 depend: [Essentials, TheatriaTime]
+softdepend: [LuckPerms]
 commands:
   session:
     usage: /<command>
