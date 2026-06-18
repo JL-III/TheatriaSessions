@@ -147,6 +147,10 @@ tasks.register('runServer', Exec) {
 	workingDir projectDir
 	commandLine 'bash', file('scripts/run-server.sh').absolutePath
 
+	// Wire the terminal's stdin to the server so its console is interactive
+	// (otherwise you can't type 'stop' or any command).
+	standardInput = System.in
+
 	environment 'SKIP_BUILD', 'true'
 	environment 'PLUGIN_ARTIFACT', 'TheatriaSessions'
 	environment 'PLUGIN_JAR', layout.buildDirectory.file('libs/TheatriaSessions.jar').get().asFile.absolutePath
