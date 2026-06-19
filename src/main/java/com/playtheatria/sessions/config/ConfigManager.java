@@ -27,6 +27,12 @@ public final class ConfigManager {
     private String communityBonusDuration;
     private int streakDelay;
 
+    private boolean discordAnnounceEnabled;
+    private String discordAnnounceChannel;
+    private String discordAnnounceCommand;
+    private String discordAnnounceMessage;
+    private String discordAnnounceEmptyMessage;
+
     private ConfigurationSection streaksSection;
     private boolean streaksEnabled;
     private final NavigableMap<Integer, List<String>> streakRewards = new TreeMap<>();
@@ -46,6 +52,7 @@ public final class ConfigManager {
         this.rewardMessage = plugin.getConfig().getString("reward-message");
         this.communityRewardsEnabled = plugin.getConfig().getBoolean("community-rewards-enabled");
         loadCommunityBonus();
+        loadDiscordAnnounce();
         this.streakDelay = plugin.getConfig().getInt("streak-delay");
         this.sessionSection = plugin.getConfig().getConfigurationSection("session");
         loadThreshold();
@@ -86,6 +93,26 @@ public final class ConfigManager {
 
     public String getCommunityBonusDuration() {
         return this.communityBonusDuration;
+    }
+
+    public boolean isDiscordAnnounceEnabled() {
+        return this.discordAnnounceEnabled;
+    }
+
+    public String getDiscordAnnounceChannel() {
+        return this.discordAnnounceChannel;
+    }
+
+    public String getDiscordAnnounceCommand() {
+        return this.discordAnnounceCommand;
+    }
+
+    public String getDiscordAnnounceMessage() {
+        return this.discordAnnounceMessage;
+    }
+
+    public String getDiscordAnnounceEmptyMessage() {
+        return this.discordAnnounceEmptyMessage;
     }
 
     public String getRewardMessage() {
@@ -179,6 +206,32 @@ public final class ConfigManager {
         this.communityBonusGroup = (group == null || group.isEmpty()) ? "default" : group;
         String duration = section.getString("duration");
         this.communityBonusDuration = (duration == null || duration.isEmpty()) ? "2d" : duration;
+    }
+
+    private void loadDiscordAnnounce() {
+        ConfigurationSection section =
+                plugin.getConfig().getConfigurationSection("discord-announce");
+        if (section == null) {
+            log.log(
+                    Level.WARNING,
+                    "No 'discord-announce' section in config.yml; disabling Discord"
+                            + " announcements");
+            this.discordAnnounceEnabled = false;
+            this.discordAnnounceChannel = "";
+            this.discordAnnounceCommand = "";
+            this.discordAnnounceMessage = "";
+            this.discordAnnounceEmptyMessage = "";
+            return;
+        }
+        this.discordAnnounceEnabled = section.getBoolean("enabled");
+        this.discordAnnounceChannel = orEmpty(section.getString("channel"));
+        this.discordAnnounceCommand = orEmpty(section.getString("command"));
+        this.discordAnnounceMessage = orEmpty(section.getString("message"));
+        this.discordAnnounceEmptyMessage = orEmpty(section.getString("empty-message"));
+    }
+
+    private static String orEmpty(String value) {
+        return value == null ? "" : value;
     }
 
     private void loadSteaksEnabled() {

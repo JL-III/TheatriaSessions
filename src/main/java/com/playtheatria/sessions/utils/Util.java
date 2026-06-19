@@ -1,6 +1,7 @@
 package com.playtheatria.sessions.utils;
 
 import com.playtheatria.sessions.database.data.Session;
+import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.command.CommandSender;
@@ -59,5 +60,39 @@ public class Util {
     /** LuckPerms command that revokes a community bonus permission from the group. */
     public static String revokeCommunityPermCommand(String permission, String group) {
         return "lp group " + group + " permission unsettemp " + permission;
+    }
+
+    // --- Discord daily-roster announcement (console command dispatch) ---
+
+    /**
+     * Renders the Discord announcement console command from the configured templates.
+     *
+     * <p>The {@code messageTemplate} placeholders ({@code {count}}, {@code {players}},
+     * {@code {date}}) are filled first, then the result is substituted into the
+     * {@code commandTemplate}'s {@code {message}} placeholder alongside {@code {channel}}.
+     * The whole thing is dispatched as a single console command line, so the message simply
+     * becomes the trailing arguments of the command (e.g. {@code discord announce general
+     * <message>}).
+     *
+     * @param commandTemplate the command template, e.g. {@code "discord announce {channel}
+     *     {message}"}
+     * @param channel the configured channel substituted for {@code {channel}}
+     * @param messageTemplate the body template (the regular or the empty-day variant)
+     * @param playerNames the roster; drives {@code {count}} and {@code {players}}
+     * @param date the day being summarized, substituted for {@code {date}}
+     * @return the fully rendered command ready for {@code Bukkit.dispatchCommand}
+     */
+    public static String discordAnnounceCommand(
+            String commandTemplate,
+            String channel,
+            String messageTemplate,
+            List<String> playerNames,
+            String date) {
+        String message =
+                messageTemplate
+                        .replace("{count}", Integer.toString(playerNames.size()))
+                        .replace("{players}", String.join(", ", playerNames))
+                        .replace("{date}", date);
+        return commandTemplate.replace("{channel}", channel).replace("{message}", message);
     }
 }

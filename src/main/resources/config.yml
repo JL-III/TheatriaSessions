@@ -16,6 +16,30 @@ session:
 
 community-rewards-enabled: false
 
+# Posts a daily roster to Discord at the day-change reset (0:00 UTC), listing
+# everyone who logged in that day. It works by dispatching a console command, so
+# it integrates with any Discord bridge that exposes one (DiscordSRV, EssentialsX
+# Discord, etc.) -- just point `command` at the right syntax. The announcement
+# fires right BEFORE sessions reset, so the roster is always complete.
+discord-announce:
+  # Master switch. Leave false unless a Discord bridge plugin is installed and
+  # the command below is correct, otherwise the dispatch simply fails (and logs a
+  # warning) at every reset.
+  enabled: false
+  # The Discord channel the announcement is posted to. Substituted for {channel}
+  # in the command below -- use whatever your bridge expects (a channel name, an
+  # id, or a #mention).
+  channel: "general"
+  # Console command dispatched to post the announcement.
+  # Placeholders: {channel}, {message}
+  command: "discord announce {channel} {message}"
+  # The announcement body. Placeholders: {players} (comma-separated names),
+  # {count} (how many played), {date} (the day being summarized).
+  message: "{count} players logged in on {date}: {players}"
+  # Posted instead when nobody logged in that day. Leave empty to post nothing on
+  # empty days.
+  empty-message: "No players logged in on {date}."
+
 # Community sell-multiplier bonus, granted via LuckPerms when the server hits a
 # playtime goal so every online player benefits.
 community-bonus:
