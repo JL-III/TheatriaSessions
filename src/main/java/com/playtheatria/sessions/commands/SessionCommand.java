@@ -6,6 +6,7 @@ import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.data.Streak;
 import com.playtheatria.sessions.enums.RewardTier;
+import com.playtheatria.sessions.events.IncrementRewardCountEvent;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
 import com.playtheatria.sessions.menus.Menu;
 import com.playtheatria.sessions.service.DailyStatsService;
@@ -40,7 +41,13 @@ import org.jetbrains.annotations.Nullable;
  */
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private static final List<String> ADMIN_VERBS =
-            List.of("create", "force-reward", "reload-config", "reset-progress", "set-progress");
+            List.of(
+                    "add-player-earned",
+                    "create",
+                    "force-reward",
+                    "reload-config",
+                    "reset-progress",
+                    "set-progress");
     private static final List<String> TABS =
             List.of("personal", "streaks", "community", "joined");
 
@@ -134,14 +141,27 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return true;
         switch (args.length) {
             case 1 -> {
-                if (args[0].equalsIgnoreCase("reload-config")) {
-                    sender.sendMessage(Util.formatMessage("sessions", "Reloading config"));
-                    configManager.reloadConfig();
-                    return true;
+                switch (args[0].toLowerCase()) {
+                    case "reload-config" -> {
+                        sender.sendMessage(Util.formatMessage("sessions", "Reloading config"));
+                        configManager.reloadConfig();
+                        return true;
+                    }
+                    case "add-player-earned" -> {
+                        return simulateEarned(sender, 1);
+                    }
                 }
             }
             case 2 -> {
                 switch (args[0].toLowerCase()) {
+                    case "add-player-earned" -> {
+                        try {
+                            return simulateEarned(sender, Integer.parseInt(args[1]));
+                        } catch (NumberFormatException e) {
+                            sender.sendMessage("Not a valid number: " + args[1]);
+                            return true;
+                        }
+                    }
                     case "force-reward" -> {
                         for (Session session : sessionService.getSessions()) {
                             if (session.getPlayerName().equalsIgnoreCase(args[1])) {
@@ -210,10 +230,34 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         return false;
     }
 
+    /**
+     * Debug helper: fires {@link IncrementRewardCountEvent} {@code count} times, driving the
+     * real reward pipeline one earn at a time so each tier threshold is checked and the
+     * community LuckPerms bonus is actually granted as tiers are crossed.
+     */
+    private boolean simulateEarned(CommandSender sender, int count) {
+        if (count < 1 || count > 10_000) {
+            sender.sendMessage("Count must be between 1 and 10000.");
+            return true;
+        }
+        for (int i = 0; i < count; i++) {
+            Bukkit.getPluginManager().callEvent(new IncrementRewardCountEvent());
+        }
+        sender.sendMessage(
+                Util.formatMessage(
+                        "Debug",
+                        "Simulated "
+                                + count
+                                + " player(s) earned; total now "
+                                + dailyStatsService.getRewardsEarned()));
+        return true;
+    }
+
     private List<String> adminTabComplete(CommandSender sender, String[] args) {
         if (!sender.hasPermission(Util.PERMISSION_ADMIN)) return List.of();
         switch (args.length) {
             case 2 -> {
+                if (args[0].equalsIgnoreCase("add-player-earned")) return List.of("<count>");
                 if (args[0].equalsIgnoreCase("reload-config")) return List.of();
                 return sessionService.getSessions().stream()
                         .map(Session::getPlayerName)
