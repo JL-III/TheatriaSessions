@@ -65,7 +65,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     private static final String BK_PURPLE = "#7a2e9e";
     private static final String BK_LABEL = "#4a4a4a";
     private static final String BK_VALUE = "#8a5e00";
-    private static final int ROSTER_PER_PAGE = 12;
+    private static final int ROSTER_PER_PAGE = 10;
 
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
@@ -329,6 +329,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                 + "</color></hover>";
     }
 
+    /** A "back to contents" link for the bottom of each page. */
+    private static String bookHome() {
+        return "<click:change_page:'1'><hover:show_text:\"Back to contents\"><color:"
+                + BK_LABEL
+                + ">« Contents</color></hover></click>";
+    }
+
     private Book buildBook(Player player, Session session, Streak streak) {
         boolean staff = canSeeRoster(player);
         int rewardCount = dailyStatsService.getRewardsEarned();
@@ -364,7 +371,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 + "\n "
                                 + bookValue(
                                         session.isRewarded() ? "✅" : "❌",
-                                        "Whether you have earned your daily reward today.")));
+                                        "Whether you have earned your daily reward today.")
+                                + "\n\n"
+                                + bookHome()));
 
         // Page 3: Streaks
         pages.add(
@@ -389,7 +398,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                         streak.getLastEarnedDate() == null
                                                 ? "N/A"
                                                 : String.valueOf(streak.getLastEarnedDate()),
-                                        "The last day you earned your daily reward.")));
+                                        "The last day you earned your daily reward.")
+                                + "\n\n"
+                                + bookHome()));
 
         // Page 4: Community ("sell hand" trimmed to keep the page within a book's lines)
         pages.add(
@@ -426,7 +437,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 + bookValue(
                                         communityNextBonus(rewardCount),
                                         "Progress towards unlocking the next community bonus"
-                                                + " level.")));
+                                                + " level.")
+                                + "\n\n"
+                                + bookHome()));
 
         // Page 5+: Joined roster (staff only), paginated; names carry detail on hover.
         if (staff) {
@@ -453,6 +466,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                             .append(
                                     Component.text("none yet")
                                             .color(TextColor.fromHexString(BK_LABEL)))
+                            .append(Component.newline())
+                            .append(Component.newline())
+                            .append(MINI.deserialize(bookHome()))
                             .build());
             return result;
         }
@@ -477,6 +493,9 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                                         Component.text(
                                                                 detail(session, includeAfk)))));
             }
+            page.append(Component.newline())
+                    .append(Component.newline())
+                    .append(MINI.deserialize(bookHome()));
             result.add(page.build());
         }
         return result;
