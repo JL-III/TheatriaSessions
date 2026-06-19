@@ -6,6 +6,8 @@ import com.playtheatria.sessions.events.RewardCommunityEvent;
 import com.playtheatria.sessions.utils.PLog;
 import com.playtheatria.sessions.utils.Util;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -30,14 +32,18 @@ public class RewardCommunity implements Listener {
                 player.sendMessage(
                         Util.formatMessage(
                                 "Community",
-                                "Unlocked "
+                                "The Oracle rewards the realm! "
                                         + tier.getDisplayName()
-                                        + " (+"
+                                        + " unlocked (+"
                                         + tier.getPercentage()
-                                        + " sell hand) until reset!"));
+                                        + " sell hand) for everyone until reset!"));
                 player.sendMessage(
-                        Component.text("Use /community for details.")
-                                .color(TextColor.fromHexString(Util.COLOR_THREE)));
+                        Component.text("Check your progress with /daily-reward")
+                                .color(TextColor.fromHexString(Util.COLOR_THREE))
+                                .clickEvent(ClickEvent.runCommand("/daily-reward view community"))
+                                .hoverEvent(
+                                        HoverEvent.showText(
+                                                Component.text("Open the community tab"))));
             }
             boolean granted =
                     Bukkit.dispatchCommand(

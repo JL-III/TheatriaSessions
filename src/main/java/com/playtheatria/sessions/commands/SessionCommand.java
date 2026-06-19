@@ -82,7 +82,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull String[] args) {
         if (args.length == 0) {
             if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
-            if (sender instanceof Player player) showView(player, "personal");
+            if (sender instanceof Player player) showView(player, label, "personal");
             return true;
         }
 
@@ -90,7 +90,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         if (first.equals("view")) {
             if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
             if (sender instanceof Player player) {
-                showView(player, args.length >= 2 ? args[1] : "personal");
+                showView(player, label, args.length >= 2 ? args[1] : "personal");
             }
             return true;
         }
@@ -276,12 +276,13 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
 
     // --- Tabbed player view -------------------------------------------------
 
-    private void showView(Player player, String tab) {
+    private void showView(Player player, String label, String tab) {
         switch (sessionService.getSession(player.getUniqueId())) {
             case Ok<Session, Exception> ok -> {
                 switch (streakService.getStreak(player.getUniqueId())) {
                     case Ok<Streak, Exception> okStreak -> player.sendMessage(
-                            buildView(player, tab, ok.value(), okStreak.value()).toComponent());
+                            buildView(player, label, tab, ok.value(), okStreak.value())
+                                    .toComponent());
                     case Err<Streak, Exception> errStreak -> player.sendMessage(
                             errStreak.error().getMessage());
                 }
@@ -290,7 +291,8 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    private Menu buildView(Player player, String requestedTab, Session session, Streak streak) {
+    private Menu buildView(
+            Player player, String label, String requestedTab, Session session, Streak streak) {
         boolean canSeeRoster = canSeeRoster(player);
         String tab = normalizeTab(requestedTab, canSeeRoster);
 
@@ -311,7 +313,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             default -> addPersonal(builder, session);
         }
 
-        builder.buttons(navButtons(tab, canSeeRoster));
+        builder.buttons(navButtons(label, tab, canSeeRoster));
         return builder.build();
     }
 
@@ -378,18 +380,21 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         builder.entries("⭐ Joined Today").entries("   ", roster(viewer));
     }
 
-    private Menu.Cmd[] navButtons(String active, boolean canSeeRoster) {
+    private Menu.Cmd[] navButtons(String label, String active, boolean canSeeRoster) {
         List<Menu.Cmd> buttons = new ArrayList<>();
-        buttons.add(navButton("Personal", "personal", active));
-        buttons.add(navButton("Streaks", "streaks", active));
-        buttons.add(navButton("Community", "community", active));
-        if (canSeeRoster) buttons.add(navButton("Joined", "joined", active));
+        buttons.add(navButton(label, "Personal", "personal", active));
+        buttons.add(navButton(label, "Streaks", "streaks", active));
+        buttons.add(navButton(label, "Community", "community", active));
+        if (canSeeRoster) buttons.add(navButton(label, "Joined", "joined", active));
         return buttons.toArray(new Menu.Cmd[0]);
     }
 
-    private Menu.Cmd navButton(String label, String tab, String active) {
+    private Menu.Cmd navButton(String label, String text, String tab, String active) {
+        // Reproduce the label the player actually used (/session or its /daily-reward
+        // alias) so the buttons stay consistent with however the menu was opened.
         // Every button wears its tab's signature color; the active one gets a marker.
-        Menu.Cmd button = Menu.Cmd.of("/session view " + tab).text(label).color(tabColor(tab));
+        Menu.Cmd button =
+                Menu.Cmd.of("/" + label + " view " + tab).text(text).color(tabColor(tab));
         if (tab.equals(active)) button.icon(">");
         return button;
     }
