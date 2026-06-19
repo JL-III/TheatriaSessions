@@ -69,7 +69,7 @@ public class RewardCommunity implements Listener {
             player.sendMessage(unlock);
             player.sendMessage(progress);
             // A bright note-block chime to mark the unlock.
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.2f);
+            player.playSound(player.getLocation(), Sound.BLOCK_CONDUIT_ACTIVATE, 1.0f, 1.2f);
         }
 
         boolean granted =
