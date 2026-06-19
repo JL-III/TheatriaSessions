@@ -371,7 +371,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                         Menu.Entry.of(" " + communityNextBonus(rewardCount))
                                 .description(
                                         "Progress towards unlocking the next community bonus"
-                                                + " tier."));
+                                                + " level."));
     }
 
     private void addJoined(Menu.Builder builder, Player viewer) {
@@ -479,7 +479,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     private String communityNextBonus(int rewardCount) {
-        String next = "top tier reached!";
+        String next = "top level reached!";
         switch (RewardTier.getNextTier(rewardCount)) {
             case Ok<RewardTier, Exception> ok -> {
                 RewardTier tier = ok.value();
