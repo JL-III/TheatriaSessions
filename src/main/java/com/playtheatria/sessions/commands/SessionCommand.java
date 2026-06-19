@@ -2,6 +2,7 @@ package com.playtheatria.sessions.commands;
 
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
+import com.playtheatria.jliii.generalutils.utils.TimeUtils;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.database.data.Streak;
@@ -13,6 +14,8 @@ import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
 import com.playtheatria.sessions.service.StreakService;
 import com.playtheatria.sessions.utils.Util;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -367,6 +370,12 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 .description(
                                         "The community sell-hand bonus active for everyone now."))
                 .entries(
+                        "   Boost ends in:",
+                        Menu.Entry.of(" " + boostRemaining(rewardCount))
+                                .description(
+                                        "Active community bonuses clear at the daily reset"
+                                                + " (midnight US Eastern)."))
+                .entries(
                         "   Next Bonus:",
                         Menu.Entry.of(" " + communityNextBonus(rewardCount))
                                 .description(
@@ -495,5 +504,26 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             case Err<RewardTier, Exception> ignored -> {}
         }
         return next;
+    }
+
+    /** "—" when no bonus is active, otherwise the time until that bonus clears at reset. */
+    private String boostRemaining(int rewardCount) {
+        String remaining = "—";
+        switch (RewardTier.getNearestTier(rewardCount)) {
+            case Ok<RewardTier, Exception> ok -> remaining = timeUntilReset();
+            case Err<RewardTier, Exception> ignored -> {}
+        }
+        return remaining;
+    }
+
+    /**
+     * Time until the daily reset (midnight in TheatriaTime's reset zone), when DayChange
+     * clears the community bonuses. The zone is region-based, so it tracks DST automatically.
+     */
+    private String timeUntilReset() {
+        ZonedDateTime now = ZonedDateTime.now(TimeUtils.timeZone);
+        ZonedDateTime nextReset = now.toLocalDate().plusDays(1).atStartOfDay(TimeUtils.timeZone);
+        Duration remaining = Duration.between(now, nextReset);
+        return remaining.toHours() + "h " + (remaining.toMinutes() % 60) + "m";
     }
 }
