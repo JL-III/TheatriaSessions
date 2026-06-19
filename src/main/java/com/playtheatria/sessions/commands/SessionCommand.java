@@ -40,10 +40,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Single entry point for the plugin. With no args it shows the player a compact,
- * tabbed screen -- Personal, Streaks, Community, and (for staff) the Joined Today
- * roster -- with clickable buttons that swap tabs via {@code /session view <tab>}.
- * The first arg otherwise selects a {@link SubCommand} (streaks) or an admin verb.
+ * Single entry point for the plugin. With no args a player opens the daily-reward
+ * book, while the console gets a plain-text community overview. {@code view <tab>}
+ * renders a section -- Personal, Streaks, Community, or the staff Joined roster --
+ * in chat for players, or as text for the console (community/joined only). The
+ * first arg otherwise selects a {@link SubCommand} (streaks) or an admin verb.
  */
 public class SessionCommand implements CommandExecutor, TabCompleter {
     private static final List<String> ADMIN_VERBS =
@@ -99,14 +100,18 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
             if (sender instanceof Player player) openBook(player);
+            else sendCommunityText(sender); // console gets the server overview as text
             return true;
         }
 
         String first = args[0].toLowerCase(Locale.ROOT);
         if (first.equals("view")) {
             if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
+            String tab = args.length >= 2 ? args[1] : "personal";
             if (sender instanceof Player player) {
-                showView(player, label, args.length >= 2 ? args[1] : "personal");
+                showView(player, label, tab);
+            } else {
+                sendConsoleView(sender, tab);
             }
             return true;
         }
@@ -658,6 +663,50 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                                 Menu.Entry.of(session.getPlayerName())
                                         .description(detail(session, includeAfk)))
                 .toArray(Menu.Entry[]::new);
+    }
+
+    // --- Console / text stats: the book and chat menu are player-only (you can't
+    // openBook a console), so console gets a plain-text rendering of the server-wide
+    // views. Per-player Personal/Streaks stay in-game (a console has no "self"). ---
+
+    private void sendConsoleView(CommandSender sender, String tab) {
+        switch (normalizeTab(tab, true)) {
+            case "community" -> sendCommunityText(sender);
+            case "joined" -> sendRosterText(sender);
+            default -> sender.sendMessage(
+                    Component.text(
+                            "Personal and streaks are per-player -- view them in-game."
+                                    + " From console: /daily-reward view <community|joined>"));
+        }
+    }
+
+    private void sendCommunityText(CommandSender sender) {
+        int rewardCount = dailyStatsService.getRewardsEarned();
+        sender.sendMessage(Component.text("Community - " + dailyStatsService.getDate()));
+        sender.sendMessage(
+                Component.text("  Players joined: " + dailyStatsService.getPlayersJoined()));
+        sender.sendMessage(Component.text("  Players earned: " + rewardCount));
+        sender.sendMessage(Component.text("  Active bonus:   " + communityActiveBonus(rewardCount)));
+        sender.sendMessage(Component.text("  Boost ends in:  " + boostRemaining(rewardCount)));
+        sender.sendMessage(Component.text("  Next bonus:     " + communityNextBonus(rewardCount)));
+    }
+
+    private void sendRosterText(CommandSender sender) {
+        Collection<Session> sessions = sessionService.getSessions();
+        sender.sendMessage(Component.text("Joined today (" + sessions.size() + "):"));
+        if (sessions.isEmpty()) {
+            sender.sendMessage(Component.text("  none yet"));
+            return;
+        }
+        boolean includeAfk = sender.hasPermission(Util.PERMISSION_ADMIN);
+        for (Session session : sessions) {
+            sender.sendMessage(
+                    Component.text(
+                            "  "
+                                    + session.getPlayerName()
+                                    + " - "
+                                    + detail(session, includeAfk).replace("\n", " | ")));
+        }
     }
 
     /** Per-player hover detail (the old "check" view). AFK is admin-gated. */
