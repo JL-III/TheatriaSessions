@@ -41,19 +41,19 @@ public class RewardCommunity implements Listener {
         RewardTier tier = event.getRewardTier();
 
         // Built once and shared (Adventure Components are immutable) -- same message for all.
-        Component unlock =
-                MINI.deserialize(
+        Component unlock
+                = MINI.deserialize(
                         GRADIENT
-                                + "The Oracle rewards the realm! "
-                                + HL
-                                + tier.getDisplayName()
-                                + HL_END
-                                + " unlocked ("
-                                + HL
-                                + "+"
-                                + tier.getPercentage()
-                                + HL_END
-                                + " sell hand) for everyone until reset!");
+                        + "The Oracle rewards the realm! "
+                        + HL
+                        + tier.getDisplayName()
+                        + HL_END
+                        + " unlocked ("
+                        + HL
+                        + "+"
+                        + tier.getPercentage() + " sell hand"
+                        + HL_END
+                        + ") for everyone! Resets Daily!");
         Component progress =
                 MINI.deserialize(
                                 GRADIENT
