@@ -24,8 +24,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -53,6 +56,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
                     "set-progress");
     private static final List<String> TABS =
             List.of("personal", "streaks", "community", "joined");
+    private static final MiniMessage MINI = MiniMessage.miniMessage();
 
     private final DailyStatsService dailyStatsService;
     private final SessionService sessionService;
@@ -85,7 +89,7 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             @NotNull String[] args) {
         if (args.length == 0) {
             if (!sender.hasPermission(Util.PERMISSION_ALLOW)) return true;
-            if (sender instanceof Player player) showView(player, label, "personal");
+            if (sender instanceof Player player) openBook(player);
             return true;
         }
 
@@ -278,6 +282,125 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
     }
 
     // --- Tabbed player view -------------------------------------------------
+
+    // --- Book view (experiment): the same data rendered as a written book the player
+    // opens with /daily-reward and pages through. The chat tabs remain on /daily-reward
+    // view <tab> for comparison. ---
+
+    private void openBook(Player player) {
+        switch (sessionService.getSession(player.getUniqueId())) {
+            case Ok<Session, Exception> ok -> {
+                switch (streakService.getStreak(player.getUniqueId())) {
+                    case Ok<Streak, Exception> okStreak -> player.openBook(
+                            buildBook(player, ok.value(), okStreak.value()));
+                    case Err<Streak, Exception> errStreak -> player.sendMessage(
+                            errStreak.error().getMessage());
+                }
+            }
+            case Err<Session, Exception> err -> player.sendMessage(err.error().getMessage());
+        }
+    }
+
+    private Book buildBook(Player player, Session session, Streak streak) {
+        boolean staff = canSeeRoster(player);
+        int rewardCount = dailyStatsService.getRewardsEarned();
+
+        List<Component> pages = new ArrayList<>();
+
+        // Page 1: contents, with click-to-jump links (book page numbers are 1-based).
+        StringBuilder contents = new StringBuilder();
+        contents.append("<bold><gradient:#67e9a8:#1fa86b>Daily-Reward</gradient></bold>\n");
+        contents.append("<color:#fff8bd>").append(dailyStatsService.getDate()).append("</color>\n\n");
+        contents.append("<color:#fff8bd>Contents</color>\n");
+        contents.append("<click:change_page:'2'><color:#67e9a8>» Personal</color></click>\n");
+        contents.append("<click:change_page:'3'><color:#E9C967>» Streaks</color></click>\n");
+        contents.append("<click:change_page:'4'><color:#67A8E9>» Community</color></click>");
+        if (staff) {
+            contents.append("\n<click:change_page:'5'><color:#D467E9>» Joined</color></click>");
+        }
+        pages.add(MINI.deserialize(contents.toString()));
+
+        // Page 2: Personal
+        pages.add(
+                MINI.deserialize(
+                        "<bold><color:#67e9a8>⭐ Personal</color></bold>\n\n"
+                                + "<color:#fff8bd>Progress</color>\n <color:#ffd119>"
+                                + progressMinutes(session)
+                                + "</color>\n\n"
+                                + "<color:#fff8bd>Earned reward</color>\n <color:#ffd119>"
+                                + (session.isRewarded() ? "✅" : "❌")
+                                + "</color>"));
+
+        // Page 3: Streaks
+        pages.add(
+                MINI.deserialize(
+                        "<bold><color:#E9C967>⭐ Streaks</color></bold>\n\n"
+                                + "<color:#fff8bd>Current</color> <color:#ffd119>"
+                                + streak.getCurrentStreak()
+                                + " days</color>\n"
+                                + "<color:#fff8bd>Longest</color> <color:#ffd119>"
+                                + streak.getLongestStreak()
+                                + " days</color>\n\n"
+                                + "<color:#fff8bd>Last earned</color>\n <color:#ffd119>"
+                                + (streak.getLastEarnedDate() == null
+                                        ? "N/A"
+                                        : streak.getLastEarnedDate())
+                                + "</color>"));
+
+        // Page 4: Community ("sell hand" trimmed to keep the page within a book's lines)
+        pages.add(
+                MINI.deserialize(
+                        "<bold><color:#67A8E9>⭐ Community</color></bold>\n\n"
+                                + "<color:#fff8bd>Joined</color> <color:#ffd119>"
+                                + dailyStatsService.getPlayersJoined()
+                                + "</color>  <color:#fff8bd>Earned</color> <color:#ffd119>"
+                                + rewardCount
+                                + "</color>\n\n"
+                                + "<color:#fff8bd>Active</color>\n <color:#ffd119>"
+                                + communityActiveBonus(rewardCount).replace(" sell hand", "")
+                                + "</color>\n"
+                                + "<color:#fff8bd>Ends in</color> <color:#ffd119>"
+                                + boostRemaining(rewardCount)
+                                + "</color>\n\n"
+                                + "<color:#fff8bd>Next</color>\n <color:#ffd119>"
+                                + communityNextBonus(rewardCount)
+                                + "</color>"));
+
+        // Page 5: Joined roster (staff only) -- names with per-player detail on hover.
+        if (staff) {
+            pages.add(joinedPage(player));
+        }
+
+        return Book.book(
+                MINI.deserialize("<gradient:#67e9a8:#1fa86b>Daily-Reward</gradient>"),
+                Component.text("The Oracle"),
+                pages);
+    }
+
+    private Component joinedPage(Player viewer) {
+        Collection<Session> sessions = sessionService.getSessions();
+        var page =
+                Component.text()
+                        .append(MINI.deserialize("<bold><color:#D467E9>⭐ Joined</color></bold>"))
+                        .append(Component.newline());
+        if (sessions.isEmpty()) {
+            return page.append(Component.newline())
+                    .append(Component.text("none yet").color(TextColor.fromHexString(Util.COLOR_THREE)))
+                    .build();
+        }
+        boolean includeAfk = viewer.hasPermission(Util.PERMISSION_ADMIN);
+        TextColor nameColor = TextColor.fromHexString("#D467E9");
+        for (Session session : sessions) {
+            page.append(Component.newline())
+                    .append(
+                            Component.text(session.getPlayerName())
+                                    .color(nameColor)
+                                    .hoverEvent(
+                                            HoverEvent.showText(
+                                                    Component.text(detail(session, includeAfk)))));
+        }
+        return page.build();
+    }
 
     private void showView(Player player, String label, String tab) {
         switch (sessionService.getSession(player.getUniqueId())) {
