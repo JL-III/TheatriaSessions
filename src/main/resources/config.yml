@@ -32,7 +32,7 @@ discord-announce:
   channel: "general"
   # Console command dispatched to post the announcement.
   # Placeholders: {channel}, {message}
-  command: "discord announce {channel} {message}"
+  command: "discord broadcast {channel} {message}"
   # The announcement body. Placeholders: {players} (comma-separated names),
   # {count} (how many played), {date} (the day being summarized).
   message: "{count} players logged in on {date}: {players}"
