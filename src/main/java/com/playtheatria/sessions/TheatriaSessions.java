@@ -14,6 +14,7 @@ import com.playtheatria.sessions.database.data.DailyStats;
 import com.playtheatria.sessions.database.repositories.DailyStatsRepo;
 import com.playtheatria.sessions.database.repositories.SessionRepo;
 import com.playtheatria.sessions.database.repositories.StreakRepo;
+import com.playtheatria.sessions.listeners.CommunityBossBar;
 import com.playtheatria.sessions.listeners.DailyStatsRewardCount;
 import com.playtheatria.sessions.listeners.DayChange;
 import com.playtheatria.sessions.listeners.PlayerJoin;
@@ -51,6 +52,7 @@ public final class TheatriaSessions extends JavaPlugin {
 
     private DatabaseTask databaseTask;
     private OneSecondTimer oneSecondTimer;
+    private CommunityBossBar communityBossBar;
     private Essentials essentials;
     private TheatriaSessionsDB sessionsDB;
     private DailyStats dailyStats;
@@ -88,13 +90,20 @@ public final class TheatriaSessions extends JavaPlugin {
                 this, 20 * cm.getInitDelay(), 20 * cm.getBackupDuration());
 
         registerEvents(cm, dailyStatsService, sessionService, streakService, log);
+        // Re-attach the community boss bar for anyone already online (e.g. after a /reload)
+        // if a bonus is currently active.
+        communityBossBar.refresh();
 
         registerCommands(
                 List.of(
                         new CommandRecord(
                                 "session",
                                 new SessionCommand(
-                                        dailyStatsService, sessionService, streakService, cm))));
+                                        dailyStatsService,
+                                        sessionService,
+                                        streakService,
+                                        cm,
+                                        communityBossBar))));
         log.info("Loaded plugin.");
     }
 
@@ -102,6 +111,7 @@ public final class TheatriaSessions extends JavaPlugin {
     public void onDisable() {
         if (databaseTask != null) databaseTask.cancel();
         if (oneSecondTimer != null) oneSecondTimer.cancel();
+        if (communityBossBar != null) communityBossBar.hideFromAll();
         sessionService.persist(true);
         dailyStatsService.persist(true);
         streakService.persist(true);
@@ -132,6 +142,8 @@ public final class TheatriaSessions extends JavaPlugin {
         pm.registerEvents(new RewardPlayer(this, ss, sts, cm, log), this);
         pm.registerEvents(new DailyStatsRewardCount(dss, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
+        communityBossBar = new CommunityBossBar(this, cm, dss, log);
+        pm.registerEvents(communityBossBar, this);
     }
 
     /**

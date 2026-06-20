@@ -9,6 +9,7 @@ import com.playtheatria.sessions.database.data.Streak;
 import com.playtheatria.sessions.enums.RewardTier;
 import com.playtheatria.sessions.events.IncrementRewardCountEvent;
 import com.playtheatria.sessions.events.RewardPlayerEvent;
+import com.playtheatria.sessions.listeners.CommunityBossBar;
 import com.playtheatria.sessions.menus.Menu;
 import com.playtheatria.sessions.service.DailyStatsService;
 import com.playtheatria.sessions.service.SessionService;
@@ -78,13 +79,15 @@ public class SessionCommand implements CommandExecutor, TabCompleter {
             DailyStatsService dailyStatsService,
             SessionService sessionService,
             StreakService streakService,
-            ConfigManager configManager) {
+            ConfigManager configManager,
+            CommunityBossBar communityBossBar) {
         this.dailyStatsService = dailyStatsService;
         this.sessionService = sessionService;
         this.streakService = streakService;
         this.configManager = configManager;
 
         register(new StreaksSubCommand(streakService));
+        register(new BossBarSubCommand(communityBossBar));
     }
 
     private void register(SubCommand sub) {
