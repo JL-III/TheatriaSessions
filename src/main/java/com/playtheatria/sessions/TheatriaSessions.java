@@ -138,7 +138,7 @@ public final class TheatriaSessions extends JavaPlugin {
         pm.registerEvents(new RewardPlayer(this, ss, sts, cm, log), this);
         pm.registerEvents(new DailyStatsRewardCount(dss, log), this);
         pm.registerEvents(new RewardCommunity(cm, log), this);
-        communityBossBar = new CommunityBossBar(cm, dss, log);
+        communityBossBar = new CommunityBossBar(this, cm, dss, log);
         pm.registerEvents(communityBossBar, this);
     }
 

@@ -56,6 +56,10 @@ community-bonus:
   # the full picture. Only ever shown when community-rewards-enabled is true and a
   # tier has been unlocked; it clears automatically at the daily reset.
   boss-bar: true
+  # How long (in seconds) the boss bar stays on screen each time it pops up -- on
+  # join, and again whenever the bonus level changes. After this it fades, so it
+  # reads as a notification rather than a permanent fixture. Must be at least 1.
+  boss-bar-seconds: 30
 
 # How many seconds between sending daily-reward message and streak message
 streak-delay: 3
