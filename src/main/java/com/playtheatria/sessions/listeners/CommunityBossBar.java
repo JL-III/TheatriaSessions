@@ -166,7 +166,7 @@ public class CommunityBossBar implements Listener {
                                 + HL
                                 + "/daily-reward"
                                 + HL_END
-                                + " to look closer"));
+                                + " for more info"));
         bar.progress(tierProgress(tier));
     }
 
