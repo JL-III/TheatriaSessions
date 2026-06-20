@@ -51,6 +51,11 @@ community-bonus:
   # arrives within 24h. Keep it comfortably longer than a day (e.g. 2d) -- do NOT
   # shorten it below 24h or a bonus could lapse mid-day.
   duration: "2d"
+  # Show a boss bar to every online player while a community sell-hand bonus is
+  # active. It displays the current boost and nudges players to /daily-reward for
+  # the full picture. Only ever shown when community-rewards-enabled is true and a
+  # tier has been unlocked; it clears automatically at the daily reset.
+  boss-bar: true
 
 # How many seconds between sending daily-reward message and streak message
 streak-delay: 3
