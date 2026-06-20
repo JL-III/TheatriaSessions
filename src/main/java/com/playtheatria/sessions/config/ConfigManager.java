@@ -26,7 +26,6 @@ public final class ConfigManager {
     private String communityBonusGroup;
     private String communityBonusDuration;
     private boolean communityBossBarEnabled;
-    private int communityBossBarSeconds;
     private int streakDelay;
 
     private boolean discordAnnounceEnabled;
@@ -99,10 +98,6 @@ public final class ConfigManager {
 
     public boolean isCommunityBossBarEnabled() {
         return this.communityBossBarEnabled;
-    }
-
-    public int getCommunityBossBarSeconds() {
-        return this.communityBossBarSeconds;
     }
 
     public boolean isDiscordAnnounceEnabled() {
@@ -211,7 +206,6 @@ public final class ConfigManager {
             this.communityBonusGroup = "default";
             this.communityBonusDuration = "2d";
             this.communityBossBarEnabled = true;
-            this.communityBossBarSeconds = 30;
             return;
         }
         String group = section.getString("group");
@@ -219,7 +213,6 @@ public final class ConfigManager {
         String duration = section.getString("duration");
         this.communityBonusDuration = (duration == null || duration.isEmpty()) ? "2d" : duration;
         this.communityBossBarEnabled = section.getBoolean("boss-bar", true);
-        this.communityBossBarSeconds = Math.max(1, section.getInt("boss-bar-seconds", 30));
     }
 
     private void loadDiscordAnnounce() {

@@ -99,7 +99,11 @@ public final class TheatriaSessions extends JavaPlugin {
                         new CommandRecord(
                                 "session",
                                 new SessionCommand(
-                                        dailyStatsService, sessionService, streakService, cm))));
+                                        dailyStatsService,
+                                        sessionService,
+                                        streakService,
+                                        cm,
+                                        communityBossBar))));
         log.info("Loaded plugin.");
     }
 
