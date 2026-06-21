@@ -54,3 +54,36 @@ The **voting system will be discontinued** as part of this transition to Theatri
 
 ### **Final Thoughts**
 TheatriaSessions is our way of saying thank you for being part of the community. We’re excited to move forward with this new system and can’t wait to see you online earning your rewards!
+
+---
+
+## **Developer API**
+
+Other plugins can ask TheatriaSessions whether a player has earned their daily
+reward instead of inferring it from vanilla state. The supported surface is
+`com.playtheatria.sessions.api.SessionsAPI`, obtained via the static
+`SessionsAPI.get()` (returns `null` while the plugin is disabled). Every method
+takes/returns only JDK types, so it can be consumed reflectively with no
+compile-time dependency:
+
+```java
+Class<?> apiClass = Class.forName("com.playtheatria.sessions.api.SessionsAPI");
+Object api = apiClass.getMethod("get").invoke(null);
+if (api != null) {
+    boolean earned = (boolean) apiClass
+            .getMethod("hasEarnedDailyReward", java.util.UUID.class)
+            .invoke(api, playerUuid);
+}
+```
+
+| Method | Returns |
+|--------|---------|
+| `hasEarnedDailyReward(UUID)` | reward actually granted today (resets daily) |
+| `hasMetThreshold(UUID)` | active playtime has reached the threshold |
+| `getSessionSeconds(UUID)` | accumulated active (non-AFK) seconds today |
+| `getThresholdSeconds()` | seconds of active playtime needed to earn |
+| `hasSession(UUID)` | whether the player has a tracked session today |
+
+A player only has a session while online and holding `theatria.sessions.allow`
+(granted by default; removed only to exclude alts), so the query methods return
+`false`/`0` for anyone without a current session.

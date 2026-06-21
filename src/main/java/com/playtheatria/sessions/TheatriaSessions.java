@@ -4,6 +4,7 @@ import com.earth2me.essentials.Essentials;
 import com.playtheatria.jliii.generalutils.result.Err;
 import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.jliii.generalutils.result.Result;
+import com.playtheatria.sessions.api.SessionsAPI;
 import com.playtheatria.sessions.cache.DailyStatsCache;
 import com.playtheatria.sessions.cache.SessionCache;
 import com.playtheatria.sessions.cache.StreakCache;
@@ -79,6 +80,10 @@ public final class TheatriaSessions extends JavaPlugin {
         dailyStatsCache = new DailyStatsCache(dailyStats);
         dailyStatsService = new DailyStatsService(dailyStatsCache, dailyStatsRepo, log);
 
+        // Publish the public query API so other plugins (e.g. TheatriaOnboarding)
+        // can read daily-reward progress instead of inferring it from vanilla state.
+        SessionsAPI.register(sessionService, cm);
+
         databaseTask = new DatabaseTask(dailyStatsService, sessionService, streakService, log);
         oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, cm, log);
 
@@ -109,6 +114,7 @@ public final class TheatriaSessions extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        SessionsAPI.unregister();
         if (databaseTask != null) databaseTask.cancel();
         if (oneSecondTimer != null) oneSecondTimer.cancel();
         if (communityBossBar != null) communityBossBar.hideFromAll();
