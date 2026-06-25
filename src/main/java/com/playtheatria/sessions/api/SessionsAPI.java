@@ -5,6 +5,7 @@ import com.playtheatria.jliii.generalutils.result.Ok;
 import com.playtheatria.sessions.config.ConfigManager;
 import com.playtheatria.sessions.database.data.Session;
 import com.playtheatria.sessions.service.SessionService;
+import com.playtheatria.sessions.utils.PLog;
 import java.util.UUID;
 
 /**
@@ -44,18 +45,20 @@ public final class SessionsAPI {
 
     private final SessionService sessionService;
     private final ConfigManager configManager;
+    private final PLog log;
 
-    private SessionsAPI(SessionService sessionService, ConfigManager configManager) {
+    private SessionsAPI(SessionService sessionService, ConfigManager configManager, PLog log) {
         this.sessionService = sessionService;
         this.configManager = configManager;
+        this.log = log;
     }
 
     /**
      * Installs the singleton. Called once from {@code TheatriaSessions#onEnable}
      * after the session service and config are ready.
      */
-    public static void register(SessionService sessionService, ConfigManager configManager) {
-        instance = new SessionsAPI(sessionService, configManager);
+    public static void register(SessionService sessionService, ConfigManager configManager, PLog log) {
+        instance = new SessionsAPI(sessionService, configManager, log);
     }
 
     /** Clears the singleton on plugin disable. */
@@ -79,8 +82,20 @@ public final class SessionsAPI {
      */
     public boolean hasEarnedDailyReward(UUID playerUUID) {
         return switch (sessionService.getSession(playerUUID)) {
-            case Ok<Session, Exception> ok -> ok.value().isRewarded();
-            case Err<Session, Exception> ignored -> false;
+            case Ok<Session, Exception> ok -> {
+                Session session = ok.value();
+                log.debugFmt(
+                        "[SessionsAPI] hasEarnedDailyReward(%s) -> %b (%ds/%ds active)",
+                        new Object[] {
+                            playerUUID, session.isRewarded(), session.getSessionTime(),
+                            configManager.getRewardThreshold()
+                        });
+                yield session.isRewarded();
+            }
+            case Err<Session, Exception> ignored -> {
+                log.debugFmt("[SessionsAPI] hasEarnedDailyReward(%s) -> false (no session)", playerUUID);
+                yield false;
+            }
         };
     }
 

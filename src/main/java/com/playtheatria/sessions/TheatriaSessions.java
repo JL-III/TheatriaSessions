@@ -82,7 +82,7 @@ public final class TheatriaSessions extends JavaPlugin {
 
         // Publish the public query API so other plugins (e.g. TheatriaOnboarding)
         // can read daily-reward progress instead of inferring it from vanilla state.
-        SessionsAPI.register(sessionService, cm);
+        SessionsAPI.register(sessionService, cm, log);
 
         databaseTask = new DatabaseTask(dailyStatsService, sessionService, streakService, log);
         oneSecondTimer = new OneSecondTimer(dailyStatsService, sessionService, essentials, cm, log);
